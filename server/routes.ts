@@ -6,6 +6,8 @@ import multer from "multer";
 import path from "path";
 import { insertVehicleSchema, insertOperationOrderSchema } from "@shared/schema";
 import { generateOrderPDF } from './utils/pdfGenerator';
+import express from "express";
+
 
 // Configure multer for file uploads
 const upload = multer({ 
@@ -44,6 +46,9 @@ const upload = multer({
 
 export async function registerRoutes(app: Express): Promise<Server> {
   setupAuth(app);
+
+  // Add this line to serve uploaded files
+  app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
   // Document upload route
   app.post("/api/documents/upload", upload.single('document'), async (req, res) => {
@@ -209,7 +214,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!["pending", "active", "suspended"].includes(status)) {
       return res.status(400).json({ message: "Invalid status" });
     }
-    const user = await storage.updateDriverStatus(parseInt(req.params.id), status);
+
+    // Update both status and isApproved
+    const user = await storage.updateDriver(parseInt(req.params.id), {
+      status,
+      isApproved: status === "active"
+    });
+
     if (!user) return res.sendStatus(404);
     res.json(user);
   });

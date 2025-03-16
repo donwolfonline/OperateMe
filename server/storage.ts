@@ -34,6 +34,7 @@ export interface IStorage {
   updateOperationOrder(order: OperationOrder): Promise<OperationOrder>;
   getPassengersByOrder(orderId: number): Promise<Passenger[]>;
   getAllOperationOrders(): Promise<OperationOrder[]>;
+  updateDriver(id: number, updates: { status: string; isApproved: boolean }): Promise<User | undefined>;
 }
 
 export class MemStorage implements IStorage {
@@ -215,13 +216,7 @@ export class MemStorage implements IStorage {
   }
 
   async updateDriverStatus(id: number, status: string): Promise<User | undefined> {
-    const user = await this.getUser(id);
-    if (user && user.role === "driver") {
-      const updatedUser = { ...user, status };
-      this.users.set(id, updatedUser);
-      return updatedUser;
-    }
-    return undefined;
+    return this.updateDriver(id, { status, isApproved: status === "active" });
   }
 
   async getDriverDetails(id: number): Promise<{ 
@@ -255,6 +250,19 @@ export class MemStorage implements IStorage {
 
   async getAllOperationOrders(): Promise<OperationOrder[]> {
     return Array.from(this.operationOrders.values());
+  }
+  async updateDriver(id: number, updates: { status: string; isApproved: boolean }): Promise<User | undefined> {
+    const user = await this.getUser(id);
+    if (user && user.role === "driver") {
+      const updatedUser = { 
+        ...user, 
+        status: updates.status,
+        isApproved: updates.isApproved
+      };
+      this.users.set(id, updatedUser);
+      return updatedUser;
+    }
+    return undefined;
   }
 }
 
