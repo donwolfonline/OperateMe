@@ -1,6 +1,5 @@
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/use-auth";
-import { useLocation } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -14,9 +13,9 @@ import HomeButton from "@/components/HomeButton";
 export default function AuthPage() {
   const { t } = useTranslation();
   const { user, loginMutation } = useAuth();
-  const [location] = useLocation();
-  // Check if we're on the admin login page
-  const isAdmin = window.location.pathname === "/admin";
+
+  // Check if we're on the admin login page by checking the full URL path
+  const isAdmin = window.location.pathname.includes('/admin');
 
   if (user) {
     const redirectPath = user.role === "admin" ? "/admin" : "/driver";
