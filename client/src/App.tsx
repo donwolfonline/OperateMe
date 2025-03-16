@@ -5,7 +5,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/hooks/use-auth";
 import NotFound from "@/pages/not-found";
 import LandingPage from "@/pages/landing-page";
-import AuthPage from "@/pages/auth-page";
+import AdminLoginPage from "@/pages/admin-login";
+import DriverLoginPage from "@/pages/driver-login";
 import RegisterPage from "@/pages/register-page";
 import DriverDashboard from "@/pages/driver-dashboard";
 import AdminDashboard from "@/pages/admin-dashboard";
@@ -15,10 +16,11 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={LandingPage} />
-      <Route path="/auth" component={AuthPage} />
+      <Route path="/auth" component={DriverLoginPage} />
+      <Route path="/admin" component={AdminLoginPage} />
       <Route path="/register" component={RegisterPage} />
       <ProtectedRoute path="/driver" component={DriverDashboard} />
-      <ProtectedRoute path="/admin" component={AdminDashboard} />
+      <ProtectedRoute path="/admin-dashboard" component={AdminDashboard} />
       <Route component={NotFound} />
     </Switch>
   );
