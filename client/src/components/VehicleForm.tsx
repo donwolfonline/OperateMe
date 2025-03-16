@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 
 const vehicleTypes = [
   "Sedan",
@@ -19,24 +21,49 @@ const vehicleTypes = [
 
 export default function VehicleForm() {
   const { t } = useTranslation();
-  
+  const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const form = useForm({
     resolver: zodResolver(insertVehicleSchema)
   });
 
   const onSubmit = async (data: any) => {
-    const formData = new FormData();
-    Object.entries(data).forEach(([key, value]) => {
-      formData.append(key, value as string);
-    });
+    try {
+      setIsSubmitting(true);
+      const formData = new FormData();
 
-    if (form.watch("photos")) {
-      Array.from(form.watch("photos")).forEach((file) => {
-        formData.append("photos", file);
+      // Add basic fields to FormData
+      formData.append('type', data.type);
+      formData.append('model', data.model);
+      formData.append('year', data.year);
+      formData.append('plateNumber', data.plateNumber);
+
+      // Handle multiple files
+      if (data.photos) {
+        Array.from(data.photos).forEach((file: File) => {
+          formData.append('photos', file);
+        });
+      }
+
+      await apiRequest("POST", "/api/vehicles", formData);
+
+      toast({
+        title: "Success",
+        description: "Vehicle information saved successfully",
       });
-    }
 
-    await apiRequest("POST", "/api/vehicles", formData);
+      // Reset form after successful submission
+      form.reset();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to save vehicle information",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -133,7 +160,12 @@ export default function VehicleForm() {
               )}
             />
 
-            <Button type="submit">{t('vehicle.save')}</Button>
+            <Button 
+              type="submit"
+              disabled={isSubmitting}
+            >
+              {t('vehicle.save')}
+            </Button>
           </form>
         </Form>
       </CardContent>
