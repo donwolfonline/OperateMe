@@ -19,13 +19,8 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
     const stream = fs.createWriteStream(pdfPath);
     doc.pipe(stream);
 
-    // Header - Company Name
-    doc.fontSize(24)
-       .fillColor('#1e40af')
-       .text('Lightning Road Transport', {
-         align: 'center'
-       });
-    doc.moveDown(4);
+    // Get passengers for this order
+    const passengers = await storage.getPassengersByOrder(order.id);
 
     // Format date
     const dateStr = new Date(order.departureTime).toLocaleString('ar-SA', {
@@ -34,8 +29,13 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
       timeStyle: 'short'
     });
 
-    // Get passengers for this order
-    const passengers = await storage.getPassengersByOrder(order.id);
+    // First Page: Trip and Passenger Details
+    doc.fontSize(24)
+       .fillColor('#1e40af')
+       .text('Lightning Road Transport', {
+         align: 'center'
+       });
+    doc.moveDown(2);
 
     // Trip details section
     const tripDetails = [
@@ -46,10 +46,18 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
 
     const tripDetailsImg = renderArabicSection('تفاصيل الرحلة / Trip Details', tripDetails);
     doc.image(tripDetailsImg, {
-      fit: [500, 150],
+      fit: [500, 120],
       align: 'center'
     });
-    doc.moveDown(4);
+    doc.moveDown(2);
+
+    // Draw a separator line
+    doc.strokeColor('#e5e7eb')
+       .lineWidth(1)
+       .moveTo(50, doc.y)
+       .lineTo(545, doc.y)
+       .stroke();
+    doc.moveDown(2);
 
     // Passenger details section
     if (passengers.length > 0) {
@@ -62,10 +70,18 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
 
       const passengerDetailsImg = renderArabicSection('بيانات الركاب / Passenger Details', passengerDetails);
       doc.image(passengerDetailsImg, {
-        fit: [500, 250],
+        fit: [500, 200],
         align: 'center'
       });
-      doc.moveDown(4);
+      doc.moveDown(2);
+
+      // Draw a separator line
+      doc.strokeColor('#e5e7eb')
+         .lineWidth(1)
+         .moveTo(50, doc.y)
+         .lineTo(545, doc.y)
+         .stroke();
+      doc.moveDown(2);
     }
 
     // Driver details section
@@ -79,14 +95,13 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
       fit: [500, 100],
       align: 'center'
     });
-    doc.moveDown(4);
 
-    // Start legal agreement on new page
+    // Legal Agreement on a new page
     doc.addPage();
 
-    // Legal Agreement section with increased height
     const legalAgreement = [
       'تم ابرام هذا العقد بين المتعاقدين بناء على المادة (39) التاسعة و الثلاثون من اللائحة المنظمة لنشاط النقل المتخصص و تأجير و توجيه الحافلات و بناء على الفقرة (1) من المادة (39) و التي تنص على ان يجب على الناقل',
+      '',
       'ابرام عقد نقل مع الاطراف المحددين في المادة (40) قبل تنفيذ عمليات النقل على الطرق البرية و بما يخالف احكام هذه الائحة التي تحددها هيئة النقل و بناء على ما سبق تم ابرام عقد النقل بين الاطراف الاتية :',
       '',
       'الطرف الاول : شركة صاعقة الطريق للنقل البري (شخص واحد)',
@@ -104,13 +119,23 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
 
     const legalAgreementImg = renderArabicSection('عقد النقل / Contract Agreement', legalAgreement);
     doc.image(legalAgreementImg, {
-      fit: [500, 700],
+      fit: [500, 600],
       align: 'center'
     });
-    doc.moveDown(4);
 
-    // Terms and conditions on new page
+    // Terms and QR Code on a new page
     doc.addPage();
+
+    // Generate QR Code
+    const qrCodeData = JSON.stringify({
+      orderId: order.id,
+      fromCity: order.fromCity,
+      toCity: order.toCity,
+      departureTime: order.departureTime,
+      mainPassenger: passengers[0]?.name
+    });
+
+    const qrCodeDataUrl = await QRCode.toDataURL(qrCodeData);
 
     // Contract terms section
     const contractTerms = [
@@ -126,27 +151,19 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
 
     const contractTermsImg = renderArabicSection('الشروط والأحكام / Terms and Conditions', contractTerms);
     doc.image(contractTermsImg, {
-      fit: [500, 300],
+      fit: [500, 250],
       align: 'center'
     });
     doc.moveDown(4);
 
-    // QR Code at the bottom of the last page
-    const qrCodeData = JSON.stringify({
-      orderId: order.id,
-      fromCity: order.fromCity,
-      toCity: order.toCity,
-      departureTime: order.departureTime,
-      mainPassenger: passengers[0]?.name
-    });
-
-    const qrCodeDataUrl = await QRCode.toDataURL(qrCodeData);
+    // Add QR Code at the bottom left with proper spacing
     doc.image(Buffer.from(qrCodeDataUrl.split(',')[1], 'base64'), {
       width: 100,
-      align: 'right'
+      x: 50,
+      y: doc.page.height - 150
     });
 
-    // Finalize PDF
+    // Finalize the PDF
     doc.end();
 
     return new Promise((resolve, reject) => {
