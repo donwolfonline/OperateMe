@@ -31,28 +31,16 @@ export class MemStorage implements IStorage {
   sessionStore: session.Store;
   currentId: number;
 
-  constructor() {
-    this.users = new Map();
-    this.vehicles = new Map();
-    this.operationOrders = new Map();
-    this.currentId = 1;
-    this.sessionStore = new MemoryStore({
-      checkPeriod: 86400000, // Prune expired entries every 24h
-    });
-
-    // Create default admin user
-    this.createDefaultAdmin();
-  }
-
-  private async createDefaultAdmin() {
-    const salt = randomBytes(16).toString("hex");
-    const buf = (await scryptAsync("admin123", salt, 64)) as Buffer;
-    const hashedPassword = `${buf.toString("hex")}.${salt}`;
+  private async createDefaultUsers() {
+    // Create admin user
+    const adminSalt = randomBytes(16).toString("hex");
+    const adminBuf = (await scryptAsync("admin123", adminSalt, 64)) as Buffer;
+    const adminHashedPassword = `${adminBuf.toString("hex")}.${adminSalt}`;
 
     const adminUser: User = {
       id: this.currentId++,
       username: "admin",
-      password: hashedPassword,
+      password: adminHashedPassword,
       role: "admin",
       isApproved: true,
       fullName: "Admin User",
@@ -63,7 +51,40 @@ export class MemStorage implements IStorage {
       createdAt: new Date()
     };
 
+    // Create test driver user
+    const driverSalt = randomBytes(16).toString("hex");
+    const driverBuf = (await scryptAsync("driver123", driverSalt, 64)) as Buffer;
+    const driverHashedPassword = `${driverBuf.toString("hex")}.${driverSalt}`;
+
+    const driverUser: User = {
+      id: this.currentId++,
+      username: "driver",
+      password: driverHashedPassword,
+      role: "driver",
+      isApproved: true,
+      fullName: "Test Driver",
+      idNumber: "DRV123",
+      licenseNumber: "LIC456",
+      idDocumentUrl: null,
+      licenseDocumentUrl: null,
+      createdAt: new Date()
+    };
+
     this.users.set(adminUser.id, adminUser);
+    this.users.set(driverUser.id, driverUser);
+  }
+
+  constructor() {
+    this.users = new Map();
+    this.vehicles = new Map();
+    this.operationOrders = new Map();
+    this.currentId = 1;
+    this.sessionStore = new MemoryStore({
+      checkPeriod: 86400000, // Prune expired entries every 24h
+    });
+
+    // Create default users
+    this.createDefaultUsers();
   }
 
   async getUser(id: number): Promise<User | undefined> {
