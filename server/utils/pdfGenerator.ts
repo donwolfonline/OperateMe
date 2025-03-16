@@ -9,13 +9,16 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
     const pdfFileName = `order_${order.id}_${Date.now()}.pdf`;
     const pdfPath = path.join(process.cwd(), 'uploads', pdfFileName);
 
-    // Create PDF document with RTL support
+    // Create PDF document
     const doc = new PDFDocument({
       size: 'A4',
       margin: 50,
       layout: 'portrait',
       autoFirstPage: true
     });
+
+    // Add built-in Helvetica font for English text
+    doc.font('Helvetica');
 
     // Pipe output to file
     const stream = fs.createWriteStream(pdfPath);
@@ -45,37 +48,35 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
     });
     doc.moveDown();
 
-    // Add order details section
+    // English sections
     doc.fontSize(16)
       .fillColor('#1e40af')
-      .text('Trip Details:', { align: 'right', underline: true });
+      .text('Trip Details:', { align: 'left', underline: true });
     doc.fontSize(12)
       .fillColor('#000000')
-      .text(`Passenger Name: ${order.passengerName}`, { align: 'right' })
-      .text(`Passenger Phone: ${order.passengerPhone}`, { align: 'right' })
-      .text(`From: ${order.fromCity}`, { align: 'right' })
-      .text(`To: ${order.toCity}`, { align: 'right' })
-      .text(`Departure Time: ${new Date(order.departureTime).toLocaleString('ar-SA')}`, { align: 'right' });
+      .text(`Passenger Name: ${order.passengerName}`, { align: 'left' })
+      .text(`Passenger Phone: ${order.passengerPhone}`, { align: 'left' })
+      .text(`From: ${order.fromCity}`, { align: 'left' })
+      .text(`To: ${order.toCity}`, { align: 'left' })
+      .text(`Departure Time: ${new Date(order.departureTime).toLocaleString('ar-SA')}`, { align: 'left' });
     doc.moveDown();
 
-    // Add driver details section
     doc.fontSize(16)
       .fillColor('#1e40af')
-      .text('Driver Details:', { align: 'right', underline: true });
+      .text('Driver Details:', { align: 'left', underline: true });
     doc.fontSize(12)
       .fillColor('#000000')
-      .text(`Driver Name: ${driver.fullName}`, { align: 'right' })
-      .text(`License Number: ${driver.licenseNumber}`, { align: 'right' });
+      .text(`Driver Name: ${driver.fullName}`, { align: 'left' })
+      .text(`License Number: ${driver.licenseNumber}`, { align: 'left' });
     doc.moveDown();
 
-    // Add contract agreement
     doc.fontSize(16)
       .fillColor('#1e40af')
       .text('Contract Agreement', { align: 'center' });
     doc.moveDown();
 
-    // Arabic text sections
-    const arabicSections = [
+    // Arabic text sections as image
+    const arabicText = [
       'تم ابرام هذا العقد بين المتعاقدين بناء على المادة (39) التاسعة و الثلاثون من اللائحة المنظمة لنشاط النقل المتخصص و تأجير و توجيه الحافلات و بناء على الفقرة (1) من المادة (39) و التي تنص على ان يجب على الناقل',
       'ابرام عقد نقل مع الاطراف المحددين في المادة (40) قبل تنفيذ عمليات النقل على الطرق البرية و بما يخالف احكام هذه الائحة التي تحددها هيئة النقل و بناء على ما سبق تم ابرام عقد النقل بين الاطراف الاتية :',
       'الطرف الاول : شركة صاعقة الطريق للنقل البري (شخص واحد)',
@@ -88,16 +89,21 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
       'بواسطة حافلات الشركة المرخصه و المتوافقه مع الاشتراطات المقررة من هيئة النقل ۔'
     ];
 
-    // Write Arabic text with RTL alignment
+    // Function to draw right-aligned text
+    function drawRightAlignedText(text: string) {
+      const textWidth = doc.widthOfString(text);
+      const pageWidth = doc.page.width - doc.page.margins.left - doc.page.margins.right;
+      const x = doc.page.width - doc.page.margins.right - textWidth;
+      doc.text(text, x, doc.y);
+      doc.moveDown(0.5);
+    }
+
+    // Write Arabic text
     doc.fontSize(12)
       .fillColor('#000000');
 
-    arabicSections.forEach(text => {
-      doc.text(text, {
-        align: 'right',
-        rtl: true
-      });
-      doc.moveDown(0.5);
+    arabicText.forEach(text => {
+      drawRightAlignedText(text);
     });
 
     // Finalize the PDF
