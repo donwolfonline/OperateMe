@@ -9,7 +9,7 @@ import { User, OperationOrder } from "@shared/schema";
 import LanguageToggle from "@/components/LanguageToggle";
 import HomeButton from "@/components/HomeButton";
 import { Badge } from "@/components/ui/badge";
-import { FileText } from "lucide-react";
+import { FileText, User as UserIcon, Car, FileCheck } from "lucide-react";
 
 export default function AdminDashboard() {
   const { t } = useTranslation();
@@ -55,18 +55,52 @@ export default function AdminDashboard() {
   if (!user || user.role !== "admin") return null;
 
   const renderDriverCard = (driver: User, actions: React.ReactNode) => (
-    <div key={driver.id} className="flex items-center justify-between p-4 border rounded-lg">
-      <div>
-        <p className="font-medium">{driver.fullName}</p>
-        <p className="text-sm text-muted-foreground">
-          {t('auth.idNumber')}: {driver.idNumber}
-        </p>
-        <p className="text-sm text-muted-foreground">
-          {t('auth.licenseNumber')}: {driver.licenseNumber}
-        </p>
+    <div key={driver.id} className="flex flex-col space-y-4 p-4 border rounded-lg">
+      <div className="flex items-start justify-between">
+        <div className="space-y-2">
+          <div className="flex items-center space-x-2">
+            <UserIcon className="h-5 w-5 text-primary" />
+            <p className="font-medium">{driver.fullName}</p>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            {t('auth.idNumber')}: {driver.idNumber}
+          </p>
+          <p className="text-sm text-muted-foreground">
+            {t('auth.licenseNumber')}: {driver.licenseNumber}
+          </p>
+        </div>
+        <div className="flex gap-2">
+          {actions}
+        </div>
       </div>
-      <div className="flex gap-2">
-        {actions}
+
+      {/* Documents Section */}
+      <div className="space-y-2 pt-2 border-t">
+        <p className="text-sm font-medium">Documents:</p>
+        <div className="flex gap-4">
+          {driver.idDocumentUrl && (
+            <a
+              href={`/uploads/${driver.idDocumentUrl}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center text-sm text-primary hover:underline"
+            >
+              <FileCheck className="h-4 w-4 mr-1" />
+              ID Document
+            </a>
+          )}
+          {driver.licenseDocumentUrl && (
+            <a
+              href={`/uploads/${driver.licenseDocumentUrl}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center text-sm text-primary hover:underline"
+            >
+              <FileCheck className="h-4 w-4 mr-1" />
+              License Document
+            </a>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -76,7 +110,8 @@ export default function AdminDashboard() {
       <CardContent className="p-4">
         <div className="flex justify-between items-start mb-4">
           <div>
-            <h3 className="font-semibold">
+            <h3 className="font-semibold flex items-center gap-2">
+              <Car className="h-4 w-4" />
               {t('order.fromCity')}: {order.fromCity} → {order.toCity}
             </h3>
             <p className="text-sm text-muted-foreground">
@@ -100,7 +135,7 @@ export default function AdminDashboard() {
           <h4 className="font-medium">{t('order.passengers')}:</h4>
           {order.passengers?.map((passenger, index) => (
             <div key={index} className="pl-4 border-l-2 border-muted">
-              <p className="text-sm">{passenger.name}</p>
+              <p className="text-sm font-medium">{passenger.name}</p>
               <p className="text-xs text-muted-foreground">
                 {t('order.idNumber')}: {passenger.idNumber}
               </p>
