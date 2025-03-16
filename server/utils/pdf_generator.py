@@ -14,16 +14,32 @@ import os
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
+def get_replit_url():
+    """Get the correct Replit URL for the current environment"""
+    try:
+        repl_id = os.getenv('REPL_ID')
+        repl_slug = os.getenv('REPL_SLUG')
+        replit_domain = os.getenv('REPLIT_DOMAIN')  # New environment variable for domain
+
+        if replit_domain:
+            base_url = f"https://{replit_domain}"
+        elif repl_slug:
+            base_url = f"https://{repl_slug}.id.repl.co"
+        else:
+            # Fallback for development
+            base_url = "http://localhost:5000"
+
+        logger.info(f"Generated base URL: {base_url}")
+        return base_url
+    except Exception as e:
+        logger.error(f"Error getting Replit URL: {str(e)}")
+        return "http://localhost:5000"
+
 def generate_qr_code(pdf_filename):
     """Generate QR code and return as base64 string"""
     try:
-        # Get Replit environment variables
-        repl_id = os.getenv('REPL_ID', '')
-        repl_slug = os.getenv('REPL_SLUG', '')
-
-        # Construct the Replit URL using the proper format
-        base_url = f"https://{repl_slug}.id.repl.co"
-        logger.info(f"Base URL for QR: {base_url}")
+        # Get the base URL for the current environment
+        base_url = get_replit_url()
 
         # Create a full URL to the PDF
         pdf_url = f"{base_url}/uploads/{pdf_filename}"

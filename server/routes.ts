@@ -53,11 +53,17 @@ const upload = multer({
 export async function registerRoutes(app: Express): Promise<Server> {
   setupAuth(app);
 
-  // Configure CORS for PDF access
+  // Update the CORS and static file serving configuration
   app.use((req, res, next) => {
+    // Allow requests from all origins
     res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PATCH'); //Added POST and PATCH
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization'); // Added Authorization
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PATCH, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+    // Handle preflight requests
+    if (req.method === 'OPTIONS') {
+      return res.sendStatus(200);
+    }
     next();
   });
 
@@ -69,8 +75,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.setHeader('Content-Disposition', 'inline; filename="' + path.split('/').pop() + '"');
         res.setHeader('Cache-Control', 'public, max-age=3600');
         res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('X-Content-Type-Options', 'nosniff');
       }
-    }
+    },
+    fallthrough: true,
+    maxAge: '1h'
   }));
 
   // Document upload route
