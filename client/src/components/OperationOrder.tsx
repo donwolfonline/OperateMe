@@ -99,14 +99,14 @@ export default function OperationOrder() {
                   name="fromCity"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t('order.fromCity')}</FormLabel>
+                      <FormLabel className="text-right">مدينة الانطلاق / From City</FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder={t('order.selectCity')} />
+                            <SelectValue placeholder="اختر المدينة / Select City" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -127,14 +127,14 @@ export default function OperationOrder() {
                   name="toCity"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t('order.toCity')}</FormLabel>
+                      <FormLabel className="text-right">مدينة الوصول / To City</FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder={t('order.selectCity')} />
+                            <SelectValue placeholder="اختر المدينة / Select City" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -155,7 +155,7 @@ export default function OperationOrder() {
                   name="departureTime"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t('order.departureTime')}</FormLabel>
+                      <FormLabel className="text-right">وقت المغادرة / Departure Time</FormLabel>
                       <FormControl>
                         <Input
                           type="datetime-local"
@@ -172,7 +172,7 @@ export default function OperationOrder() {
               {/* Passengers Section */}
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
-                  <h3 className="text-lg font-semibold">{t('order.passengers')}</h3>
+                  <h3 className="text-lg font-semibold">الركاب / Passengers</h3>
                   <Button
                     type="button"
                     variant="outline"
@@ -180,7 +180,7 @@ export default function OperationOrder() {
                     onClick={() => append({ name: '', idNumber: '', nationality: '', phone: '' })}
                   >
                     <Plus className="h-4 w-4 mr-2" />
-                    {t('order.addPassenger')}
+                    إضافة راكب / Add Passenger
                   </Button>
                 </div>
 
@@ -193,7 +193,7 @@ export default function OperationOrder() {
                           name={`passengers.${index}.name`}
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>{t('order.passengerName')}</FormLabel>
+                              <FormLabel className="text-right">اسم الراكب / Passenger Name</FormLabel>
                               <FormControl>
                                 <Input {...field} />
                               </FormControl>
@@ -207,7 +207,7 @@ export default function OperationOrder() {
                           name={`passengers.${index}.idNumber`}
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>{t('order.idNumber')}</FormLabel>
+                              <FormLabel className="text-right">رقم الهوية / ID Number</FormLabel>
                               <FormControl>
                                 <Input {...field} />
                               </FormControl>
@@ -221,7 +221,7 @@ export default function OperationOrder() {
                           name={`passengers.${index}.nationality`}
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>{t('order.nationality')}</FormLabel>
+                              <FormLabel className="text-right">الجنسية / Nationality</FormLabel>
                               <FormControl>
                                 <Input {...field} />
                               </FormControl>
@@ -235,7 +235,7 @@ export default function OperationOrder() {
                           name={`passengers.${index}.phone`}
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>{t('order.passengerPhone')}</FormLabel>
+                              <FormLabel className="text-right">رقم هاتف الراكب / Phone Number</FormLabel>
                               <FormControl>
                                 <Input {...field} type="tel" />
                               </FormControl>
@@ -254,7 +254,7 @@ export default function OperationOrder() {
                           onClick={() => remove(index)}
                         >
                           <Trash2 className="h-4 w-4 mr-2" />
-                          {t('order.removePassenger')}
+                          حذف الراكب / Remove Passenger
                         </Button>
                       )}
                     </CardContent>
@@ -267,7 +267,7 @@ export default function OperationOrder() {
                 disabled={isSubmitting}
                 className="w-full"
               >
-                {isSubmitting ? t('common.saving') : t('order.create')}
+                {isSubmitting ? 'جاري الإنشاء... / Saving...' : 'إنشاء الطلب / Create Order'}
               </Button>
             </form>
           </Form>
@@ -278,7 +278,7 @@ export default function OperationOrder() {
         <Card>
           <CardContent className="p-6">
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold">{t('order.documentReady')}</h3>
+              <h3 className="text-lg font-semibold">المستند جاهز / Document Ready</h3>
               <div className="aspect-[16/9] w-full bg-muted rounded-lg overflow-hidden">
                 <iframe
                   src={`/uploads/${pdfUrl}`}
@@ -292,7 +292,7 @@ export default function OperationOrder() {
                   variant="outline"
                 >
                   <FileText className="mr-2 h-4 w-4" />
-                  {t('order.downloadPdf')}
+                  تحميل PDF / Download PDF
                 </Button>
               </div>
             </div>
