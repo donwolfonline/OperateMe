@@ -14,59 +14,69 @@ function createRTLCanvas(width: number, height: number) {
   return { canvas, ctx };
 }
 
-export function renderArabicSection(title: string, items: string[]): Buffer {
-  // Calculate dimensions
-  const fontSize = 14;
+export function renderArabicSection(text: string[], options: {
+  width?: number;
+  fontSize?: number;
+  backgroundColor?: string;
+  textColor?: string;
+} = {}): Buffer {
+  // Default options
+  const {
+    width = 500,
+    fontSize = 14,
+    backgroundColor = '#ffffff',
+    textColor = '#000000'
+  } = options;
+
   const lineHeight = fontSize * 1.5;
   const padding = 20;
-  const width = 600;
 
-  // Calculate total height needed
-  let totalLines = items.reduce((acc, item) => {
-    const estimatedWidth = item.length * (fontSize * 0.6);
+  // Calculate height needed
+  const totalLines = text.reduce((acc, line) => {
+    if (!line.trim()) return acc + 0.5; // Half line for empty lines
+    const estimatedWidth = line.length * (fontSize * 0.6);
     const linesNeeded = Math.ceil(estimatedWidth / (width - (padding * 2)));
     return acc + linesNeeded;
   }, 0);
 
-  const height = (totalLines * lineHeight) + (padding * 2);
+  const height = Math.ceil((totalLines * lineHeight) + (padding * 2));
 
+  // Create canvas and set context
   const { canvas, ctx } = createRTLCanvas(width, height);
 
-  // White background
-  ctx.fillStyle = '#ffffff';
+  // Fill background
+  ctx.fillStyle = backgroundColor;
   ctx.fillRect(0, 0, width, height);
 
   // Draw text
-  ctx.fillStyle = '#000000';
+  ctx.fillStyle = textColor;
   let currentY = padding;
 
-  items.forEach(item => {
-    if (!item.trim()) {
+  text.forEach(line => {
+    if (!line.trim()) {
       currentY += lineHeight * 0.5;
       return;
     }
 
-    // Word wrapping
-    const words = item.split(' ').reverse(); // Reverse for RTL
-    let line = '';
+    // Word wrapping for RTL text
+    const words = line.split(' ').reverse();
+    let currentLine = '';
     let testLine = '';
 
     for (let i = 0; i < words.length; i++) {
-      testLine = words[i] + (line ? ' ' : '') + line;
+      testLine = words[i] + (currentLine ? ' ' : '') + currentLine;
       const metrics = ctx.measureText(testLine);
 
       if (metrics.width > width - (padding * 2) && i > 0) {
-        // Draw the line before it gets too long
-        ctx.fillText(line, width - padding, currentY);
-        line = words[i];
+        ctx.fillText(currentLine, width - padding, currentY);
+        currentLine = words[i];
         currentY += lineHeight;
       } else {
-        line = testLine;
+        currentLine = testLine;
       }
     }
 
-    // Draw remaining text
-    ctx.fillText(line, width - padding, currentY);
+    ctx.fillText(currentLine, width - padding, currentY);
     currentY += lineHeight;
   });
 

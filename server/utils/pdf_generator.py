@@ -9,6 +9,7 @@ from bidi.algorithm import get_display
 import os
 import qrcode
 from io import BytesIO
+from PIL import Image
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -41,13 +42,10 @@ def generate_pdf(data_path, output_path):
         # Set initial position
         current_y = height - 50
 
-        # Title
+        # Draw title
         c.setFont("Helvetica-Bold", 16)
         title = reshape_arabic("عقد نقل على الطرق البرية")
-        title_width = c.stringWidth(title, "Helvetica-Bold", 16)
-        c.drawString(width/2 - title_width/2, current_y, title)
-
-        logger.info("Title added successfully")
+        c.drawCentredString(width/2, current_y, title)
         current_y -= 40
 
         # Contract agreement text
@@ -64,42 +62,40 @@ def generate_pdf(data_path, output_path):
             if line:
                 reshaped_line = reshape_arabic(line)
                 text_width = c.stringWidth(reshaped_line, "Helvetica", 10)
-                c.drawString(width - 50 - text_width, current_y, reshaped_line)
+                c.drawRightString(width - 50, current_y, reshaped_line)
             current_y -= 20
 
-        logger.info("Agreement text added successfully")
+        def draw_box(title, content, height):
+            nonlocal current_y
 
-        def draw_info_box(title, content, y_pos, box_height):
-            # Draw box outline
+            # Box outline
             box_width = width - 100
-            c.rect(50, y_pos - box_height, box_width, box_height)
+            c.rect(50, current_y - height, box_width, height)
 
-            # Draw grey header
+            # Grey header
             c.setFillColor(colors.lightgrey)
-            c.rect(50, y_pos - 30, box_width, 30, fill=1)
+            c.rect(50, current_y - 30, box_width, 30, fill=1)
             c.setFillColor(colors.black)
 
-            # Draw title
+            # Title
+            title_text = reshape_arabic(title)
             c.setFont("Helvetica-Bold", 12)
-            reshaped_title = reshape_arabic(title)
-            title_width = c.stringWidth(reshaped_title, "Helvetica-Bold", 12)
-            c.drawString(width - 60 - title_width, y_pos - 20, reshaped_title)
+            title_width = c.stringWidth(title_text, "Helvetica-Bold", 12)
+            c.drawRightString(width - 60, current_y - 20, title_text)
 
-            # Draw content
+            # Content
             c.setFont("Helvetica", 10)
-            content_y = y_pos - 50
+            content_y = current_y - 50
             for line in content:
-                reshaped_line = reshape_arabic(line)
-                text_width = c.stringWidth(reshaped_line, "Helvetica", 10)
-                c.drawString(width - 60 - text_width, content_y, reshaped_line)
+                text = reshape_arabic(line)
+                text_width = c.stringWidth(text, "Helvetica", 10)
+                c.drawRightString(width - 60, content_y, text)
                 content_y -= 20
 
-            return y_pos - box_height - 10
-
-        # Draw information boxes
-        current_y = height - 250
+            current_y = current_y - height - 10
 
         # Trip Information Box
+        current_y = height - 250
         trip_info = [
             f"التاريخ / Date: {data['date']}",
             f"من / From: {data['from_city']}",
@@ -107,7 +103,7 @@ def generate_pdf(data_path, output_path):
             f"نوع التأشيرة / Visa Type: {data['visa_type']}",
             f"رقم الرحلة / Trip No.: {data['trip_number']}"
         ]
-        current_y = draw_info_box("معلومات الرحلة / Trip Information", trip_info, current_y, 120)
+        draw_box("معلومات الرحلة / Trip Information", trip_info, 120)
         logger.info("Trip information box added successfully")
 
         # Driver Information Box
@@ -116,7 +112,7 @@ def generate_pdf(data_path, output_path):
             f"رقم الهوية / ID Number: {data['driver_id']}",
             f"رقم الرخصة / License Number: {data['license_number']}"
         ]
-        current_y = draw_info_box("معلومات السائق / Driver Information", driver_info, current_y, 100)
+        draw_box("معلومات السائق / Driver Information", driver_info, 100)
         logger.info("Driver information box added successfully")
 
         # Passenger Information Box
@@ -129,7 +125,7 @@ def generate_pdf(data_path, output_path):
             ])
 
         box_height = min(200, len(passenger_info) * 20 + 40)
-        current_y = draw_info_box("معلومات الركاب / Passenger Information", passenger_info, current_y, box_height)
+        draw_box("معلومات الركاب / Passenger Information", passenger_info, box_height)
         logger.info("Passenger information box added successfully")
 
         # Add QR Code
@@ -149,7 +145,7 @@ def generate_pdf(data_path, output_path):
         except Exception as e:
             logger.error(f"Error adding QR code: {str(e)}")
 
-        # Save and close the PDF
+        # Save the PDF
         c.save()
         logger.info(f"PDF saved successfully at: {output_path}")
         return os.path.basename(output_path)
