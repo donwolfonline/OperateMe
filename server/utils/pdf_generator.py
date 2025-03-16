@@ -17,19 +17,21 @@ logger = logging.getLogger(__name__)
 def get_replit_url():
     """Get the correct Replit URL for the current environment"""
     try:
+        replit_domain = os.getenv('REPLIT_DOMAIN')  # Primary domain
         repl_id = os.getenv('REPL_ID')
         repl_slug = os.getenv('REPL_SLUG')
-        replit_domain = os.getenv('REPLIT_DOMAIN')  # New environment variable for domain
 
         if replit_domain:
+            # Use the primary domain if available
             base_url = f"https://{replit_domain}"
-        elif repl_slug:
+        elif repl_slug and repl_id:
+            # Fallback to repl.co domain
             base_url = f"https://{repl_slug}.id.repl.co"
         else:
-            # Fallback for development
+            # Local development fallback
             base_url = "http://localhost:5000"
 
-        logger.info(f"Generated base URL: {base_url}")
+        logger.info(f"Using base URL: {base_url}")
         return base_url
     except Exception as e:
         logger.error(f"Error getting Replit URL: {str(e)}")

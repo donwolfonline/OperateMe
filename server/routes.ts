@@ -53,20 +53,6 @@ const upload = multer({
 export async function registerRoutes(app: Express): Promise<Server> {
   setupAuth(app);
 
-  // Update the CORS and static file serving configuration
-  app.use((req, res, next) => {
-    // Allow requests from all origins
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PATCH, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-
-    // Handle preflight requests
-    if (req.method === 'OPTIONS') {
-      return res.sendStatus(200);
-    }
-    next();
-  });
-
   // Configure static file serving for uploads with proper headers
   app.use('/uploads', express.static(uploadsDir, {
     setHeaders: (res, path) => {
