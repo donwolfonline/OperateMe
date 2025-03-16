@@ -1,5 +1,5 @@
-import PDFDocument from 'pdfkit';
 import { OperationOrder, User } from "@shared/schema";
+import PDFDocument from 'pdfkit';
 import path from 'path';
 import QRCode from 'qrcode';
 import fs from 'fs';
@@ -62,7 +62,27 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
     });
     doc.moveDown(2);
 
-    // Contract section
+    // Legal Agreement section
+    const legalAgreement = [
+      'تم ابرام هذا العقد بين المتعاقدين بناء على المادة (39) التاسعة و الثلاثون من اللائحة المنظمة لنشاط النقل المتخصص و تأجير و توجيه الحافلات و بناء على الفقرة (1) من المادة (39) و التي تنص على ان يجب على الناقل',
+      'ابرام عقد نقل مع الاطراف المحددين في المادة (40) قبل تنفيذ عمليات النقل على الطرق البرية و بما يخالف احكام هذه الائحة التي تحددها هيئة النقل و بناء على ما سبق تم ابرام عقد النقل بين الاطراف الاتية :',
+      'الطرف الاول : شركة صاعقة الطريق للنقل البري (شخص واحد)',
+      `الطرف الثاني : ${order.passengerName}`,
+      'اتفق الطرفان على أن ينفذ الطرف اول عملية النقل للطرف الثاني مع مرافقيه و ذويهم من الموقع المحدد مسبقا مع الطرف الثاني و توصيلهم الى الجهه المحدده بالعقد ۔',
+      `النقل من : ${order.fromCity}`,
+      `الوصول الى : ${order.toCity}`,
+      'في حالة الغاء التعاقد الى سبب شخصى او أسباب أخرى تتعلق في الحجوزات او الانظمة تكون سياسة إلالغاء و الاستبدال حسب نظام وزارة التجارة السعودى في حالة الحجز و تم الإلغاء قبل موعد الرحله بأكثر من 24 ساعه يتم استرداد المبلغ كامل .',
+      'وفي حالة طلب المبلغ كامل الطرف الثاني الحجز من خلال الموقع الالكتروني لشركة يعتبر هذا الحجز و موافقته على الشروط و الحكام بالموقع الالكتروني هو موافقة على هذا العقد لتنفيذ عملية النقل المتفق عليها مع الطرف الاول'
+    ];
+
+    const legalAgreementImg = renderArabicSection('عقد النقل / Contract Agreement', legalAgreement);
+    doc.image(legalAgreementImg, {
+      fit: [500, 400],
+      align: 'center'
+    });
+    doc.moveDown(2);
+
+    // Contract terms section
     const contractTerms = [
       '١. يلتزم السائق بالوصول في الموعد المحدد',
       '١.١ The driver commits to arrive at the specified time',
@@ -74,8 +94,8 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
       '٣.١ The company reserves the right to cancel trips in emergency situations'
     ];
 
-    const contractImg = renderArabicSection('عقد النقل / Contract Agreement', contractTerms);
-    doc.image(contractImg, {
+    const contractTermsImg = renderArabicSection('الشروط والأحكام / Terms and Conditions', contractTerms);
+    doc.image(contractTermsImg, {
       fit: [500, 300],
       align: 'center'
     });
