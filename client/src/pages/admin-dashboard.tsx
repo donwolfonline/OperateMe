@@ -103,7 +103,7 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* Additional Information Section */}
+      {/* Status Information Section */}
       <div className="space-y-2 pt-2 border-t">
         <p className="text-sm font-medium">Status Information:</p>
         <div className="flex flex-wrap gap-2">

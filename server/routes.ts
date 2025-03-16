@@ -7,11 +7,17 @@ import path from "path";
 import { insertVehicleSchema, insertOperationOrderSchema } from "@shared/schema";
 import { generateOrderPDF } from './utils/pdfGenerator';
 import express from "express";
+import fs from 'fs';
 
+// Ensure uploads directory exists
+const uploadsDir = path.join(process.cwd(), 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
 
 // Configure multer for file uploads
 const upload = multer({ 
-  dest: 'uploads/',
+  dest: uploadsDir,
   limits: {
     fileSize: 10 * 1024 * 1024, // 10MB limit
   },
@@ -47,8 +53,8 @@ const upload = multer({
 export async function registerRoutes(app: Express): Promise<Server> {
   setupAuth(app);
 
-  // Add this line to serve uploaded files
-  app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+  // Configure static file serving for uploads
+  app.use('/uploads', express.static(uploadsDir));
 
   // Document upload route
   app.post("/api/documents/upload", upload.single('document'), async (req, res) => {
@@ -61,7 +67,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const documentType = req.body.type;
-      const filePath = req.file.path;
+      // Store only the filename, not the full path
+      const filePath = req.file.filename;
 
       const user = await storage.getUser(req.user.id);
       if (!user) return res.sendStatus(404);
@@ -103,7 +110,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const vehicle = await storage.createVehicle({
         ...parsedData,
         driverId: req.user.id,
-        photoUrls: files.map(f => f.path),
+        photoUrls: files.map(f => f.filename),
         registrationUrl: "",
         isActive: true,
         createdAt: new Date()
