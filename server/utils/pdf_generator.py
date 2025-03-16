@@ -10,7 +10,11 @@ import os
 
 def reshape_arabic(text):
     """Reshape Arabic text for proper rendering"""
-    return get_display(arabic_reshaper.reshape(str(text)))
+    try:
+        reshaped_text = arabic_reshaper.reshape(str(text))
+        return get_display(reshaped_text)
+    except:
+        return text
 
 def generate_pdf(data_path, output_path):
     """Generate PDF with proper Arabic text rendering"""
@@ -18,17 +22,22 @@ def generate_pdf(data_path, output_path):
     with open(data_path, 'r') as f:
         data = json.load(f)
 
-    # Create PDF
+    # Initialize PDF
     c = canvas.Canvas(output_path, pagesize=A4)
     width, height = A4
 
-    # Set title
+    # Set initial position
+    current_y = height - 50
+
+    # Title
     title = reshape_arabic("عقد نقل على الطرق البرية")
     c.setFont("Helvetica-Bold", 16)
-    c.drawCentredString(width / 2, height - 50, title)
+    c.drawCentredString(width/2, current_y, title)
+    current_y -= 40
 
-    # Draw contract text
-    contract_text = [
+    # Draw agreement text
+    c.setFont("Helvetica", 10)
+    agreement_text = [
         reshape_arabic("تم ابرام هذا العقد بين المتعاقدين بناء على المادة (39) التاسعة و الثلاثون من اللائحة المنظمة لنشاط النقل المتخصص و تأجير و توجيه الحافلات"),
         reshape_arabic("و بناء على الفقرة (1) من المادة (39) و التي تنص على ان يجب على الناقل ابرام عقد نقل مع الاطراف المحددين في المادة (40) قبل تنفيذ عمليات النقل على الطرق البرية"),
         "",
@@ -36,38 +45,47 @@ def generate_pdf(data_path, output_path):
         reshape_arabic(f"الطرف الثاني : {data['main_passenger']}")
     ]
 
-    y_position = height - 100
-    c.setFont("Helvetica", 10)
-    for line in contract_text:
+    for line in agreement_text:
         if line:
-            c.drawRightString(width - 50, y_position, line)
-        y_position -= 20
+            text_width = c.stringWidth(line, "Helvetica", 10)
+            x_position = width - 50 - text_width
+            c.drawString(x_position, current_y, line)
+            current_y -= 20
+        else:
+            current_y -= 10
 
-    # Helper function to create info box
-    def create_info_box(title, content, y_pos, box_height):
+    current_y -= 20
+
+    def draw_section(title, content, height):
+        nonlocal current_y
+
         # Draw box
-        c.rect(50, y_pos - box_height, width - 100, box_height)
+        c.rect(50, current_y - height, width - 100, height)
 
-        # Draw grey header background
+        # Draw grey header
         c.setFillColor(colors.lightgrey)
-        c.rect(50, y_pos - 25, width - 100, 25, fill=1)
+        c.rect(50, current_y - 20, width - 100, 20, fill=1)
         c.setFillColor(colors.black)
 
         # Draw title
-        c.setFont("Helvetica-Bold", 12)
-        c.drawString(60, y_pos - 20, reshape_arabic(title))
+        c.setFont("Helvetica-Bold", 11)
+        title_text = reshape_arabic(title)
+        title_width = c.stringWidth(title_text, "Helvetica-Bold", 11)
+        c.drawString(width - 60 - title_width, current_y - 15, title_text)
 
         # Draw content
         c.setFont("Helvetica", 10)
-        content_y = y_pos - 45
+        content_y = current_y - 40
+
         for line in content:
-            c.drawRightString(width - 60, content_y, reshape_arabic(line))
+            text = reshape_arabic(line)
+            text_width = c.stringWidth(text, "Helvetica", 10)
+            c.drawString(width - 60 - text_width, content_y, text)
             content_y -= 20
 
-        return y_pos - box_height - 10
+        current_y -= (height + 20)
 
-    # Trip Information Box
-    y_pos = height - 250
+    # Trip Information
     trip_content = [
         f"Date / التاريخ: {data['date']}",
         f"From / من: {data['from_city']}",
@@ -75,29 +93,27 @@ def generate_pdf(data_path, output_path):
         f"Visa Type / نوع التأشيرة: {data['visa_type']}",
         f"Trip No. / رقم الرحلة: {data['trip_number']}"
     ]
-    y_pos = create_info_box("Trip Information / معلومات الرحلة", trip_content, y_pos, 130)
+    draw_section("Trip Information / معلومات الرحلة", trip_content, 120)
 
-    # Driver Information Box
+    # Driver Information
     driver_content = [
         f"Driver Name / اسم السائق: {data['driver_name']}",
         f"ID Number / رقم الهوية: {data['driver_id']}",
         f"License Number / رقم الرخصة: {data['license_number']}"
     ]
-    y_pos = create_info_box("Driver Information / معلومات السائق", driver_content, y_pos, 100)
+    draw_section("Driver Information / معلومات السائق", driver_content, 80)
 
-    # Passenger Information Box
+    # Passenger Information
     passenger_content = []
     for i, passenger in enumerate(data['passengers'], 1):
         passenger_content.extend([
             f"{i}. {passenger['name']}",
-            f"   ID / رقم الهوية: {passenger['id_number']}",
-            f"   Nationality / الجنسية: {passenger['nationality']}"
+            f"ID / رقم الهوية: {passenger['id_number']}",
+            f"Nationality / الجنسية: {passenger['nationality']}"
         ])
+    passenger_height = min(200, len(passenger_content) * 20 + 30)
+    draw_section("Passenger Information / معلومات الركاب", passenger_content, passenger_height)
 
-    box_height = min(200, len(passenger_content) * 20 + 35)
-    y_pos = create_info_box("Passenger Information / معلومات الركاب", passenger_content, y_pos, box_height)
-
-    # Save the PDF
     c.save()
     return os.path.basename(output_path)
 
