@@ -17,7 +17,7 @@ type AuthContextType = {
   registerMutation: UseMutationResult<SelectUser, Error, InsertUser>;
 };
 
-type LoginData = Pick<InsertUser, "username" | "password">;
+type LoginData = Pick<InsertUser, "username" | "password"> & { role?: string };
 
 export const AuthContext = createContext<AuthContextType | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -38,6 +38,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     onSuccess: (user: SelectUser) => {
       queryClient.setQueryData(["/api/user"], user);
+      // Redirect based on user role
+      const redirectPath = user.role === "admin" ? "/admin-dashboard" : "/driver";
+      window.location.href = redirectPath;
     },
     onError: (error: Error) => {
       toast({
@@ -55,6 +58,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     onSuccess: (user: SelectUser) => {
       queryClient.setQueryData(["/api/user"], user);
+      // After registration, redirect to driver dashboard
+      window.location.href = "/driver";
     },
     onError: (error: Error) => {
       toast({
@@ -71,6 +76,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     onSuccess: () => {
       queryClient.setQueryData(["/api/user"], null);
+      // After logout, redirect to home
+      window.location.href = "/";
     },
     onError: (error: Error) => {
       toast({

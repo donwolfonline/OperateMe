@@ -14,10 +14,7 @@ export default function AdminLoginPage() {
   const { t } = useTranslation();
   const { user, loginMutation } = useAuth();
 
-  if (user) {
-    window.location.href = "/admin";
-    return null;
-  }
+  if (user) return null;
 
   const loginForm = useForm({
     resolver: zodResolver(
