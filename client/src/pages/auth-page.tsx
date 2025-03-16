@@ -50,7 +50,7 @@ export default function AuthPage() {
         <Card className="max-w-md mx-auto mt-10">
           <CardContent className="p-6">
             <h2 className="text-2xl font-bold text-center mb-6">
-              {isAdmin ? t('auth.adminLogin') : t('auth.driverLogin')}
+              {t(isAdmin ? 'auth.adminLogin' : 'auth.driverLogin')}
             </h2>
 
             <Form {...loginForm}>
@@ -89,6 +89,7 @@ export default function AuthPage() {
                   {t('auth.login')}
                 </Button>
 
+                {/* Only show register button for driver login */}
                 {!isAdmin && (
                   <div className="text-center mt-4">
                     <Button 
