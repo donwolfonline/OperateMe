@@ -28,7 +28,8 @@ const resources = {
         orders: "Operation Orders",
         newOrder: "New Operation Order",
         uploadId: "Upload ID Document",
-        uploadLicense: "Upload License Document"
+        uploadLicense: "Upload License Document",
+        uploadProfileImage: "Upload Profile Image"
       },
       vehicle: {
         type: "Vehicle Type",
@@ -39,8 +40,6 @@ const resources = {
         save: "Save Vehicle"
       },
       order: {
-        passengerName: "Passenger Name",
-        passengerPhone: "Passenger Phone",
         fromCity: "From City",
         toCity: "To City",
         departureTime: "Departure Time",
@@ -50,6 +49,8 @@ const resources = {
         addPassenger: "Add Passenger",
         removePassenger: "Remove Passenger",
         nationality: "Nationality",
+        visaType: "Visa Type",
+        tripNumber: "Trip Number",
         documentReady: "Document Ready",
         downloadPdf: "Download PDF"
       },
@@ -100,7 +101,8 @@ const resources = {
         orders: "أوامر التشغيل",
         newOrder: "أمر تشغيل جديد",
         uploadId: "رفع صورة الهوية",
-        uploadLicense: "رفع صورة الرخصة"
+        uploadLicense: "رفع صورة الرخصة",
+        uploadProfileImage: "رفع صورة الملف الشخصي"
       },
       vehicle: {
         type: "نوع المركبة",
@@ -111,8 +113,6 @@ const resources = {
         save: "حفظ المركبة"
       },
       order: {
-        passengerName: "اسم الراكب",
-        passengerPhone: "رقم هاتف الراكب",
         fromCity: "مدينة الانطلاق",
         toCity: "مدينة الوصول",
         departureTime: "وقت المغادرة",
@@ -122,6 +122,8 @@ const resources = {
         addPassenger: "إضافة راكب",
         removePassenger: "حذف الراكب",
         nationality: "الجنسية",
+        visaType: "نوع التأشيرة",
+        tripNumber: "رقم الرحلة",
         documentReady: "المستند جاهز",
         downloadPdf: "تحميل PDF"
       },
@@ -143,6 +145,79 @@ const resources = {
       common: {
         logout: "تسجيل الخروج",
         saving: "جاري الحفظ..."
+      }
+    }
+  },
+  ur: {
+    translation: {
+      landing: {
+        title: "روڈ لائٹننگ ٹرانسپورٹ",
+        subtitle: "پیشہ ورانہ ٹرانسپورٹ سروسز",
+        loginButton: "ڈرائیور لاگ ان",
+        adminButton: "ایڈمن لاگ ان"
+      },
+      auth: {
+        driverLogin: "ڈرائیور لاگ ان",
+        adminLogin: "ایڈمن لاگ ان",
+        registerAsDriver: "بطور ڈرائیور رجسٹر کریں",
+        login: "لاگ ان",
+        register: "رجسٹر",
+        username: "صارف نام",
+        password: "پاس ورڈ",
+        fullName: "پورا نام",
+        idNumber: "شناختی نمبر",
+        licenseNumber: "لائسنس نمبر"
+      },
+      driver: {
+        profile: "ڈرائیور پروفائل",
+        vehicles: "میری گاڑیاں",
+        orders: "آپریشن آرڈرز",
+        newOrder: "نیا آپریشن آرڈر",
+        uploadId: "شناختی دستاویز اپلوڈ کریں",
+        uploadLicense: "لائسنس دستاویز اپلوڈ کریں",
+        uploadProfileImage: "پروفائل تصویر اپلوڈ کریں"
+      },
+      vehicle: {
+        type: "گاڑی کی قسم",
+        model: "گاڑی کا ماڈل",
+        year: "تیاری کا سال",
+        plateNumber: "پلیٹ نمبر",
+        photos: "گاڑی کی تصاویر",
+        save: "گاڑی محفوظ کریں"
+      },
+      order: {
+        fromCity: "کس شہر سے",
+        toCity: "کس شہر تک",
+        departureTime: "روانگی کا وقت",
+        create: "آرڈر بنائیں",
+        selectCity: "شہر منتخب کریں",
+        passengers: "مسافر",
+        addPassenger: "مسافر شامل کریں",
+        removePassenger: "مسافر ہٹائیں",
+        nationality: "قومیت",
+        visaType: "ویزا کی قسم",
+        tripNumber: "سفر نمبر",
+        documentReady: "دستاویز تیار ہے",
+        downloadPdf: "PDF ڈاؤنلوڈ کریں"
+      },
+      admin: {
+        dashboard: "ایڈمن ڈیش بورڈ",
+        pendingDrivers: "زیر التواء ڈرائیور",
+        activeDrivers: "فعال ڈرائیور",
+        suspendedDrivers: "معطل ڈرائیور",
+        approve: "منظور کریں",
+        suspend: "معطل کریں",
+        activate: "فعال کریں",
+        noDrivers: "کوئی زیر التواء ڈرائیور نہیں",
+        noActiveDrivers: "کوئی فعال ڈرائیور نہیں",
+        noSuspendedDrivers: "کوئی معطل ڈرائیور نہیں",
+        allOrders: "تمام آرڈرز",
+        noOrders: "کوئی آرڈر نہیں ملا",
+        orders: "آرڈرز"
+      },
+      common: {
+        logout: "لاگ آؤٹ",
+        saving: "محفوظ کیا جا رہا ہے..."
       }
     }
   }
