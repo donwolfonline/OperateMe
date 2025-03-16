@@ -29,6 +29,15 @@ const resources = {
         newOrder: "New Operation Order",
         uploadId: "Upload ID Document",
         uploadLicense: "Upload License Document"
+      },
+      admin: {
+        dashboard: "Admin Dashboard",
+        pendingDrivers: "Pending Drivers",
+        approve: "Approve",
+        noDrivers: "No pending drivers"
+      },
+      common: {
+        logout: "Logout"
       }
     }
   },
@@ -59,6 +68,15 @@ const resources = {
         newOrder: "أمر تشغيل جديد",
         uploadId: "رفع صورة الهوية",
         uploadLicense: "رفع صورة الرخصة"
+      },
+      admin: {
+        dashboard: "لوحة تحكم المشرف",
+        pendingDrivers: "السائقين المعلقين",
+        approve: "موافقة",
+        noDrivers: "لا يوجد سائقين معلقين"
+      },
+      common: {
+        logout: "تسجيل الخروج"
       }
     }
   }
