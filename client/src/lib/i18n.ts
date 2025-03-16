@@ -42,7 +42,11 @@ const resources = {
         photos: "Vehicle Photos",
         save: "Save Vehicle",
         saving: "Saving...",
-        registered: "Vehicle Registered"
+        registered: "Vehicle Registration Successful",
+        noAdditional: "No additional vehicles can be registered",
+        selectType: "Select Vehicle Type",
+        modelPlaceholder: "Enter vehicle model",
+        plateNumberPlaceholder: "Enter plate number"
       },
       order: {
         fromCity: "From City",
@@ -130,7 +134,11 @@ const resources = {
         photos: "صور المركبة",
         save: "حفظ المركبة",
         saving: "جاري الحفظ...",
-        registered: "تم تسجيل المركبة"
+        registered: "تم تسجيل المركبة بنجاح",
+        noAdditional: "لا يمكن تسجيل مركبات إضافية",
+        selectType: "اختر نوع المركبة",
+        modelPlaceholder: "أدخل موديل المركبة",
+        plateNumberPlaceholder: "أدخل رقم اللوحة"
       },
       order: {
         fromCity: "مدينة الانطلاق",
@@ -218,7 +226,11 @@ const resources = {
         photos: "گاڑی کی تصاویر",
         save: "گاڑی محفوظ کریں",
         saving: "محفوظ کیا جا رہا ہے...",
-        registered: "گاڑی رجسٹرڈ ہے"
+        registered: "گاڑی کی رجسٹریشن کامیاب ہو گئی",
+        noAdditional: "مزید گاڑیاں رجسٹر نہیں کی جا سکتیں",
+        selectType: "گاڑی کی قسم منتخب کریں",
+        modelPlaceholder: "گاڑی کا ماڈل درج کریں",
+        plateNumberPlaceholder: "پلیٹ نمبر درج کریں"
       },
       order: {
         fromCity: "کس شہر سے",
