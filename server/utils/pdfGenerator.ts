@@ -49,7 +49,7 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
     .text(`Passenger Phone: ${order.passengerPhone}`)
     .text(`From: ${order.fromCity}`)
     .text(`To: ${order.toCity}`)
-    .text(`Departure Time: ${new Date(order.departureTime).toLocaleString('ar-SA')}`)
+    .text(`Departure Time: ${order.departureTime.toLocaleString('ar-SA')}`)
     .moveDown();
 
   // Add driver details section
@@ -68,16 +68,11 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
     .text('Contract Agreement', { align: 'center' });
   doc.moveDown();
 
-  // Add contract content in Arabic with RTL support
-  doc.fontSize(12)
-    .fillColor('#000000');
-
   // Write Arabic text with RTL alignment
   const writeRTLText = (text: string) => {
     doc.text(text, {
       align: 'right',
-      features: ['rtla'], // Enable RTL alignment
-      language: 'ar'
+      direction: 'rtl'
     });
   };
 
@@ -102,6 +97,7 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
   doc.moveDown(0.5);
   writeRTLText('بواسطة حافلات الشركة المرخصه و المتوافقه مع الاشتراطات المقررة من هيئة النقل ۔');
 
+  // End the document
   doc.end();
 
   return new Promise((resolve, reject) => {
