@@ -15,7 +15,8 @@ export default function AuthPage() {
   const { t } = useTranslation();
   const { user, loginMutation } = useAuth();
   const [location] = useLocation();
-  const isAdmin = location.includes("admin");
+  // Explicitly check if we're on the admin path
+  const isAdmin = location === "/admin";
 
   if (user) {
     const redirectPath = user.role === "admin" ? "/admin" : "/driver";
@@ -39,6 +40,9 @@ export default function AuthPage() {
     });
   };
 
+  // Determine the title based on the page type
+  const pageTitle = isAdmin ? t('auth.adminLogin') : t('auth.driverLogin');
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-secondary p-4">
       <div className="container mx-auto">
@@ -50,7 +54,7 @@ export default function AuthPage() {
         <Card className="max-w-md mx-auto mt-10">
           <CardContent className="p-6">
             <h2 className="text-2xl font-bold text-center mb-6">
-              {t(isAdmin ? 'auth.adminLogin' : 'auth.driverLogin')}
+              {pageTitle}
             </h2>
 
             <Form {...loginForm}>
@@ -89,7 +93,7 @@ export default function AuthPage() {
                   {t('auth.login')}
                 </Button>
 
-                {/* Only show register button for driver login - removing for admin */}
+                {/* Only show register button for driver login */}
                 {!isAdmin && (
                   <div className="text-center mt-4">
                     <Button 
