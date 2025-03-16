@@ -17,8 +17,13 @@ logger = logging.getLogger(__name__)
 def generate_qr_code(pdf_filename):
     """Generate QR code and return as base64 string"""
     try:
-        # Use localhost with port 5000 since that's our running server
-        base_url = 'http://0.0.0.0:5000'
+        # Get Replit environment variables
+        repl_slug = os.getenv('REPL_SLUG', '')
+        repl_owner = os.getenv('REPL_OWNER', '')
+
+        # Construct the Replit URL
+        base_url = f"https://{repl_slug}.{repl_owner}.repl.co"
+        logger.info(f"Base URL for QR: {base_url}")
 
         # Create a full URL to the PDF
         pdf_url = f"{base_url}/uploads/{pdf_filename}"
@@ -26,7 +31,7 @@ def generate_qr_code(pdf_filename):
 
         qr = qrcode.QRCode(
             version=1,
-            error_correction=qrcode.constants.ERROR_CORRECT_L,
+            error_correction=qrcode.constants.ERROR_CORRECT_H,  # Higher error correction
             box_size=10,
             border=4,
         )
