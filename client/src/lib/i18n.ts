@@ -20,7 +20,8 @@ const resources = {
         invalidFile: "Invalid file type",
         maxFileSize: "File size exceeds limit",
         savingChanges: "Saving changes...",
-        changesSaved: "Changes saved successfully"
+        changesSaved: "Changes saved successfully",
+        viewDocument: "View uploaded document"
       },
       landing: {
         title: "Road Lightning Transport",
@@ -130,7 +131,8 @@ const resources = {
         invalidFile: "نوع الملف غير صالح",
         maxFileSize: "حجم الملف يتجاوز الحد المسموح",
         savingChanges: "جاري حفظ التغييرات...",
-        changesSaved: "تم حفظ التغييرات بنجاح"
+        changesSaved: "تم حفظ التغييرات بنجاح",
+        viewDocument: "عرض المستند المرفوع"
       },
       landing: {
         title: "صاعقة الطريق للنقل",
@@ -240,7 +242,8 @@ const resources = {
         invalidFile: "غلط فائل کی قسم",
         maxFileSize: "فائل کا سائز حد سے زیادہ ہے",
         savingChanges: "تبدیلیاں محفوظ کی جا رہی ہیں...",
-        changesSaved: "تبدیلیاں کامیابی سے محفوظ ہو گئیں"
+        changesSaved: "تبدیلیاں کامیابی سے محفوظ ہو گئیں",
+        viewDocument: "اپ لوڈ کردہ دستاویز دیکھیں"
       },
       landing: {
         title: "روڈ لائٹننگ ٹرانسپورٹ",

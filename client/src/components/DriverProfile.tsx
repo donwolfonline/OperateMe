@@ -45,13 +45,13 @@ export default function DriverProfile() {
       queryClient.setQueryData(["/api/user"], updatedUser);
 
       toast({
-        title: "Success",
-        description: "Document uploaded successfully",
+        title: t('notifications.success'),
+        description: t('notifications.uploadSuccess'),
       });
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Failed to upload document",
+        title: t('notifications.error'),
+        description: t('notifications.uploadError'),
         variant: "destructive",
       });
     }
@@ -79,7 +79,7 @@ export default function DriverProfile() {
             rel="noopener noreferrer"
             className="text-primary hover:underline"
           >
-            View uploaded document
+            {t('notifications.viewDocument')}
           </a>
         </div>
       );
