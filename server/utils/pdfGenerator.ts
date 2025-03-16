@@ -13,18 +13,25 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
     const doc = new PDFDocument({
       size: 'A4',
       margin: 50,
-      layout: 'portrait',
       autoFirstPage: true
     });
-
-    // Add built-in Helvetica font for English text
-    doc.font('Helvetica');
 
     // Pipe output to file
     const stream = fs.createWriteStream(pdfPath);
     doc.pipe(stream);
 
-    // Generate QR Code
+    // Set up fonts
+    doc.font('Helvetica');
+
+    // Add company header
+    doc.fontSize(24)
+      .fillColor('#1d4ed8')
+      .text('Lightning Road Transport', {
+        align: 'center'
+      });
+    doc.moveDown();
+
+    // Generate and add QR Code (only once)
     const qrCodeData = JSON.stringify({
       orderId: order.id,
       passengerName: order.passengerName,
@@ -34,79 +41,83 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
     });
 
     const qrCodeImage = await QRCode.toDataURL(qrCodeData);
-
-    // Add header
-    doc.fontSize(24)
-      .fillColor('#1d4ed8')
-      .text('Lightning Road Transport', { align: 'center' });
-    doc.moveDown();
-
-    // Add QR Code
     doc.image(Buffer.from(qrCodeImage.split(',')[1], 'base64'), {
       width: 100,
       align: 'right'
     });
-    doc.moveDown();
+    doc.moveDown(2);
 
-    // English sections
-    doc.fontSize(16)
-      .fillColor('#1e40af')
-      .text('Trip Details:', { align: 'left', underline: true });
-    doc.fontSize(12)
-      .fillColor('#000000')
-      .text(`Passenger Name: ${order.passengerName}`, { align: 'left' })
-      .text(`Passenger Phone: ${order.passengerPhone}`, { align: 'left' })
-      .text(`From: ${order.fromCity}`, { align: 'left' })
-      .text(`To: ${order.toCity}`, { align: 'left' })
-      .text(`Departure Time: ${new Date(order.departureTime).toLocaleString('ar-SA')}`, { align: 'left' });
-    doc.moveDown();
+    // Add trip details
+    doc.fontSize(14)
+      .fillColor('#000000');
 
-    doc.fontSize(16)
-      .fillColor('#1e40af')
-      .text('Driver Details:', { align: 'left', underline: true });
-    doc.fontSize(12)
-      .fillColor('#000000')
-      .text(`Driver Name: ${driver.fullName}`, { align: 'left' })
-      .text(`License Number: ${driver.licenseNumber}`, { align: 'left' });
-    doc.moveDown();
+    const tripDetails = [
+      ['Passenger Name:', order.passengerName],
+      ['Passenger Phone:', order.passengerPhone],
+      ['From:', order.fromCity],
+      ['To:', order.toCity],
+      ['Departure Time:', new Date(order.departureTime).toLocaleString('ar-SA')]
+    ];
 
+    tripDetails.forEach(([label, value]) => {
+      doc.text(label, { continued: true })
+         .text(`  ${value}`, { align: 'left' });
+    });
+
+    doc.moveDown(2);
+
+    // Add driver details
+    const driverDetails = [
+      ['Driver Name:', driver.fullName],
+      ['License Number:', driver.licenseNumber]
+    ];
+
+    driverDetails.forEach(([label, value]) => {
+      doc.text(label, { continued: true })
+         .text(`  ${value}`, { align: 'left' });
+    });
+
+    doc.moveDown(2);
+
+    // Contract title
     doc.fontSize(16)
       .fillColor('#1e40af')
       .text('Contract Agreement', { align: 'center' });
     doc.moveDown();
 
-    // Arabic text sections as image
-    const arabicText = [
-      'تم ابرام هذا العقد بين المتعاقدين بناء على المادة (39) التاسعة و الثلاثون من اللائحة المنظمة لنشاط النقل المتخصص و تأجير و توجيه الحافلات و بناء على الفقرة (1) من المادة (39) و التي تنص على ان يجب على الناقل',
-      'ابرام عقد نقل مع الاطراف المحددين في المادة (40) قبل تنفيذ عمليات النقل على الطرق البرية و بما يخالف احكام هذه الائحة التي تحددها هيئة النقل و بناء على ما سبق تم ابرام عقد النقل بين الاطراف الاتية :',
-      'الطرف الاول : شركة صاعقة الطريق للنقل البري (شخص واحد)',
-      `الطرف الثاني : ${order.passengerName}`,
-      'اتفق الطرفان على أن ينفذ الطرف اول عملية النقل للطرف الثاني مع مرافقيه و ذويهم من الموقع المحدد مسبقا مع الطرف الثاني و توصيلهم الى الجهه المحدده بالعقد ۔',
-      `النقل من : ${order.fromCity}`,
-      `الوصول الى : ${order.toCity}`,
-      'في حالة الغاء التعاقد الى سبب شخصى او أسباب أخرى تتعلق في الحجوزات او الانظمة تكون سياسة إلالغاء و الاستبدال حسب نظام وزارة التجارة السعودى في حالة الحجز و تم الإلغاء قبل موعد الرحله بأكثر من 24 ساعه يتم استرداد المبلغ كامل .',
-      'وفي حالة طلب المبلغ كامل الطرف الثاني الحجز من خلال الموقع الالكتروني لشركة يعتبر هذا الحجز و موافقته على الشروط و الحكام بالموقع الالكتروني هو موافقة على هذا العقد لتنفيذ عملية النقل المتفق عليها مع الطرف الاول',
-      'بواسطة حافلات الشركة المرخصه و المتوافقه مع الاشتراطات المقررة من هيئة النقل ۔'
-    ];
-
-    // Function to draw right-aligned text
-    function drawRightAlignedText(text: string) {
-      const textWidth = doc.widthOfString(text);
-      const pageWidth = doc.page.width - doc.page.margins.left - doc.page.margins.right;
-      const x = doc.page.width - doc.page.margins.right - textWidth;
-      doc.text(text, x, doc.y);
-      doc.moveDown(0.5);
-    }
-
-    // Write Arabic text
+    // Add Arabic contract text
     doc.fontSize(12)
       .fillColor('#000000');
 
+    function writeRTLText(text: string) {
+      const textOptions = {
+        align: 'right' as const,
+        lineBreak: true,
+        paragraphGap: 10
+      };
+      doc.text(text, textOptions);
+    }
+
+    const arabicText = [
+      'عقد نقل ركاب',
+      `اسم الراكب: ${order.passengerName}`,
+      `رقم الهاتف: ${order.passengerPhone}`,
+      `مدينة الانطلاق: ${order.fromCity}`,
+      `مدينة الوصول: ${order.toCity}`,
+      `موعد المغادرة: ${new Date(order.departureTime).toLocaleString('ar-SA')}`,
+      'شروط وأحكام النقل:',
+      '١. يلتزم السائق بالوصول في الموعد المحدد',
+      '٢. يجب على الركاب الالتزام بتعليمات السلامة',
+      '٣. يحق للشركة إلغاء الرحلة في حالة الظروف الطارئة',
+      'توقيع العقد'
+    ];
+
     arabicText.forEach(text => {
-      drawRightAlignedText(text);
+      writeRTLText(text);
+      doc.moveDown(0.5);
     });
 
-    // Finalize the PDF
+    // Finalize PDF
     doc.end();
 
     return new Promise((resolve, reject) => {
