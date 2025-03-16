@@ -49,9 +49,9 @@ export default function VehicleForm() {
       <Card>
         <CardContent className="p-6">
           <div className="text-center space-y-2">
-            <p className="text-lg font-medium">تم تسجيل المركبة / Vehicle Registered</p>
+            <p className="text-lg font-medium">{t('vehicle.registered')}</p>
             <p className="text-sm text-muted-foreground">
-              لا يمكن تسجيل مركبات إضافية / Additional vehicles cannot be registered
+              {t('vehicle.noAdditional')}
             </p>
           </div>
         </CardContent>
@@ -140,14 +140,14 @@ export default function VehicleForm() {
               name="type"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>نوع المركبة / Vehicle Type</FormLabel>
+                  <FormLabel>{t('vehicle.type')}</FormLabel>
                   <Select 
                     onValueChange={field.onChange} 
                     defaultValue={field.value}
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="اختر نوع المركبة / Select Vehicle Type" />
+                        <SelectValue placeholder={t('vehicle.selectType')} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -168,9 +168,9 @@ export default function VehicleForm() {
               name="model"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>موديل المركبة / Vehicle Model</FormLabel>
+                  <FormLabel>{t('vehicle.model')}</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="موديل المركبة / Vehicle Model" />
+                    <Input {...field} placeholder={t('vehicle.modelPlaceholder')} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -182,7 +182,7 @@ export default function VehicleForm() {
               name="year"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>سنة التصنيع / Year</FormLabel>
+                  <FormLabel>{t('vehicle.year')}</FormLabel>
                   <FormControl>
                     <Input {...field} placeholder="2020" type="number" min="1900" max="2025" />
                   </FormControl>
@@ -196,9 +196,9 @@ export default function VehicleForm() {
               name="plateNumber"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>رقم اللوحة / Plate Number</FormLabel>
+                  <FormLabel>{t('vehicle.plateNumber')}</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="رقم اللوحة / Plate Number" />
+                    <Input {...field} placeholder={t('vehicle.plateNumberPlaceholder')} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -206,7 +206,7 @@ export default function VehicleForm() {
             />
 
             <FormItem>
-              <FormLabel>صور المركبة / Vehicle Photos</FormLabel>
+              <FormLabel>{t('vehicle.photos')}</FormLabel>
               <FormControl>
                 <Input 
                   type="file" 
@@ -235,7 +235,7 @@ export default function VehicleForm() {
               disabled={isSubmitting}
               className="w-full"
             >
-              {isSubmitting ? 'جاري الحفظ... / Saving...' : 'حفظ المركبة / Save Vehicle'}
+              {isSubmitting ? t('vehicle.saving') : t('vehicle.save')}
             </Button>
           </form>
         </Form>

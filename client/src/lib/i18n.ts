@@ -37,7 +37,13 @@ const resources = {
         year: "Manufacturing Year",
         plateNumber: "Plate Number",
         photos: "Vehicle Photos",
-        save: "Save Vehicle"
+        save: "Save Vehicle",
+        saving: "Saving...",
+        registered: "Vehicle Registered",
+        noAdditional: "Additional vehicles cannot be registered",
+        selectType: "Select Vehicle Type",
+        modelPlaceholder: "Enter vehicle model",
+        plateNumberPlaceholder: "Enter plate number"
       },
       order: {
         fromCity: "From City",
@@ -51,8 +57,15 @@ const resources = {
         nationality: "Nationality",
         visaType: "Visa Type",
         tripNumber: "Trip Number",
+        passengerName: "Passenger Name",
+        passengerIdNumber: "ID Number",
         documentReady: "Document Ready",
-        downloadPdf: "Download PDF"
+        downloadPdf: "Download PDF",
+        success: "Success",
+        orderCreated: "Order created successfully",
+        maxPassengers: "Maximum limit reached",
+        maxPassengersMessage: "Maximum 12 passengers allowed",
+        errorCreating: "Error creating order"
       },
       admin: {
         dashboard: "Admin Dashboard",
@@ -71,7 +84,8 @@ const resources = {
       },
       common: {
         logout: "Logout",
-        saving: "Saving..."
+        saving: "Saving...",
+        error: "Error"
       }
     }
   },
@@ -110,7 +124,13 @@ const resources = {
         year: "سنة التصنيع",
         plateNumber: "رقم اللوحة",
         photos: "صور المركبة",
-        save: "حفظ المركبة"
+        save: "حفظ المركبة",
+        saving: "جاري الحفظ...",
+        registered: "تم تسجيل المركبة",
+        noAdditional: "لا يمكن تسجيل مركبات إضافية",
+        selectType: "اختر نوع المركبة",
+        modelPlaceholder: "أدخل موديل المركبة",
+        plateNumberPlaceholder: "أدخل رقم اللوحة"
       },
       order: {
         fromCity: "مدينة الانطلاق",
@@ -124,8 +144,15 @@ const resources = {
         nationality: "الجنسية",
         visaType: "نوع التأشيرة",
         tripNumber: "رقم الرحلة",
+        passengerName: "اسم الراكب",
+        passengerIdNumber: "رقم الهوية",
         documentReady: "المستند جاهز",
-        downloadPdf: "تحميل PDF"
+        downloadPdf: "تحميل PDF",
+        success: "تم بنجاح",
+        orderCreated: "تم إنشاء الطلب بنجاح",
+        maxPassengers: "تم الوصول للحد الأقصى",
+        maxPassengersMessage: "الحد الأقصى 12 راكب",
+        errorCreating: "خطأ في إنشاء الطلب"
       },
       admin: {
         dashboard: "لوحة تحكم المشرف",
@@ -144,7 +171,8 @@ const resources = {
       },
       common: {
         logout: "تسجيل الخروج",
-        saving: "جاري الحفظ..."
+        saving: "جاري الحفظ...",
+        error: "خطأ"
       }
     }
   },
@@ -183,7 +211,13 @@ const resources = {
         year: "تیاری کا سال",
         plateNumber: "پلیٹ نمبر",
         photos: "گاڑی کی تصاویر",
-        save: "گاڑی محفوظ کریں"
+        save: "گاڑی محفوظ کریں",
+        saving: "محفوظ کیا جا رہا ہے...",
+        registered: "گاڑی رجسٹرڈ ہے",
+        noAdditional: "مزید گاڑیاں رجسٹر نہیں کی جا سکتیں",
+        selectType: "گاڑی کی قسم منتخب کریں",
+        modelPlaceholder: "گاڑی کا ماڈل درج کریں",
+        plateNumberPlaceholder: "پلیٹ نمبر درج کریں"
       },
       order: {
         fromCity: "کس شہر سے",
@@ -197,8 +231,15 @@ const resources = {
         nationality: "قومیت",
         visaType: "ویزا کی قسم",
         tripNumber: "سفر نمبر",
+        passengerName: "مسافر کا نام",
+        passengerIdNumber: "شناختی نمبر",
         documentReady: "دستاویز تیار ہے",
-        downloadPdf: "PDF ڈاؤنلوڈ کریں"
+        downloadPdf: "PDF ڈاؤنلوڈ کریں",
+        success: "کامیابی",
+        orderCreated: "آرڈر کامیابی سے بنایا گیا",
+        maxPassengers: "زیادہ سے زیادہ حد تک پہنچ گئے",
+        maxPassengersMessage: "زیادہ سے زیادہ 12 مسافر",
+        errorCreating: "آرڈر بنانے میں خطا"
       },
       admin: {
         dashboard: "ایڈمن ڈیش بورڈ",
@@ -217,7 +258,8 @@ const resources = {
       },
       common: {
         logout: "لاگ آؤٹ",
-        saving: "محفوظ کیا جا رہا ہے..."
+        saving: "محفوظ کیا جا رہا ہے...",
+        error: "خطا"
       }
     }
   }
@@ -227,7 +269,7 @@ i18n
   .use(initReactI18next)
   .init({
     resources,
-    lng: "ar",
+    lng: "ar", // default language
     fallbackLng: "ar",
     interpolation: {
       escapeValue: false

@@ -71,15 +71,15 @@ export default function OperationOrder() {
       }
 
       toast({
-        title: "Success",
-        description: "Order created successfully",
+        title: t('order.success'),
+        description: t('order.orderCreated'),
       });
 
       queryClient.invalidateQueries({ queryKey: ["/api/operation-orders/driver"] });
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Error creating order",
+        title: t('common.error'),
+        description: error.message || t('order.errorCreating'),
         variant: "destructive",
       });
     } finally {
@@ -93,21 +93,20 @@ export default function OperationOrder() {
         <CardContent className="p-6">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              {/* Trip Details */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
                   name="fromCity"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="block mb-2">مدينة الانطلاق / From City</FormLabel>
+                      <FormLabel>{t('order.fromCity')}</FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="اختر المدينة / Select City" />
+                          <SelectTrigger>
+                            <SelectValue placeholder={t('order.selectCity')} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -128,14 +127,14 @@ export default function OperationOrder() {
                   name="toCity"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="block mb-2">مدينة الوصول / To City</FormLabel>
+                      <FormLabel>{t('order.toCity')}</FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="اختر المدينة / Select City" />
+                          <SelectTrigger>
+                            <SelectValue placeholder={t('order.selectCity')} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -156,7 +155,7 @@ export default function OperationOrder() {
                   name="departureTime"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="block mb-2">وقت المغادرة / Departure Time</FormLabel>
+                      <FormLabel>{t('order.departureTime')}</FormLabel>
                       <FormControl>
                         <Input
                           type="datetime-local"
@@ -174,7 +173,7 @@ export default function OperationOrder() {
                   name="visaType"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="block mb-2">نوع التأشيرة / Visa Type</FormLabel>
+                      <FormLabel>{t('order.visaType')}</FormLabel>
                       <FormControl>
                         <Input {...field} className="w-full" />
                       </FormControl>
@@ -182,12 +181,13 @@ export default function OperationOrder() {
                     </FormItem>
                   )}
                 />
+
                 <FormField
                   control={form.control}
                   name="tripNumber"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="block mb-2">رقم الرحلة / Trip No.</FormLabel>
+                      <FormLabel>{t('order.tripNumber')}</FormLabel>
                       <FormControl>
                         <Input {...field} className="w-full" />
                       </FormControl>
@@ -197,10 +197,9 @@ export default function OperationOrder() {
                 />
               </div>
 
-              {/* Passengers Section */}
               <div className="space-y-4">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                  <h3 className="text-lg font-semibold">الركاب / Passengers</h3>
+                  <h3 className="text-lg font-semibold">{t('order.passengers')}</h3>
                   <Button
                     type="button"
                     variant="outline"
@@ -208,8 +207,8 @@ export default function OperationOrder() {
                     onClick={() => {
                       if (fields.length >= 12) {
                         toast({
-                          title: "Maximum limit reached",
-                          description: "Maximum 12 passengers allowed",
+                          title: t('order.maxPassengers'),
+                          description: t('order.maxPassengersMessage'),
                           variant: "destructive",
                         });
                         return;
@@ -222,20 +221,20 @@ export default function OperationOrder() {
                     }}
                   >
                     <Plus className="h-4 w-4 mr-2" />
-                    إضافة راكب / Add Passenger
+                    {t('order.addPassenger')}
                   </Button>
                 </div>
 
                 {fields.map((field, index) => (
                   <Card key={field.id}>
                     <CardContent className="p-4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <FormField
                           control={form.control}
                           name={`passengers.${index}.name`}
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="block mb-2">اسم الراكب / Passenger Name</FormLabel>
+                              <FormLabel>{t('order.passengerName')}</FormLabel>
                               <FormControl>
                                 <Input {...field} className="w-full" />
                               </FormControl>
@@ -249,7 +248,7 @@ export default function OperationOrder() {
                           name={`passengers.${index}.idNumber`}
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="block mb-2">رقم الهوية / ID Number</FormLabel>
+                              <FormLabel>{t('order.passengerIdNumber')}</FormLabel>
                               <FormControl>
                                 <Input {...field} className="w-full" />
                               </FormControl>
@@ -263,7 +262,7 @@ export default function OperationOrder() {
                           name={`passengers.${index}.nationality`}
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="block mb-2">الجنسية / Nationality</FormLabel>
+                              <FormLabel>{t('order.nationality')}</FormLabel>
                               <FormControl>
                                 <Input {...field} className="w-full" />
                               </FormControl>
@@ -282,7 +281,7 @@ export default function OperationOrder() {
                           onClick={() => remove(index)}
                         >
                           <Trash2 className="h-4 w-4 mr-2" />
-                          حذف الراكب / Remove Passenger
+                          {t('order.removePassenger')}
                         </Button>
                       )}
                     </CardContent>
@@ -295,7 +294,7 @@ export default function OperationOrder() {
                 disabled={isSubmitting}
                 className="w-full"
               >
-                {isSubmitting ? 'جاري الإنشاء... / Saving...' : 'إنشاء الطلب / Create Order'}
+                {isSubmitting ? t('common.saving') : t('order.create')}
               </Button>
             </form>
           </Form>
@@ -306,7 +305,7 @@ export default function OperationOrder() {
         <Card>
           <CardContent className="p-6">
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold">المستند جاهز / Document Ready</h3>
+              <h3 className="text-lg font-semibold">{t('order.documentReady')}</h3>
               <div className="aspect-[16/9] w-full bg-muted rounded-lg overflow-hidden">
                 <iframe
                   src={`/uploads/${pdfUrl}`}
@@ -321,7 +320,7 @@ export default function OperationOrder() {
                   className="w-full sm:w-auto"
                 >
                   <FileText className="mr-2 h-4 w-4" />
-                  تحميل PDF / Download PDF
+                  {t('order.downloadPdf')}
                 </Button>
               </div>
             </div>
