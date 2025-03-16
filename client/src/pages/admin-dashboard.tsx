@@ -29,7 +29,7 @@ export default function AdminDashboard() {
   });
 
   // Query for orders
-  const { data: allOrders } = useQuery<(OperationOrder & { passengers: any[] })[]>({
+  const { data: allOrders } = useQuery<(OperationOrder & { passengers: any[]; driver?: any })[]>({
     queryKey: ["/api/admin/all-orders"],
   });
 
@@ -55,7 +55,7 @@ export default function AdminDashboard() {
   if (!user || user.role !== "admin") return null;
 
   const renderDriverCard = (driver: User, actions: React.ReactNode) => (
-    <div key={driver.id} className="flex flex-col space-y-4 p-4 border rounded-lg">
+    <div key={driver.id} className="flex flex-col space-y-4 p-4 border rounded-lg bg-card">
       <div className="flex items-start justify-between">
         <div className="space-y-2">
           <div className="flex items-center space-x-2">
@@ -77,16 +77,16 @@ export default function AdminDashboard() {
       {/* Documents Section */}
       <div className="space-y-2 pt-2 border-t">
         <p className="text-sm font-medium">Documents:</p>
-        <div className="flex gap-4">
+        <div className="flex flex-wrap gap-4">
           {driver.idDocumentUrl && (
             <a
               href={`/uploads/${driver.idDocumentUrl}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center text-sm text-primary hover:underline"
+              className="flex items-center text-sm text-primary hover:underline bg-muted px-3 py-2 rounded-md"
             >
               <FileCheck className="h-4 w-4 mr-1" />
-              ID Document
+              View ID Document
             </a>
           )}
           {driver.licenseDocumentUrl && (
@@ -94,18 +94,31 @@ export default function AdminDashboard() {
               href={`/uploads/${driver.licenseDocumentUrl}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center text-sm text-primary hover:underline"
+              className="flex items-center text-sm text-primary hover:underline bg-muted px-3 py-2 rounded-md"
             >
               <FileCheck className="h-4 w-4 mr-1" />
-              License Document
+              View License Document
             </a>
           )}
+        </div>
+      </div>
+
+      {/* Additional Information Section */}
+      <div className="space-y-2 pt-2 border-t">
+        <p className="text-sm font-medium">Status Information:</p>
+        <div className="flex gap-2">
+          <Badge variant={driver.status === 'active' ? 'default' : 'secondary'}>
+            {driver.status}
+          </Badge>
+          <Badge variant={driver.isApproved ? 'default' : 'destructive'}>
+            {driver.isApproved ? 'Approved' : 'Not Approved'}
+          </Badge>
         </div>
       </div>
     </div>
   );
 
-  const renderOrderCard = (order: OperationOrder & { passengers: any[] }) => (
+  const renderOrderCard = (order: OperationOrder & { passengers: any[]; driver?: any }) => (
     <Card key={order.id} className="mb-4">
       <CardContent className="p-4">
         <div className="flex justify-between items-start mb-4">
@@ -117,13 +130,18 @@ export default function AdminDashboard() {
             <p className="text-sm text-muted-foreground">
               {new Date(order.departureTime).toLocaleString()}
             </p>
+            {order.driver && (
+              <p className="text-sm text-muted-foreground mt-1">
+                Driver: {order.driver.fullName} ({order.driver.idNumber})
+              </p>
+            )}
           </div>
           {order.pdfUrl && (
             <a
               href={`/uploads/${order.pdfUrl}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center text-sm text-primary hover:underline"
+              className="flex items-center text-sm text-primary hover:underline bg-muted px-3 py-2 rounded-md"
             >
               <FileText className="h-4 w-4 mr-1" />
               {t('order.downloadPdf')}
@@ -132,23 +150,30 @@ export default function AdminDashboard() {
         </div>
 
         <div className="space-y-2">
-          <h4 className="font-medium">{t('order.passengers')}:</h4>
-          {order.passengers?.map((passenger, index) => (
-            <div key={index} className="pl-4 border-l-2 border-muted">
-              <p className="text-sm font-medium">{passenger.name}</p>
-              <p className="text-xs text-muted-foreground">
-                {t('order.idNumber')}: {passenger.idNumber}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {t('order.nationality')}: {passenger.nationality}
-              </p>
-              {passenger.phone && (
-                <p className="text-xs text-muted-foreground">
-                  {t('order.passengerPhone')}: {passenger.phone}
-                </p>
-              )}
-            </div>
-          ))}
+          <h4 className="font-medium flex items-center gap-2">
+            <UserIcon className="h-4 w-4" />
+            {t('order.passengers')}:
+          </h4>
+          <div className="grid gap-2">
+            {order.passengers?.map((passenger, index) => (
+              <div key={index} className="bg-muted p-3 rounded-lg">
+                <p className="text-sm font-medium">{passenger.name}</p>
+                <div className="grid grid-cols-2 gap-x-4 mt-1">
+                  <p className="text-xs text-muted-foreground">
+                    {t('order.idNumber')}: {passenger.idNumber}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {t('order.nationality')}: {passenger.nationality}
+                  </p>
+                  {passenger.phone && (
+                    <p className="text-xs text-muted-foreground col-span-2">
+                      {t('order.passengerPhone')}: {passenger.phone}
+                    </p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </CardContent>
     </Card>
@@ -171,7 +196,7 @@ export default function AdminDashboard() {
         </div>
 
         <Tabs defaultValue="pending" className="space-y-4">
-          <TabsList>
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="pending">
               {t('admin.pendingDrivers')}
               {pendingDrivers?.length ? (

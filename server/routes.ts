@@ -218,28 +218,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!req.user || req.user.role !== "admin") return res.sendStatus(403);
     const details = await storage.getDriverDetails(parseInt(req.params.id));
     if (!details) return res.sendStatus(404);
-    res.json(details);
+
+    // Get passengers for each order
+    const ordersWithPassengers = await Promise.all(details.orders.map(async (order) => {
+      const passengers = await storage.getPassengersByOrder(order.id);
+      return { ...order, passengers };
+    }));
+
+    res.json({
+      ...details,
+      orders: ordersWithPassengers
+    });
   });
 
   // Add these new routes to the existing admin routes section
   app.get("/api/admin/all-orders", async (req, res) => {
     if (!req.user || req.user.role !== "admin") return res.sendStatus(403);
     const orders = await storage.getAllOperationOrders();
-    res.json(orders);
-  });
 
-  app.get("/api/admin/driver/:id/orders", async (req, res) => {
-    if (!req.user || req.user.role !== "admin") return res.sendStatus(403);
-    const orders = await storage.getOperationOrdersByDriver(parseInt(req.params.id));
-
-    // Get passengers for each order
-    const ordersWithPassengers = await Promise.all(orders.map(async (order) => {
+    // Get passengers and driver info for each order
+    const ordersWithDetails = await Promise.all(orders.map(async (order) => {
       const passengers = await storage.getPassengersByOrder(order.id);
-      return { ...order, passengers };
+      const driver = await storage.getUser(order.driverId);
+      return { 
+        ...order, 
+        passengers,
+        driver: {
+          fullName: driver?.fullName,
+          idNumber: driver?.idNumber
+        }
+      };
     }));
 
-    res.json(ordersWithPassengers);
+    res.json(ordersWithDetails);
   });
+
 
   const httpServer = createServer(app);
   return httpServer;
