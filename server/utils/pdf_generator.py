@@ -14,26 +14,22 @@ import os
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-def reshape_arabic(text):
-    """Reshape Arabic text for proper rendering"""
-    try:
-        reshaped_text = arabic_reshaper.reshape(str(text))
-        return get_display(reshaped_text)
-    except Exception as e:
-        logger.error(f"Error reshaping text: {text}, Error: {str(e)}")
-        return text
-
-def generate_qr_code(data):
+def generate_qr_code(pdf_filename):
     """Generate QR code and return as base64 string"""
     try:
         # Get base URL from environment or use default
         base_url = os.getenv('BASE_URL', 'https://vehicle-management.replit.app')
 
         # Create a full URL to the PDF
-        pdf_url = f"{base_url}/uploads/{data['filename']}"
+        pdf_url = f"{base_url}/uploads/{pdf_filename}"
         logger.info(f"Generated PDF URL for QR: {pdf_url}")
 
-        qr = qrcode.QRCode(version=1, box_size=10, border=5)
+        qr = qrcode.QRCode(
+            version=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_L,
+            box_size=10,
+            border=4,
+        )
         qr.add_data(pdf_url)
         qr.make(fit=True)
         qr_img = qr.make_image(fill_color="black", back_color="white")
@@ -41,6 +37,8 @@ def generate_qr_code(data):
         buffer = BytesIO()
         qr_img.save(buffer, format="PNG")
         qr_base64 = base64.b64encode(buffer.getvalue()).decode()
+
+        logger.info(f"Successfully generated QR code for URL: {pdf_url}")
         return f"data:image/png;base64,{qr_base64}"
     except Exception as e:
         logger.error(f"Error generating QR code: {str(e)}")
@@ -55,16 +53,17 @@ def generate_pdf(data_path, output_path):
         with open(data_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
 
-        # Add filename to data for QR code generation
-        data['filename'] = Path(output_path).name
+        # Get the PDF filename
+        pdf_filename = Path(output_path).name
+        logger.info(f"PDF filename: {pdf_filename}")
+
+        # Generate QR code with the PDF filename
+        qr_code_base64 = generate_qr_code(pdf_filename)
 
         # Set up Jinja2 environment
         template_dir = Path(__file__).parent / 'pdf_templates'
         env = Environment(loader=FileSystemLoader(template_dir))
         template = env.get_template('transport_contract.html')
-
-        # Generate QR code
-        qr_code_base64 = generate_qr_code(data)
 
         # Render template
         html_content = template.render(
@@ -91,7 +90,7 @@ def generate_pdf(data_path, output_path):
         )
 
         logger.info(f"PDF saved successfully at: {output_path}")
-        return Path(output_path).name
+        return pdf_filename
 
     except Exception as e:
         logger.error(f"Error generating PDF: {str(e)}")

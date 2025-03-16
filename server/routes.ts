@@ -58,7 +58,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     setHeaders: (res, path) => {
       if (path.endsWith('.pdf')) {
         res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', 'inline');
+        res.setHeader('Content-Disposition', 'inline; filename="' + path.split('/').pop() + '"');
+        res.setHeader('Cache-Control', 'public, max-age=3600');
       }
     }
   }));
