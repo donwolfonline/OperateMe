@@ -89,7 +89,7 @@ export default function AuthPage() {
                   {t('auth.login')}
                 </Button>
 
-                {/* Only show register button for driver login */}
+                {/* Only show register button for driver login - removing for admin */}
                 {!isAdmin && (
                   <div className="text-center mt-4">
                     <Button 
