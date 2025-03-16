@@ -15,8 +15,8 @@ export default function AuthPage() {
   const { t } = useTranslation();
   const { user, loginMutation } = useAuth();
   const [location] = useLocation();
-  // Explicitly check if we're on the admin path
-  const isAdmin = location === "/admin";
+  // Check if we're on the admin login page
+  const isAdmin = window.location.pathname === "/admin";
 
   if (user) {
     const redirectPath = user.role === "admin" ? "/admin" : "/driver";
@@ -40,9 +40,6 @@ export default function AuthPage() {
     });
   };
 
-  // Determine the title based on the page type
-  const pageTitle = isAdmin ? t('auth.adminLogin') : t('auth.driverLogin');
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-secondary p-4">
       <div className="container mx-auto">
@@ -54,7 +51,7 @@ export default function AuthPage() {
         <Card className="max-w-md mx-auto mt-10">
           <CardContent className="p-6">
             <h2 className="text-2xl font-bold text-center mb-6">
-              {pageTitle}
+              {isAdmin ? t('auth.adminLogin') : t('auth.driverLogin')}
             </h2>
 
             <Form {...loginForm}>
