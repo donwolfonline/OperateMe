@@ -1,6 +1,5 @@
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/use-auth";
-import { useLocation } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -11,32 +10,21 @@ import { insertUserSchema } from "@shared/schema";
 import LanguageToggle from "@/components/LanguageToggle";
 import HomeButton from "@/components/HomeButton";
 
-export default function AuthPage() {
+export default function RegisterPage() {
   const { t } = useTranslation();
-  const { user, loginMutation } = useAuth();
-  const [location] = useLocation();
-  const isAdmin = location.includes("admin");
+  const { user, registerMutation } = useAuth();
 
   if (user) {
-    const redirectPath = user.role === "admin" ? "/admin" : "/driver";
-    window.location.href = redirectPath;
+    window.location.href = "/driver";
     return null;
   }
 
-  const loginForm = useForm({
-    resolver: zodResolver(
-      insertUserSchema.pick({ 
-        username: true, 
-        password: true 
-      })
-    )
+  const registerForm = useForm({
+    resolver: zodResolver(insertUserSchema)
   });
 
-  const onLogin = async (data: any) => {
-    await loginMutation.mutateAsync({
-      ...data,
-      role: isAdmin ? "admin" : "driver"
-    });
+  const onRegister = async (data: any) => {
+    await registerMutation.mutateAsync(data);
   };
 
   return (
@@ -50,13 +38,13 @@ export default function AuthPage() {
         <Card className="max-w-md mx-auto mt-10">
           <CardContent className="p-6">
             <h2 className="text-2xl font-bold text-center mb-6">
-              {isAdmin ? t('auth.adminLogin') : t('auth.driverLogin')}
+              {t('auth.registerAsDriver')}
             </h2>
 
-            <Form {...loginForm}>
-              <form onSubmit={loginForm.handleSubmit(onLogin)} className="space-y-4">
+            <Form {...registerForm}>
+              <form onSubmit={registerForm.handleSubmit(onRegister)} className="space-y-4">
                 <FormField
-                  control={loginForm.control}
+                  control={registerForm.control}
                   name="username"
                   render={({ field }) => (
                     <FormItem>
@@ -69,7 +57,7 @@ export default function AuthPage() {
                   )}
                 />
                 <FormField
-                  control={loginForm.control}
+                  control={registerForm.control}
                   name="password"
                   render={({ field }) => (
                     <FormItem>
@@ -81,24 +69,52 @@ export default function AuthPage() {
                     </FormItem>
                   )}
                 />
+                <FormField
+                  control={registerForm.control}
+                  name="fullName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('auth.fullName')}</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={registerForm.control}
+                  name="idNumber"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('auth.idNumber')}</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={registerForm.control}
+                  name="licenseNumber"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('auth.licenseNumber')}</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 <Button 
                   type="submit" 
                   className="w-full"
-                  disabled={loginMutation.isPending}
+                  disabled={registerMutation.isPending}
                 >
-                  {t('auth.login')}
+                  {t('auth.register')}
                 </Button>
-
-                {!isAdmin && (
-                  <div className="text-center mt-4">
-                    <Button 
-                      variant="link" 
-                      onClick={() => window.location.href = "/register"}
-                    >
-                      {t('auth.registerAsDriver')}
-                    </Button>
-                  </div>
-                )}
               </form>
             </Form>
           </CardContent>

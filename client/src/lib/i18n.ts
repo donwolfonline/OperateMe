@@ -11,6 +11,9 @@ const resources = {
         adminButton: "Admin Login"
       },
       auth: {
+        driverLogin: "Driver Login",
+        adminLogin: "Admin Login",
+        registerAsDriver: "Register as a Driver",
         login: "Login",
         register: "Register",
         username: "Username",
@@ -23,7 +26,9 @@ const resources = {
         profile: "Driver Profile",
         vehicles: "My Vehicles",
         orders: "Operation Orders",
-        newOrder: "New Operation Order"
+        newOrder: "New Operation Order",
+        uploadId: "Upload ID Document",
+        uploadLicense: "Upload License Document"
       }
     }
   },
@@ -36,6 +41,9 @@ const resources = {
         adminButton: "دخول المشرف"
       },
       auth: {
+        driverLogin: "تسجيل دخول السائق",
+        adminLogin: "دخول المشرف",
+        registerAsDriver: "تسجيل سائق جديد",
         login: "تسجيل الدخول",
         register: "تسجيل جديد",
         username: "اسم المستخدم",
@@ -48,7 +56,9 @@ const resources = {
         profile: "ملف السائق",
         vehicles: "مركباتي",
         orders: "أوامر التشغيل",
-        newOrder: "أمر تشغيل جديد"
+        newOrder: "أمر تشغيل جديد",
+        uploadId: "رفع صورة الهوية",
+        uploadLicense: "رفع صورة الرخصة"
       }
     }
   }

@@ -2,8 +2,11 @@ import { IStorage } from "./storage";
 import { User, Vehicle, OperationOrder, InsertUser } from "@shared/schema";
 import createMemoryStore from "memorystore";
 import session from "express-session";
+import { scrypt, randomBytes } from "crypto";
+import { promisify } from "util";
 
 const MemoryStore = createMemoryStore(session);
+const scryptAsync = promisify(scrypt);
 
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
@@ -20,6 +23,31 @@ export class MemStorage implements IStorage {
     this.sessionStore = new MemoryStore({
       checkPeriod: 86400000,
     });
+
+    // Create default admin user
+    this.createDefaultAdmin();
+  }
+
+  private async createDefaultAdmin() {
+    const salt = randomBytes(16).toString("hex");
+    const buf = (await scryptAsync("admin123", salt, 64)) as Buffer;
+    const hashedPassword = `${buf.toString("hex")}.${salt}`;
+
+    const adminUser: User = {
+      id: this.currentId++,
+      username: "admin",
+      password: hashedPassword,
+      role: "admin",
+      isApproved: true,
+      fullName: null,
+      idNumber: null,
+      licenseNumber: null,
+      idDocumentUrl: null,
+      licenseDocumentUrl: null,
+      createdAt: new Date()
+    };
+
+    this.users.set(adminUser.id, adminUser);
   }
 
   async getUser(id: number): Promise<User | undefined> {
