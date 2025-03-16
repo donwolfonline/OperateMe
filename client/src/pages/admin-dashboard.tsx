@@ -10,6 +10,9 @@ import LanguageToggle from "@/components/LanguageToggle";
 import HomeButton from "@/components/HomeButton";
 import { Badge } from "@/components/ui/badge";
 import { FileText, User as UserIcon, Car, FileCheck } from "lucide-react";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"; // Assuming this import is correct
+import { UserCircle2 } from "lucide-react"; // Import needed for fallback avatar
+
 
 export default function AdminDashboard() {
   const { t } = useTranslation();
@@ -57,17 +60,28 @@ export default function AdminDashboard() {
   const renderDriverCard = (driver: User, actions: React.ReactNode) => (
     <div key={driver.id} className="flex flex-col space-y-4 p-4 border rounded-lg bg-card">
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-        <div className="space-y-2">
-          <div className="flex items-center space-x-2">
-            <UserIcon className="h-5 w-5 text-primary" />
-            <p className="font-medium">{driver.fullName}</p>
+        <div className="flex items-center gap-4">
+          <Avatar className="h-16 w-16">
+            {driver.profileImageUrl ? (
+              <AvatarImage src={`/uploads/${driver.profileImageUrl}`} alt={driver.fullName || ''} />
+            ) : (
+              <AvatarFallback>
+                <UserCircle2 className="h-10 w-10" />
+              </AvatarFallback>
+            )}
+          </Avatar>
+          <div className="space-y-2">
+            <div className="flex items-center space-x-2">
+              <UserIcon className="h-5 w-5 text-primary" />
+              <p className="font-medium">{driver.fullName}</p>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              {t('auth.idNumber')}: {driver.idNumber}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              {t('auth.licenseNumber')}: {driver.licenseNumber}
+            </p>
           </div>
-          <p className="text-sm text-muted-foreground">
-            {t('auth.idNumber')}: {driver.idNumber}
-          </p>
-          <p className="text-sm text-muted-foreground">
-            {t('auth.licenseNumber')}: {driver.licenseNumber}
-          </p>
         </div>
         <div className="flex flex-wrap gap-2">
           {actions}
