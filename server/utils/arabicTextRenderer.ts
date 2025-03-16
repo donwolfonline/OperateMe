@@ -17,7 +17,7 @@ export function renderArabicSection(title: string, items: string[]): Buffer {
   // Calculate dimensions with more space for text
   const fontSize = 14;
   const titleSize = fontSize + 6;
-  const lineHeight = fontSize * 1.8; // Increased line height
+  const lineHeight = fontSize * 1.8; // Increased line height for better readability
   const padding = 20;
   const width = 600;
 
@@ -50,21 +50,27 @@ export function renderArabicSection(title: string, items: string[]): Buffer {
     // Word wrapping for Arabic text
     const words = item.split(' ');
     let line = '';
+    let firstLine = true;
 
     for (let i = 0; i < words.length; i++) {
       const testLine = line + (line ? ' ' : '') + words[i];
       const metrics = ctx.measureText(testLine);
 
-      if (metrics.width > width - (padding * 2) && i > 0) {
-        ctx.fillText(line, width - padding, currentY);
+      if (metrics.width > width - (padding * 3) && i > 0) {
+        // Add indentation for wrapped lines
+        const xPosition = width - padding - (firstLine ? 0 : 20);
+        ctx.fillText(line, xPosition, currentY);
         line = words[i];
         currentY += lineHeight;
+        firstLine = false;
       } else {
         line = testLine;
       }
     }
-    ctx.fillText(line, width - padding, currentY);
-    currentY += lineHeight;
+    // Draw remaining text
+    const xPosition = width - padding - (firstLine ? 0 : 20);
+    ctx.fillText(line, xPosition, currentY);
+    currentY += lineHeight * 1.2; // Add extra space between items
   });
 
   return canvas.toBuffer('image/png');

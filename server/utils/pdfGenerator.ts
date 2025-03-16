@@ -24,7 +24,7 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
        .text('Lightning Road Transport', {
          align: 'center'
        });
-    doc.moveDown(2);
+    doc.moveDown(3);
 
     // Format date
     const dateStr = new Date(order.departureTime).toLocaleString('ar-SA', {
@@ -47,7 +47,7 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
       fit: [500, 200],
       align: 'center'
     });
-    doc.moveDown(2);
+    doc.moveDown(3);
 
     // Driver details section
     const driverDetails = [
@@ -60,7 +60,10 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
       fit: [500, 100],
       align: 'center'
     });
-    doc.moveDown(2);
+    doc.moveDown(3);
+
+    // Add new page for legal agreement
+    doc.addPage();
 
     // Legal Agreement section
     const legalAgreement = [
@@ -77,10 +80,13 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
 
     const legalAgreementImg = renderArabicSection('عقد النقل / Contract Agreement', legalAgreement);
     doc.image(legalAgreementImg, {
-      fit: [500, 600], // Increased height for legal text
+      fit: [500, 700],
       align: 'center'
     });
-    doc.moveDown(2);
+    doc.moveDown(3);
+
+    // New page for terms and conditions
+    doc.addPage();
 
     // Contract terms section
     const contractTerms = [
@@ -99,9 +105,9 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
       fit: [500, 300],
       align: 'center'
     });
-    doc.moveDown(2);
+    doc.moveDown(3);
 
-    // Generate QR Code at the end
+    // QR Code at the bottom of the last page
     const qrCodeData = JSON.stringify({
       orderId: order.id,
       passengerName: order.passengerName,
