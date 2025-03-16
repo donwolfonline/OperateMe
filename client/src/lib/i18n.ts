@@ -33,8 +33,24 @@ const resources = {
       admin: {
         dashboard: "Admin Dashboard",
         pendingDrivers: "Pending Drivers",
+        activeDrivers: "Active Drivers",
+        suspendedDrivers: "Suspended Drivers",
+        tripRequests: "Trip Requests",
         approve: "Approve",
-        noDrivers: "No pending drivers"
+        suspend: "Suspend",
+        activate: "Activate",
+        noDrivers: "No pending drivers",
+        noActiveDrivers: "No active drivers",
+        noSuspendedDrivers: "No suspended drivers",
+        noTripRequests: "No pending trip requests",
+        approveTrip: "Approve Trip",
+        rejectTrip: "Reject Trip"
+      },
+      trips: {
+        from: "From",
+        to: "To",
+        status: "Status",
+        date: "Date"
       },
       common: {
         logout: "Logout"
@@ -72,8 +88,24 @@ const resources = {
       admin: {
         dashboard: "لوحة تحكم المشرف",
         pendingDrivers: "السائقين المعلقين",
+        activeDrivers: "السائقين النشطين",
+        suspendedDrivers: "السائقين الموقوفين",
+        tripRequests: "طلبات الرحلات",
         approve: "موافقة",
-        noDrivers: "لا يوجد سائقين معلقين"
+        suspend: "إيقاف",
+        activate: "تفعيل",
+        noDrivers: "لا يوجد سائقين معلقين",
+        noActiveDrivers: "لا يوجد سائقين نشطين",
+        noSuspendedDrivers: "لا يوجد سائقين موقوفين",
+        noTripRequests: "لا يوجد طلبات رحلات معلقة",
+        approveTrip: "الموافقة على الرحلة",
+        rejectTrip: "رفض الرحلة"
+      },
+      trips: {
+        from: "من",
+        to: "إلى",
+        status: "الحالة",
+        date: "التاريخ"
       },
       common: {
         logout: "تسجيل الخروج"
