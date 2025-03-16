@@ -38,11 +38,11 @@ export default function OperationOrder() {
       fromCity: '',
       toCity: '',
       departureTime: new Date().toISOString().slice(0, 16),
+      visaType: '',
       passengers: [{
         name: '',
         idNumber: '',
         nationality: '',
-        phone: ''
       }]
     }
   });
@@ -154,7 +154,7 @@ export default function OperationOrder() {
                   control={form.control}
                   name="departureTime"
                   render={({ field }) => (
-                    <FormItem className="col-span-full">
+                    <FormItem>
                       <FormLabel className="block mb-2">وقت المغادرة / Departure Time</FormLabel>
                       <FormControl>
                         <Input
@@ -162,6 +162,20 @@ export default function OperationOrder() {
                           className="w-full"
                           {...field}
                         />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="visaType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="block mb-2">نوع التأشيرة / Visa Type</FormLabel>
+                      <FormControl>
+                        <Input {...field} className="w-full" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -177,7 +191,21 @@ export default function OperationOrder() {
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => append({ name: '', idNumber: '', nationality: '', phone: '' })}
+                    onClick={() => {
+                      if (fields.length >= 12) {
+                        toast({
+                          title: "Maximum limit reached",
+                          description: "Maximum 12 passengers allowed",
+                          variant: "destructive",
+                        });
+                        return;
+                      }
+                      append({
+                        name: '',
+                        idNumber: '',
+                        nationality: '',
+                      });
+                    }}
                   >
                     <Plus className="h-4 w-4 mr-2" />
                     إضافة راكب / Add Passenger
@@ -224,20 +252,6 @@ export default function OperationOrder() {
                               <FormLabel className="block mb-2">الجنسية / Nationality</FormLabel>
                               <FormControl>
                                 <Input {...field} className="w-full" />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <FormField
-                          control={form.control}
-                          name={`passengers.${index}.phone`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="block mb-2">رقم هاتف الراكب / Phone Number</FormLabel>
-                              <FormControl>
-                                <Input {...field} type="tel" className="w-full" />
                               </FormControl>
                               <FormMessage />
                             </FormItem>

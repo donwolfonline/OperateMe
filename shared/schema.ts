@@ -37,7 +37,6 @@ export const passengers = pgTable("passengers", {
   name: text("name").notNull(),
   idNumber: text("id_number").notNull(),
   nationality: text("nationality").notNull(),
-  phone: text("phone")
 });
 
 export const operationOrders = pgTable("operation_orders", {
@@ -47,6 +46,7 @@ export const operationOrders = pgTable("operation_orders", {
   fromCity: text("from_city").notNull(),
   toCity: text("to_city").notNull(),
   departureTime: timestamp("departure_time").notNull(),
+  visaType: text("visa_type").notNull(),
   qrCode: text("qr_code"),
   pdfUrl: text("pdf_url"),
   status: text("status").notNull().default("active"), 
@@ -72,7 +72,6 @@ export const insertPassengerSchema = createInsertSchema(passengers).pick({
   name: true,
   idNumber: true,
   nationality: true,
-  phone: true,
 });
 
 export const insertOperationOrderSchema = createInsertSchema(operationOrders)
@@ -80,6 +79,7 @@ export const insertOperationOrderSchema = createInsertSchema(operationOrders)
     fromCity: true,
     toCity: true,
     departureTime: true,
+    visaType: true,
   })
   .extend({
     departureTime: z.string()
@@ -88,6 +88,8 @@ export const insertOperationOrderSchema = createInsertSchema(operationOrders)
       })
       .transform((val) => new Date(val)),
     passengers: z.array(insertPassengerSchema)
+      .min(1, "At least one passenger is required")
+      .max(12, "Maximum 12 passengers allowed")
   });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
