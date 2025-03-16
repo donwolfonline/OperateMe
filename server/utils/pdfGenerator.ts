@@ -77,7 +77,7 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
 
     const legalAgreementImg = renderArabicSection('عقد النقل / Contract Agreement', legalAgreement);
     doc.image(legalAgreementImg, {
-      fit: [500, 400],
+      fit: [500, 600], // Increased height for legal text
       align: 'center'
     });
     doc.moveDown(2);

@@ -14,13 +14,21 @@ function createRTLCanvas(width: number, height: number) {
 }
 
 export function renderArabicSection(title: string, items: string[]): Buffer {
-  // Calculate dimensions
+  // Calculate dimensions with more space for text
   const fontSize = 14;
   const titleSize = fontSize + 6;
-  const lineHeight = fontSize * 2;
+  const lineHeight = fontSize * 1.8; // Increased line height
   const padding = 20;
   const width = 600;
-  const height = titleSize + (items.length * lineHeight) + (padding * 3);
+
+  // Calculate required height based on text content
+  let totalLines = items.reduce((acc, item) => {
+    // Estimate number of lines needed for each item based on text length and width
+    const estimatedLines = Math.ceil((item.length * fontSize * 0.6) / (width - (padding * 2)));
+    return acc + estimatedLines;
+  }, 0);
+
+  const height = titleSize + (totalLines * lineHeight) + (padding * 4);
 
   const { canvas, ctx } = createRTLCanvas(width, height);
 
@@ -33,13 +41,30 @@ export function renderArabicSection(title: string, items: string[]): Buffer {
   ctx.fillStyle = '#1e40af';
   ctx.fillText(title, width - padding, padding + titleSize/2);
 
-  // Draw items
+  // Draw items with text wrapping
   ctx.font = `${fontSize}px Arial`;
   ctx.fillStyle = '#000000';
 
-  items.forEach((item, index) => {
-    const y = (padding * 2) + titleSize + (index * lineHeight);
-    ctx.fillText(item, width - padding, y);
+  let currentY = (padding * 2) + titleSize;
+  items.forEach(item => {
+    // Word wrapping for Arabic text
+    const words = item.split(' ');
+    let line = '';
+
+    for (let i = 0; i < words.length; i++) {
+      const testLine = line + (line ? ' ' : '') + words[i];
+      const metrics = ctx.measureText(testLine);
+
+      if (metrics.width > width - (padding * 2) && i > 0) {
+        ctx.fillText(line, width - padding, currentY);
+        line = words[i];
+        currentY += lineHeight;
+      } else {
+        line = testLine;
+      }
+    }
+    ctx.fillText(line, width - padding, currentY);
+    currentY += lineHeight;
   });
 
   return canvas.toBuffer('image/png');
