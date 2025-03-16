@@ -86,21 +86,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const files = req.files as Express.Multer.File[];
       if (!files || files.length === 0) {
         return res.status(400).json({ 
-          message: "No files uploaded or file types not supported. Please upload valid images or documents." 
+          message: "No files uploaded or file types not supported. Please upload valid images." 
         });
       }
 
-      const vehicleData = insertVehicleSchema.parse(req.body);
+      const vehicleData = {
+        type: req.body.type,
+        model: req.body.model,
+        year: req.body.year,
+        plateNumber: req.body.plateNumber
+      };
+
+      const parsedData = insertVehicleSchema.parse(vehicleData);
 
       const vehicle = await storage.createVehicle({
-        ...vehicleData,
+        ...parsedData,
         driverId: req.user.id,
-        photoUrls: files.map(f => f.path) || [],
+        photoUrls: files.map(f => f.path),
         registrationUrl: ""
       });
 
       res.status(201).json(vehicle);
     } catch (error: any) {
+      console.error('Vehicle creation error:', error);
       res.status(400).json({ 
         message: error.message || "Error creating vehicle" 
       });

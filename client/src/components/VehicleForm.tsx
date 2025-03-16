@@ -7,7 +7,7 @@ import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 
@@ -23,9 +23,17 @@ export default function VehicleForm() {
   const { t } = useTranslation();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [photoPreview, setPhotoPreview] = useState<string[]>([]);
 
   const form = useForm({
-    resolver: zodResolver(insertVehicleSchema)
+    resolver: zodResolver(insertVehicleSchema),
+    defaultValues: {
+      type: '',
+      model: '',
+      year: '',
+      plateNumber: '',
+      photos: undefined
+    }
   });
 
   const onSubmit = async (data: any) => {
@@ -53,8 +61,12 @@ export default function VehicleForm() {
         description: "Vehicle information saved successfully",
       });
 
-      // Reset form after successful submission
+      // Invalidate and refetch vehicles query
+      queryClient.invalidateQueries({ queryKey: ["/api/vehicles/driver"] });
+
+      // Reset form and preview after successful submission
       form.reset();
+      setPhotoPreview([]);
     } catch (error: any) {
       toast({
         title: "Error",
@@ -63,6 +75,13 @@ export default function VehicleForm() {
       });
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleFileChange = (files: FileList | null) => {
+    if (files) {
+      const previews = Array.from(files).map(file => URL.createObjectURL(file));
+      setPhotoPreview(previews);
     }
   };
 
@@ -144,7 +163,7 @@ export default function VehicleForm() {
             <FormField
               control={form.control}
               name="photos"
-              render={({ field }) => (
+              render={({ field: { onChange, ...field } }) => (
                 <FormItem>
                   <FormLabel>{t('vehicle.photos')}</FormLabel>
                   <FormControl>
@@ -152,10 +171,26 @@ export default function VehicleForm() {
                       type="file" 
                       accept="image/*"
                       multiple
-                      onChange={(e) => field.onChange(e.target.files)}
+                      onChange={(e) => {
+                        onChange(e.target.files);
+                        handleFileChange(e.target.files);
+                      }}
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
+                  {photoPreview.length > 0 && (
+                    <div className="grid grid-cols-2 gap-2 mt-2">
+                      {photoPreview.map((url, index) => (
+                        <img 
+                          key={index}
+                          src={url}
+                          alt={`Preview ${index + 1}`}
+                          className="w-full h-40 object-cover rounded-lg"
+                        />
+                      ))}
+                    </div>
+                  )}
                 </FormItem>
               )}
             />
@@ -163,8 +198,9 @@ export default function VehicleForm() {
             <Button 
               type="submit"
               disabled={isSubmitting}
+              className="w-full"
             >
-              {t('vehicle.save')}
+              {isSubmitting ? t('common.saving') : t('vehicle.save')}
             </Button>
           </form>
         </Form>
