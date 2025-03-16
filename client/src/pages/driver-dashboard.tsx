@@ -10,15 +10,21 @@ import OperationOrder from "@/components/OperationOrder";
 import LanguageToggle from "@/components/LanguageToggle";
 import HomeButton from "@/components/HomeButton";
 import { FileText, Download, Calendar, MapPin, Users } from "lucide-react";
+import { OperationOrder as OperationOrderType } from "@shared/schema";
 
 export default function DriverDashboard() {
   const { t } = useTranslation();
   const { user, logoutMutation } = useAuth();
 
-  // Query for driver's orders
-  const { data: driverOrders } = useQuery({
+  // Query for driver's orders with proper typing
+  const { data: driverOrders } = useQuery<
+    (OperationOrderType & { passengers: any[]; pdfUrl?: string })[]
+  >({
     queryKey: ["/api/driver/orders"],
+    enabled: !!user, // Only run query if user is logged in
   });
+
+  console.log("Driver Orders:", driverOrders); // Debug log
 
   if (!user) return null;
 
