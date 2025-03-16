@@ -47,6 +47,7 @@ export const operationOrders = pgTable("operation_orders", {
   toCity: text("to_city").notNull(),
   departureTime: timestamp("departure_time").notNull(),
   visaType: text("visa_type").notNull(),
+  tripNumber: text("trip_number").notNull(),
   qrCode: text("qr_code"),
   pdfUrl: text("pdf_url"),
   status: text("status").notNull().default("active"), 
@@ -80,6 +81,7 @@ export const insertOperationOrderSchema = createInsertSchema(operationOrders)
     toCity: true,
     departureTime: true,
     visaType: true,
+    tripNumber: true,
   })
   .extend({
     departureTime: z.string()

@@ -10,9 +10,8 @@ import LanguageToggle from "@/components/LanguageToggle";
 import HomeButton from "@/components/HomeButton";
 import { Badge } from "@/components/ui/badge";
 import { FileText, User as UserIcon, Car, FileCheck } from "lucide-react";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"; // Assuming this import is correct
-import { UserCircle2 } from "lucide-react"; // Import needed for fallback avatar
-
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { UserCircle2 } from "lucide-react";
 
 export default function AdminDashboard() {
   const { t } = useTranslation();
@@ -146,6 +145,9 @@ export default function AdminDashboard() {
             </p>
             <p className="text-sm text-muted-foreground">
               نوع التأشيرة / Visa Type: {order.visaType}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              رقم الرحلة / Trip No.: {order.tripNumber}
             </p>
             {order.driver && (
               <p className="text-sm text-muted-foreground mt-1">

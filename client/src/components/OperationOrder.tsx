@@ -39,6 +39,7 @@ export default function OperationOrder() {
       toCity: '',
       departureTime: new Date().toISOString().slice(0, 16),
       visaType: '',
+      tripNumber: '',
       passengers: [{
         name: '',
         idNumber: '',
@@ -174,6 +175,19 @@ export default function OperationOrder() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="block mb-2">نوع التأشيرة / Visa Type</FormLabel>
+                      <FormControl>
+                        <Input {...field} className="w-full" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="tripNumber"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="block mb-2">رقم الرحلة / Trip No.</FormLabel>
                       <FormControl>
                         <Input {...field} className="w-full" />
                       </FormControl>
