@@ -27,11 +27,18 @@ export const vehicles = pgTable("vehicles", {
   photoUrls: json("photo_urls").$type<string[]>(),
 });
 
+export const passengers = pgTable("passengers", {
+  id: serial("id").primaryKey(),
+  orderId: integer("order_id").notNull(),
+  name: text("name").notNull(),
+  idNumber: text("id_number").notNull(),
+  nationality: text("nationality").notNull(),
+  phone: text("phone")
+});
+
 export const operationOrders = pgTable("operation_orders", {
   id: serial("id").primaryKey(),
   driverId: integer("driver_id").notNull(),
-  passengerName: text("passenger_name").notNull(),
-  passengerPhone: text("passenger_phone").notNull(),
   fromCity: text("from_city").notNull(),
   toCity: text("to_city").notNull(),
   departureTime: timestamp("departure_time").notNull(),
@@ -55,10 +62,15 @@ export const insertVehicleSchema = createInsertSchema(vehicles).pick({
   plateNumber: true,
 });
 
+export const insertPassengerSchema = createInsertSchema(passengers).pick({
+  name: true,
+  idNumber: true,
+  nationality: true,
+  phone: true,
+});
+
 export const insertOperationOrderSchema = createInsertSchema(operationOrders)
   .pick({
-    passengerName: true,
-    passengerPhone: true,
     fromCity: true,
     toCity: true,
     departureTime: true,
@@ -68,10 +80,13 @@ export const insertOperationOrderSchema = createInsertSchema(operationOrders)
       .refine((val) => !isNaN(Date.parse(val)), {
         message: "Invalid date format"
       })
-      .transform((val) => new Date(val))
+      .transform((val) => new Date(val)),
+    passengers: z.array(insertPassengerSchema)
   });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type Vehicle = typeof vehicles.$inferSelect;
 export type OperationOrder = typeof operationOrders.$inferSelect;
+export type Passenger = typeof passengers.$inferSelect;
+export type InsertPassenger = z.infer<typeof insertPassengerSchema>;

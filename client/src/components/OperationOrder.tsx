@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertOperationOrderSchema } from "@shared/schema";
 import { Card, CardContent } from "@/components/ui/card";
@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
-import { FileText } from "lucide-react";
+import { FileText, Plus, Trash2 } from "lucide-react";
 
 // Saudi cities list
 const saudiCities = [
@@ -35,12 +35,21 @@ export default function OperationOrder() {
   const form = useForm({
     resolver: zodResolver(insertOperationOrderSchema),
     defaultValues: {
-      passengerName: '',
-      passengerPhone: '',
       fromCity: '',
       toCity: '',
-      departureTime: new Date().toISOString().slice(0, 16) // Format: YYYY-MM-DDTHH:mm
+      departureTime: new Date().toISOString().slice(0, 16),
+      passengers: [{
+        name: '',
+        idNumber: '',
+        nationality: '',
+        phone: ''
+      }]
     }
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "passengers"
   });
 
   const onSubmit = async (data: any) => {
@@ -48,7 +57,6 @@ export default function OperationOrder() {
       setIsSubmitting(true);
       setPdfUrl(null);
 
-      // Ensure proper date formatting
       const formattedData = {
         ...data,
         departureTime: new Date(data.departureTime).toISOString()
@@ -84,107 +92,175 @@ export default function OperationOrder() {
         <CardContent className="p-6">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="passengerName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t('order.passengerName')}</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {/* Trip Details */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="fromCity"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('order.fromCity')}</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder={t('order.selectCity')} />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {saudiCities.map((city) => (
+                            <SelectItem key={city} value={city}>
+                              {city}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <FormField
-                control={form.control}
-                name="passengerPhone"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t('order.passengerPhone')}</FormLabel>
-                    <FormControl>
-                      <Input {...field} type="tel" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                <FormField
+                  control={form.control}
+                  name="toCity"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('order.toCity')}</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder={t('order.selectCity')} />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {saudiCities.map((city) => (
+                            <SelectItem key={city} value={city}>
+                              {city}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <FormField
-                control={form.control}
-                name="fromCity"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t('order.fromCity')}</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
+                <FormField
+                  control={form.control}
+                  name="departureTime"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('order.departureTime')}</FormLabel>
                       <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder={t('order.selectCity')} />
-                        </SelectTrigger>
+                        <Input
+                          type="datetime-local"
+                          min={new Date().toISOString().slice(0, 16)}
+                          {...field}
+                        />
                       </FormControl>
-                      <SelectContent>
-                        {saudiCities.map((city) => (
-                          <SelectItem key={city} value={city}>
-                            {city}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
-              <FormField
-                control={form.control}
-                name="toCity"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t('order.toCity')}</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder={t('order.selectCity')} />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {saudiCities.map((city) => (
-                          <SelectItem key={city} value={city}>
-                            {city}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {/* Passengers Section */}
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-lg font-semibold">{t('order.passengers')}</h3>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => append({ name: '', idNumber: '', nationality: '', phone: '' })}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    {t('order.addPassenger')}
+                  </Button>
+                </div>
 
-              <FormField
-                control={form.control}
-                name="departureTime"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t('order.departureTime')}</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="datetime-local"
-                        min={new Date().toISOString().slice(0, 16)}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                {fields.map((field, index) => (
+                  <Card key={field.id}>
+                    <CardContent className="p-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name={`passengers.${index}.name`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>{t('order.passengerName')}</FormLabel>
+                              <FormControl>
+                                <Input {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name={`passengers.${index}.idNumber`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>{t('order.idNumber')}</FormLabel>
+                              <FormControl>
+                                <Input {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name={`passengers.${index}.nationality`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>{t('order.nationality')}</FormLabel>
+                              <FormControl>
+                                <Input {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name={`passengers.${index}.phone`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>{t('order.passengerPhone')}</FormLabel>
+                              <FormControl>
+                                <Input {...field} type="tel" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+
+                      {fields.length > 1 && (
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          className="mt-4"
+                          onClick={() => remove(index)}
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          {t('order.removePassenger')}
+                        </Button>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
 
               <Button
                 type="submit"

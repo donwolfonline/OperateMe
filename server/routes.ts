@@ -40,7 +40,7 @@ const upload = multer({
     if (allowedTypes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error('Unsupported file type. Please upload an image or document.'), false);
+      cb(null, false);
     }
   }
 });
@@ -116,14 +116,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Keep existing routes
   app.get("/api/vehicles/driver", async (req, res) => {
     if (!req.user) return res.sendStatus(401);
     const vehicles = await storage.getVehiclesByDriver(req.user.id);
     res.json(vehicles);
   });
 
-  // Update the operation order creation route
+  // Update the operation order creation route to handle passengers
   app.post("/api/operation-orders", async (req, res) => {
     try {
       if (!req.user) return res.sendStatus(401);
@@ -133,14 +132,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         departureTime: new Date(req.body.departureTime).toISOString()
       });
 
-      // Create the order first
-      const order = await storage.createOperationOrder({
-        ...orderData,
-        driverId: req.user.id,
-        qrCode: "",
-        pdfUrl: "",
-        createdAt: new Date()
-      });
+      // Create the order with passengers
+      const order = await storage.createOperationOrder(
+        {
+          fromCity: orderData.fromCity,
+          toCity: orderData.toCity,
+          departureTime: new Date(orderData.departureTime),
+          driverId: req.user.id,
+          qrCode: "",
+          pdfUrl: "",
+          createdAt: new Date()
+        },
+        orderData.passengers
+      );
 
       try {
         // Generate PDF with QR code
@@ -168,6 +172,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!req.user) return res.sendStatus(401);
     const orders = await storage.getOperationOrdersByDriver(req.user.id);
     res.json(orders);
+  });
+
+  // Get passengers for an order
+  app.get("/api/operation-orders/:id/passengers", async (req, res) => {
+    if (!req.user) return res.sendStatus(401);
+    const passengers = await storage.getPassengersByOrder(parseInt(req.params.id));
+    res.json(passengers);
   });
 
   // Admin routes

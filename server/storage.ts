@@ -4,7 +4,7 @@ import createMemoryStore from "memorystore";
 import session from "express-session";
 import { scrypt, randomBytes } from "crypto";
 import { promisify } from "util";
-import { User, Vehicle, OperationOrder, InsertUser } from "@shared/schema";
+import { User, Vehicle, OperationOrder, Passenger, InsertUser } from "@shared/schema";
 
 const MemoryStore = createMemoryStore(session);
 const scryptAsync = promisify(scrypt);
@@ -20,16 +20,18 @@ export interface IStorage {
   createVehicle(vehicle: Omit<Vehicle, "id">): Promise<Vehicle>;
   getOperationOrder(id: number): Promise<OperationOrder | undefined>;
   getOperationOrdersByDriver(driverId: number): Promise<OperationOrder[]>;
-  createOperationOrder(order: Omit<OperationOrder, "id">): Promise<OperationOrder>;
+  createOperationOrder(order: Omit<OperationOrder, "id">, passengers: Omit<Passenger, "id" | "orderId">[]): Promise<OperationOrder>;
   getPendingDrivers(): Promise<User[]>;
   approveDriver(id: number): Promise<User | undefined>;
   updateOperationOrder(order: OperationOrder): Promise<OperationOrder>;
+  getPassengersByOrder(orderId: number): Promise<Passenger[]>;
 }
 
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
   private vehicles: Map<number, Vehicle>;
   private operationOrders: Map<number, OperationOrder>;
+  private passengers: Map<number, Passenger>;
   sessionStore: session.Store;
   currentId: number;
 
@@ -80,6 +82,7 @@ export class MemStorage implements IStorage {
     this.users = new Map();
     this.vehicles = new Map();
     this.operationOrders = new Map();
+    this.passengers = new Map();
     this.currentId = 1;
     this.sessionStore = new MemoryStore({
       checkPeriod: 86400000, // Prune expired entries every 24h
@@ -109,8 +112,8 @@ export class MemStorage implements IStorage {
     const user: User = {
       ...insertUser,
       id,
-      role: insertUser.role || "driver",
-      isApproved: insertUser.role === "admin",
+      role: "driver",
+      isApproved: false,
       fullName: insertUser.fullName || null,
       idNumber: insertUser.idNumber || null,
       licenseNumber: insertUser.licenseNumber || null,
@@ -149,10 +152,25 @@ export class MemStorage implements IStorage {
     );
   }
 
-  async createOperationOrder(order: Omit<OperationOrder, "id">): Promise<OperationOrder> {
-    const id = this.currentId++;
-    const newOrder = { ...order, id };
-    this.operationOrders.set(id, newOrder);
+  async createOperationOrder(
+    order: Omit<OperationOrder, "id">,
+    passengers: Omit<Passenger, "id" | "orderId">[]
+  ): Promise<OperationOrder> {
+    const orderId = this.currentId++;
+    const newOrder = { ...order, id: orderId };
+    this.operationOrders.set(orderId, newOrder);
+
+    // Create passengers for this order
+    passengers.forEach(passenger => {
+      const passengerId = this.currentId++;
+      const newPassenger: Passenger = {
+        ...passenger,
+        id: passengerId,
+        orderId
+      };
+      this.passengers.set(passengerId, newPassenger);
+    });
+
     return newOrder;
   }
 
@@ -175,6 +193,12 @@ export class MemStorage implements IStorage {
   async updateOperationOrder(order: OperationOrder): Promise<OperationOrder> {
     this.operationOrders.set(order.id, order);
     return order;
+  }
+
+  async getPassengersByOrder(orderId: number): Promise<Passenger[]> {
+    return Array.from(this.passengers.values()).filter(
+      (passenger) => passenger.orderId === orderId
+    );
   }
 }
 
