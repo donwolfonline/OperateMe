@@ -92,7 +92,11 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
 
   // Write Arabic text sections
   arabicSections.forEach((text) => {
-    doc.text(text, arabicTextOptions);
+    doc.text(text, { 
+      align: 'right',
+      continued: false,
+      features: ['arab', 'rtla']
+    });
     doc.moveDown(0.5);
   });
 
