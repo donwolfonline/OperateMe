@@ -56,7 +56,7 @@ export default function AdminDashboard() {
 
   const renderDriverCard = (driver: User, actions: React.ReactNode) => (
     <div key={driver.id} className="flex flex-col space-y-4 p-4 border rounded-lg bg-card">
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
         <div className="space-y-2">
           <div className="flex items-center space-x-2">
             <UserIcon className="h-5 w-5 text-primary" />
@@ -69,7 +69,7 @@ export default function AdminDashboard() {
             {t('auth.licenseNumber')}: {driver.licenseNumber}
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {actions}
         </div>
       </div>
@@ -77,7 +77,7 @@ export default function AdminDashboard() {
       {/* Documents Section */}
       <div className="space-y-2 pt-2 border-t">
         <p className="text-sm font-medium">Documents:</p>
-        <div className="flex flex-wrap gap-4">
+        <div className="flex flex-wrap gap-2">
           {driver.idDocumentUrl && (
             <a
               href={`/uploads/${driver.idDocumentUrl}`}
@@ -106,7 +106,7 @@ export default function AdminDashboard() {
       {/* Additional Information Section */}
       <div className="space-y-2 pt-2 border-t">
         <p className="text-sm font-medium">Status Information:</p>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Badge variant={driver.status === 'active' ? 'default' : 'secondary'}>
             {driver.status}
           </Badge>
@@ -121,7 +121,7 @@ export default function AdminDashboard() {
   const renderOrderCard = (order: OperationOrder & { passengers: any[]; driver?: any }) => (
     <Card key={order.id} className="mb-4">
       <CardContent className="p-4">
-        <div className="flex justify-between items-start mb-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4">
           <div>
             <h3 className="font-semibold flex items-center gap-2">
               <Car className="h-4 w-4" />
@@ -141,7 +141,7 @@ export default function AdminDashboard() {
               href={`/uploads/${order.pdfUrl}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center text-sm text-primary hover:underline bg-muted px-3 py-2 rounded-md"
+              className="flex items-center text-sm text-primary hover:underline bg-muted px-3 py-2 rounded-md w-full sm:w-auto justify-center sm:justify-start"
             >
               <FileText className="h-4 w-4 mr-1" />
               {t('order.downloadPdf')}
@@ -158,7 +158,7 @@ export default function AdminDashboard() {
             {order.passengers?.map((passenger, index) => (
               <div key={index} className="bg-muted p-3 rounded-lg">
                 <p className="text-sm font-medium">{passenger.name}</p>
-                <div className="grid grid-cols-2 gap-x-4 mt-1">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-1">
                   <p className="text-xs text-muted-foreground">
                     {t('order.idNumber')}: {passenger.idNumber}
                   </p>
@@ -166,7 +166,7 @@ export default function AdminDashboard() {
                     {t('order.nationality')}: {passenger.nationality}
                   </p>
                   {passenger.phone && (
-                    <p className="text-xs text-muted-foreground col-span-2">
+                    <p className="text-xs text-muted-foreground col-span-full">
                       {t('order.passengerPhone')}: {passenger.phone}
                     </p>
                   )}
@@ -182,7 +182,7 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-8">
           <HomeButton />
           <div className="flex gap-4">
             <LanguageToggle />
@@ -196,7 +196,7 @@ export default function AdminDashboard() {
         </div>
 
         <Tabs defaultValue="pending" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid grid-cols-2 sm:grid-cols-4 w-full">
             <TabsTrigger value="pending">
               {t('admin.pendingDrivers')}
               {pendingDrivers?.length ? (

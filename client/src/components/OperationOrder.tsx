@@ -99,13 +99,13 @@ export default function OperationOrder() {
                   name="fromCity"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-right">مدينة الانطلاق / From City</FormLabel>
+                      <FormLabel className="block mb-2">مدينة الانطلاق / From City</FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger className="w-full">
                             <SelectValue placeholder="اختر المدينة / Select City" />
                           </SelectTrigger>
                         </FormControl>
@@ -127,13 +127,13 @@ export default function OperationOrder() {
                   name="toCity"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-right">مدينة الوصول / To City</FormLabel>
+                      <FormLabel className="block mb-2">مدينة الوصول / To City</FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger className="w-full">
                             <SelectValue placeholder="اختر المدينة / Select City" />
                           </SelectTrigger>
                         </FormControl>
@@ -154,11 +154,12 @@ export default function OperationOrder() {
                   control={form.control}
                   name="departureTime"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-right">وقت المغادرة / Departure Time</FormLabel>
+                    <FormItem className="col-span-full">
+                      <FormLabel className="block mb-2">وقت المغادرة / Departure Time</FormLabel>
                       <FormControl>
                         <Input
                           type="datetime-local"
+                          className="w-full"
                           min={new Date().toISOString().slice(0, 16)}
                           {...field}
                         />
@@ -171,7 +172,7 @@ export default function OperationOrder() {
 
               {/* Passengers Section */}
               <div className="space-y-4">
-                <div className="flex justify-between items-center">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                   <h3 className="text-lg font-semibold">الركاب / Passengers</h3>
                   <Button
                     type="button"
@@ -193,9 +194,9 @@ export default function OperationOrder() {
                           name={`passengers.${index}.name`}
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="text-right">اسم الراكب / Passenger Name</FormLabel>
+                              <FormLabel className="block mb-2">اسم الراكب / Passenger Name</FormLabel>
                               <FormControl>
-                                <Input {...field} />
+                                <Input {...field} className="w-full" />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -207,9 +208,9 @@ export default function OperationOrder() {
                           name={`passengers.${index}.idNumber`}
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="text-right">رقم الهوية / ID Number</FormLabel>
+                              <FormLabel className="block mb-2">رقم الهوية / ID Number</FormLabel>
                               <FormControl>
-                                <Input {...field} />
+                                <Input {...field} className="w-full" />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -221,9 +222,9 @@ export default function OperationOrder() {
                           name={`passengers.${index}.nationality`}
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="text-right">الجنسية / Nationality</FormLabel>
+                              <FormLabel className="block mb-2">الجنسية / Nationality</FormLabel>
                               <FormControl>
-                                <Input {...field} />
+                                <Input {...field} className="w-full" />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -235,9 +236,9 @@ export default function OperationOrder() {
                           name={`passengers.${index}.phone`}
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="text-right">رقم هاتف الراكب / Phone Number</FormLabel>
+                              <FormLabel className="block mb-2">رقم هاتف الراكب / Phone Number</FormLabel>
                               <FormControl>
-                                <Input {...field} type="tel" />
+                                <Input {...field} type="tel" className="w-full" />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -250,7 +251,7 @@ export default function OperationOrder() {
                           type="button"
                           variant="destructive"
                           size="sm"
-                          className="mt-4"
+                          className="mt-4 w-full sm:w-auto"
                           onClick={() => remove(index)}
                         >
                           <Trash2 className="h-4 w-4 mr-2" />
@@ -286,10 +287,11 @@ export default function OperationOrder() {
                   title="Order PDF Preview"
                 />
               </div>
-              <div className="flex justify-end gap-2">
+              <div className="flex justify-end">
                 <Button
                   onClick={() => window.open(`/uploads/${pdfUrl}`, '_blank')}
                   variant="outline"
+                  className="w-full sm:w-auto"
                 >
                   <FileText className="mr-2 h-4 w-4" />
                   تحميل PDF / Download PDF
