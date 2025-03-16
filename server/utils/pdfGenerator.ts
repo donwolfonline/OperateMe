@@ -50,7 +50,6 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
     .moveDown();
 
   // Add contract agreement text in Arabic
-  doc.font('public/fonts/arabic.ttf'); //Retained from original code.  May cause failure if font is missing.
   doc.fontSize(14).text('Contract Agreement', { align: 'center' });
   doc.fontSize(12).text(`
     تم ابرام هذا العقد بين المتعاقدين بناء على المادة (39) التاسعة و الثلاثون من اللائحة المنظمة لنشاط النقل المتخصص و تأجير و توجيه الحافلات و بناء على الفقرة (1) من المادة (39) و التي تنص على ان يجب على الناقل 
