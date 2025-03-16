@@ -30,6 +30,22 @@ const resources = {
         uploadId: "Upload ID Document",
         uploadLicense: "Upload License Document"
       },
+      vehicle: {
+        type: "Vehicle Type",
+        model: "Vehicle Model",
+        year: "Manufacturing Year",
+        plateNumber: "Plate Number",
+        photos: "Vehicle Photos",
+        save: "Save Vehicle"
+      },
+      order: {
+        passengerName: "Passenger Name",
+        passengerPhone: "Passenger Phone",
+        fromCity: "From City",
+        toCity: "To City",
+        departureTime: "Departure Time",
+        create: "Create Order"
+      },
       admin: {
         dashboard: "Admin Dashboard",
         pendingDrivers: "Pending Drivers",
@@ -76,6 +92,22 @@ const resources = {
         fullName: "الاسم الكامل",
         idNumber: "رقم الهوية",
         licenseNumber: "رقم الرخصة"
+      },
+      vehicle: {
+        type: "نوع المركبة",
+        model: "موديل المركبة",
+        year: "سنة التصنيع",
+        plateNumber: "رقم اللوحة",
+        photos: "صور المركبة",
+        save: "حفظ المركبة"
+      },
+      order: {
+        passengerName: "اسم الراكب",
+        passengerPhone: "رقم هاتف الراكب",
+        fromCity: "مدينة الانطلاق",
+        toCity: "مدينة الوصول",
+        departureTime: "وقت المغادرة",
+        create: "إنشاء الطلب"
       },
       driver: {
         profile: "ملف السائق",
