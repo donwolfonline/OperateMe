@@ -123,11 +123,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(vehicles);
   });
 
+  // Update the operation order creation route
   app.post("/api/operation-orders", async (req, res) => {
     try {
       if (!req.user) return res.sendStatus(401);
 
-      const orderData = insertOperationOrderSchema.parse(req.body);
+      const orderData = insertOperationOrderSchema.parse({
+        ...req.body,
+        departureTime: new Date(req.body.departureTime).toISOString()
+      });
 
       // Create the order first
       const order = await storage.createOperationOrder({
@@ -138,14 +142,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         createdAt: new Date()
       });
 
-      // Generate PDF with QR code
-      const pdfFileName = await generateOrderPDF(order, req.user);
+      try {
+        // Generate PDF with QR code
+        const pdfFileName = await generateOrderPDF(order, req.user);
 
-      // Update order with PDF URL
-      order.pdfUrl = pdfFileName;
-      await storage.updateOperationOrder(order);
+        // Update order with PDF URL
+        order.pdfUrl = pdfFileName;
+        await storage.updateOperationOrder(order);
 
-      res.status(201).json(order);
+        res.status(201).json(order);
+      } catch (pdfError) {
+        console.error('PDF generation error:', pdfError);
+        // Still return the order even if PDF generation fails
+        res.status(201).json(order);
+      }
     } catch (error: any) {
       console.error('Operation order creation error:', error);
       res.status(400).json({ 
