@@ -38,6 +38,26 @@ export default function VehicleForm() {
 
   const onSubmit = async (data: any) => {
     try {
+      // Validate required fields
+      if (!data.type || !data.model || !data.year || !data.plateNumber) {
+        toast({
+          title: "Error",
+          description: "Please fill in all required fields",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Validate photos
+      if (!selectedFiles || selectedFiles.length === 0) {
+        toast({
+          title: "Error",
+          description: "Please select at least one photo",
+          variant: "destructive",
+        });
+        return;
+      }
+
       setIsSubmitting(true);
       const formData = new FormData();
 
@@ -48,26 +68,25 @@ export default function VehicleForm() {
       formData.append('plateNumber', data.plateNumber);
 
       // Handle multiple files
-      if (selectedFiles) {
-        Array.from(selectedFiles).forEach((file) => {
-          formData.append('photos', file);
-        });
-      }
+      Array.from(selectedFiles).forEach((file) => {
+        formData.append('photos', file);
+      });
 
-      await apiRequest("POST", "/api/vehicles", formData);
+      const response = await apiRequest("POST", "/api/vehicles", formData);
+      const vehicle = await response.json();
 
       toast({
         title: "Success",
         description: "Vehicle information saved successfully",
       });
 
-      // Invalidate and refetch vehicles query
-      queryClient.invalidateQueries({ queryKey: ["/api/vehicles/driver"] });
-
-      // Reset form and preview after successful submission
+      // Reset form and preview
       form.reset();
       setPhotoPreview([]);
       setSelectedFiles(null);
+
+      // Invalidate and refetch vehicles query
+      queryClient.invalidateQueries({ queryKey: ["/api/vehicles/driver"] });
     } catch (error: any) {
       toast({
         title: "Error",
@@ -80,7 +99,7 @@ export default function VehicleForm() {
   };
 
   const handleFileChange = (files: FileList | null) => {
-    if (files) {
+    if (files && files.length > 0) {
       setSelectedFiles(files);
       // Create preview URLs
       const previews = Array.from(files).map(file => URL.createObjectURL(file));
@@ -105,7 +124,7 @@ export default function VehicleForm() {
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder={t('vehicle.selectType')} />
+                        <SelectValue placeholder="اختر نوع المركبة / Select Vehicle Type" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -128,7 +147,7 @@ export default function VehicleForm() {
                 <FormItem>
                   <FormLabel>{t('vehicle.model')}</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input {...field} placeholder="موديل المركبة / Vehicle Model" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -142,7 +161,7 @@ export default function VehicleForm() {
                 <FormItem>
                   <FormLabel>{t('vehicle.year')}</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input {...field} placeholder="2020" type="number" min="1900" max="2025" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -156,7 +175,7 @@ export default function VehicleForm() {
                 <FormItem>
                   <FormLabel>{t('vehicle.plateNumber')}</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input {...field} placeholder="رقم اللوحة / Plate Number" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
