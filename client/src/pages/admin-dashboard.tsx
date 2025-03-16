@@ -300,7 +300,7 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-8">
+        <div className="flex justify-between items-center mb-8">
           <HomeButton />
           <div className="flex gap-4">
             <LanguageToggle />
@@ -324,10 +324,9 @@ export default function AdminDashboard() {
             <TabsTrigger value="active">{t('admin.activeDrivers')}</TabsTrigger>
             <TabsTrigger value="suspended">{t('admin.suspendedDrivers')}</TabsTrigger>
             <TabsTrigger value="orders">{t('admin.orders')}</TabsTrigger>
-            <TabsTrigger value="pdf-history">{t('admin.pdfHistory')}</TabsTrigger>
+            <TabsTrigger value="pdf-history">{t('admin.documentHistory')}</TabsTrigger>
           </TabsList>
 
-          {/* Existing tab content... */}
           <TabsContent value="pending">
             <Card>
               <CardContent className="p-6">
@@ -407,9 +406,109 @@ export default function AdminDashboard() {
           <TabsContent value="pdf-history">
             <Card>
               <CardContent className="p-6">
-                <h2 className="text-xl font-semibold mb-4">{t('admin.pdfHistory')}</h2>
-                <div className="space-y-4">
-                  {allOrders?.filter(order => order.pdfUrl).map(renderPDFHistoryItem)}
+                <h2 className="text-xl font-semibold mb-6">{t('admin.documentHistory')}</h2>
+                <div className="grid gap-6">
+                  {allOrders?.filter(order => order.pdfUrl).map((order) => (
+                    <Card key={order.id} className="mb-4 hover:shadow-md transition-shadow">
+                      <CardContent className="p-6">
+                        {/* Header Section */}
+                        <div className="flex justify-between items-start mb-4">
+                          <div>
+                            <h3 className="text-lg font-semibold flex items-center gap-2">
+                              <FileText className="h-5 w-5 text-primary" />
+                              {t('order.tripNumber')}: {order.tripNumber}
+                            </h3>
+                            <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
+                              <Calendar className="h-4 w-4" />
+                              {new Date(order.createdAt).toLocaleString()}
+                            </p>
+                          </div>
+                          <div className="flex gap-2">
+                            <Badge variant={order.status === 'active' ? 'default' : 'secondary'}>
+                              {order.status}
+                            </Badge>
+                            {order.visaType && (
+                              <Badge variant="outline">
+                                {order.visaType}
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Trip Details */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                          <div className="space-y-2">
+                            <h4 className="font-medium flex items-center gap-2">
+                              <MapPin className="h-4 w-4" />
+                              {t('order.route')}
+                            </h4>
+                            <p className="text-sm">
+                              {order.fromCity} → {order.toCity}
+                            </p>
+                          </div>
+
+                          {order.driver && (
+                            <div className="space-y-2">
+                              <h4 className="font-medium flex items-center gap-2">
+                                <UserIcon className="h-4 w-4" />
+                                {t('order.driver')}
+                              </h4>
+                              <div className="flex items-center gap-2">
+                                <Avatar className="h-6 w-6">
+                                  {order.driver.profileImageUrl ? (
+                                    <AvatarImage src={`/uploads/${order.driver.profileImageUrl}`} alt={order.driver.fullName} />
+                                  ) : (
+                                    <AvatarFallback>
+                                      <UserCircle2 className="h-4 w-4" />
+                                    </AvatarFallback>
+                                  )}
+                                </Avatar>
+                                <span className="text-sm">{order.driver.fullName}</span>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Passengers Section */}
+                        <div className="space-y-2">
+                          <h4 className="font-medium flex items-center gap-2">
+                            <Users className="h-4 w-4" />
+                            {t('order.passengers')} ({order.passengers?.length || 0})
+                          </h4>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                            {order.passengers?.map((passenger, index) => (
+                              <div key={index} className="text-sm bg-muted p-2 rounded-md">
+                                <p className="font-medium">{passenger.name}</p>
+                                <p className="text-muted-foreground text-xs">
+                                  {t('order.idNumber')}: {passenger.idNumber}
+                                </p>
+                                <p className="text-muted-foreground text-xs">
+                                  {t('order.nationality')}: {passenger.nationality}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="flex justify-end gap-2 mt-4">
+                          <a
+                            href={`/uploads/${order.pdfUrl}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center text-sm text-primary hover:underline bg-muted px-3 py-2 rounded-md"
+                          >
+                            <FileText className="h-4 w-4 mr-1" />
+                            {t('order.viewPdf')}
+                          </a>
+                          <Button variant="outline" size="sm">
+                            <Download className="h-4 w-4 mr-1" />
+                            {t('order.download')}
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
                 </div>
               </CardContent>
             </Card>
