@@ -3,6 +3,7 @@ import { OperationOrder, User } from "@shared/schema";
 import path from 'path';
 import QRCode from 'qrcode';
 import fs from 'fs';
+import Handlebars from 'handlebars';
 
 const template = `
 <!DOCTYPE html>
@@ -12,21 +13,35 @@ const template = `
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;700&display=swap');
 
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
             font-family: 'Noto Naskh Arabic', Arial, sans-serif;
             margin: 40px;
             direction: rtl;
+            background: white;
         }
 
         .header {
             text-align: center;
-            color: #1d4ed8;
             margin-bottom: 30px;
+            padding: 20px;
+            border-bottom: 2px solid #1d4ed8;
+        }
+
+        .header h1 {
+            color: #1d4ed8;
+            font-size: 28px;
         }
 
         .qr-code {
-            text-align: left;
-            margin: 20px 0;
+            position: absolute;
+            top: 20px;
+            left: 20px;
         }
 
         .section {
@@ -34,31 +49,43 @@ const template = `
             padding: 20px;
             border: 1px solid #e5e7eb;
             border-radius: 8px;
+            background: #f8fafc;
         }
 
         .section-title {
             color: #1e40af;
-            font-size: 18px;
+            font-size: 20px;
             font-weight: bold;
             margin-bottom: 15px;
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 10px;
         }
 
-        .details {
-            margin: 10px 0;
+        .details p {
+            margin: 8px 0;
+            font-size: 16px;
+            color: #334155;
         }
 
         .contract {
             line-height: 1.8;
+            font-size: 14px;
+            color: #334155;
+        }
+
+        .contract p {
+            margin-bottom: 12px;
+            text-align: justify;
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>Lightning Road Transport</h1>
-    </div>
-
     <div class="qr-code">
         <img src="{{qrCodeDataUrl}}" width="100">
+    </div>
+
+    <div class="header">
+        <h1>Lightning Road Transport</h1>
     </div>
 
     <div class="section">
@@ -100,54 +127,54 @@ const template = `
 `;
 
 export async function generateOrderPDF(order: OperationOrder, driver: User): Promise<string> {
-  try {
-    // Generate QR Code
-    const qrCodeData = JSON.stringify({
-      orderId: order.id,
-      passengerName: order.passengerName,
-      fromCity: order.fromCity,
-      toCity: order.toCity,
-      departureTime: order.departureTime
-    });
-    const qrCodeDataUrl = await QRCode.toDataURL(qrCodeData);
+    try {
+        // Generate QR Code
+        const qrCodeData = JSON.stringify({
+            orderId: order.id,
+            passengerName: order.passengerName,
+            fromCity: order.fromCity,
+            toCity: order.toCity,
+            departureTime: order.departureTime
+        });
+        const qrCodeDataUrl = await QRCode.toDataURL(qrCodeData);
 
-    // Format departure time
-    const departureTime = new Date(order.departureTime).toLocaleDateString('ar-SA', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+        // Format departure time
+        const departureTime = new Date(order.departureTime).toLocaleDateString('ar-SA', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
 
-    // Compile template
-    const compiledTemplate = Handlebars.compile(template);
-    const html = compiledTemplate({
-        order,
-        driver,
-        qrCodeDataUrl,
-        departureTime
-    });
+        // Replace template variables
+        const compiledTemplate = Handlebars.compile(template);
+        const html = compiledTemplate({
+            order,
+            driver,
+            qrCodeDataUrl,
+            departureTime
+        });
 
+        const pdfFileName = `order_${order.id}_${Date.now()}.pdf`;
+        const pdfPath = path.join(process.cwd(), 'uploads', pdfFileName);
 
-    const options = {
-      format: 'A4',
-      margin: { top: 20, right: 20, bottom: 20, left: 20 },
-      printBackground: true
-    };
+        // Generate PDF with optimized settings
+        const file = { content: html };
+        const options = {
+            format: 'A4',
+            margin: { top: 20, right: 20, bottom: 20, left: 20 },
+            printBackground: true,
+            preferCSSPageSize: true
+        };
 
-    const pdfFileName = `order_${order.id}_${Date.now()}.pdf`;
-    const pdfPath = path.join(process.cwd(), 'uploads', pdfFileName);
+        const buffer = await html_to_pdf.generatePdf(file, options);
+        fs.writeFileSync(pdfPath, buffer);
 
-    const file = { content: html };
-    const buffer = await html_to_pdf.generatePdf(file, options);
-
-    fs.writeFileSync(pdfPath, buffer);
-    return pdfFileName;
-
-  } catch (error) {
-    console.error('Error generating PDF:', error);
-    throw new Error('Failed to generate PDF');
-  }
+        return pdfFileName;
+    } catch (error) {
+        console.error('Error generating PDF:', error);
+        throw new Error('Failed to generate PDF');
+    }
 }
