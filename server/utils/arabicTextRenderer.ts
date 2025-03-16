@@ -24,8 +24,8 @@ export function renderArabicSection(title: string, items: string[]): Buffer {
   // Calculate required height based on text content
   let totalLines = items.reduce((acc, item) => {
     // Estimate number of lines needed for each item based on text length and width
-    const estimatedLines = Math.ceil((item.length * fontSize * 0.6) / (width - (padding * 2)));
-    return acc + estimatedLines;
+    const estimatedLines = Math.ceil((item.length * fontSize * 0.6) / (width - (padding * 3)));
+    return acc + (estimatedLines + (item === '' ? 1 : 0)); // Add extra space for empty lines
   }, 0);
 
   const height = titleSize + (totalLines * lineHeight) + (padding * 4);
@@ -47,6 +47,12 @@ export function renderArabicSection(title: string, items: string[]): Buffer {
 
   let currentY = (padding * 2) + titleSize;
   items.forEach(item => {
+    if (item === '') {
+      // Add extra space for empty lines
+      currentY += lineHeight * 0.8;
+      return;
+    }
+
     // Word wrapping for Arabic text
     const words = item.split(' ');
     let line = '';

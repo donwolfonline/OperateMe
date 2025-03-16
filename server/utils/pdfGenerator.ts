@@ -19,13 +19,13 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
     const stream = fs.createWriteStream(pdfPath);
     doc.pipe(stream);
 
-    // Header - English only
+    // Header - Company Name
     doc.fontSize(24)
        .fillColor('#1e40af')
        .text('Lightning Road Transport', {
          align: 'center'
        });
-    doc.moveDown(3);
+    doc.moveDown(4);
 
     // Format date
     const dateStr = new Date(order.departureTime).toLocaleString('ar-SA', {
@@ -39,33 +39,33 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
 
     // Trip details section
     const tripDetails = [
-      `المدينة / From: ${order.fromCity}`,
-      `الوجهة / To: ${order.toCity}`,
-      `وقت المغادرة / Departure: ${dateStr}`
+      `من / From: ${order.fromCity}`,
+      `إلى / To: ${order.toCity}`,
+      `موعد المغادرة / Departure: ${dateStr}`
     ];
 
     const tripDetailsImg = renderArabicSection('تفاصيل الرحلة / Trip Details', tripDetails);
     doc.image(tripDetailsImg, {
-      fit: [500, 200],
+      fit: [500, 150],
       align: 'center'
     });
-    doc.moveDown(3);
+    doc.moveDown(4);
 
     // Passenger details section
-    const passengerDetails = passengers.map(passenger => [
-      `بيانات الراكب / Passenger Name: ${passenger.name}`,
-      `رقم الهوية / ID Number: ${passenger.idNumber}`,
-      `الجنسية / Nationality: ${passenger.nationality}`,
-      `رقم الهاتف / Phone: ${passenger.phone || 'N/A'}`
-    ]).flat();
+    if (passengers.length > 0) {
+      const passengerDetails = passengers.map(passenger => [
+        `اسم الراكب / Passenger Name: ${passenger.name}`,
+        `رقم الهوية / ID Number: ${passenger.idNumber}`,
+        `الجنسية / Nationality: ${passenger.nationality}`,
+        `رقم الهاتف / Phone: ${passenger.phone || 'N/A'}`
+      ]).flat();
 
-    if (passengerDetails.length > 0) {
       const passengerDetailsImg = renderArabicSection('بيانات الركاب / Passenger Details', passengerDetails);
       doc.image(passengerDetailsImg, {
-        fit: [500, 300],
+        fit: [500, 250],
         align: 'center'
       });
-      doc.moveDown(3);
+      doc.moveDown(4);
     }
 
     // Driver details section
@@ -79,20 +79,26 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
       fit: [500, 100],
       align: 'center'
     });
-    doc.moveDown(3);
+    doc.moveDown(4);
 
+    // Start legal agreement on new page
     doc.addPage();
 
-    // Legal Agreement section
+    // Legal Agreement section with increased height
     const legalAgreement = [
       'تم ابرام هذا العقد بين المتعاقدين بناء على المادة (39) التاسعة و الثلاثون من اللائحة المنظمة لنشاط النقل المتخصص و تأجير و توجيه الحافلات و بناء على الفقرة (1) من المادة (39) و التي تنص على ان يجب على الناقل',
       'ابرام عقد نقل مع الاطراف المحددين في المادة (40) قبل تنفيذ عمليات النقل على الطرق البرية و بما يخالف احكام هذه الائحة التي تحددها هيئة النقل و بناء على ما سبق تم ابرام عقد النقل بين الاطراف الاتية :',
+      '',
       'الطرف الاول : شركة صاعقة الطريق للنقل البري (شخص واحد)',
       `الطرف الثاني : ${passengers[0]?.name || ''}`,
+      '',
       'اتفق الطرفان على أن ينفذ الطرف اول عملية النقل للطرف الثاني مع مرافقيه و ذويهم من الموقع المحدد مسبقا مع الطرف الثاني و توصيلهم الى الجهه المحدده بالعقد ۔',
+      '',
       `النقل من : ${order.fromCity}`,
       `الوصول الى : ${order.toCity}`,
+      '',
       'في حالة الغاء التعاقد الى سبب شخصى او أسباب أخرى تتعلق في الحجوزات او الانظمة تكون سياسة إلالغاء و الاستبدال حسب نظام وزارة التجارة السعودى في حالة الحجز و تم الإلغاء قبل موعد الرحله بأكثر من 24 ساعه يتم استرداد المبلغ كامل .',
+      '',
       'وفي حالة طلب المبلغ كامل الطرف الثاني الحجز من خلال الموقع الالكتروني لشركة يعتبر هذا الحجز و موافقته على الشروط و الحكام بالموقع الالكتروني هو موافقة على هذا العقد لتنفيذ عملية النقل المتفق عليها مع الطرف الاول'
     ];
 
@@ -101,8 +107,9 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
       fit: [500, 700],
       align: 'center'
     });
-    doc.moveDown(3);
+    doc.moveDown(4);
 
+    // Terms and conditions on new page
     doc.addPage();
 
     // Contract terms section
@@ -122,7 +129,7 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
       fit: [500, 300],
       align: 'center'
     });
-    doc.moveDown(3);
+    doc.moveDown(4);
 
     // QR Code at the bottom of the last page
     const qrCodeData = JSON.stringify({
