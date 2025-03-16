@@ -10,14 +10,32 @@ import { insertVehicleSchema, insertOperationOrderSchema } from "@shared/schema"
 const upload = multer({ 
   dest: 'uploads/',
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB limit
+    fileSize: 10 * 1024 * 1024, // 10MB limit
   },
   fileFilter: (_req, file, cb) => {
-    const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf'];
+    // Allow a wide range of document and image formats
+    const allowedTypes = [
+      // Images
+      'image/jpeg',
+      'image/png',
+      'image/gif',
+      'image/webp',
+      'image/heic',
+      'image/heif',
+      // Documents
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'text/plain',
+      'application/rtf'
+    ];
+
     if (allowedTypes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(null, false);
+      cb(new Error('Unsupported file type. Please upload an image or document.'), false);
     }
   }
 });
@@ -25,51 +43,73 @@ const upload = multer({
 export async function registerRoutes(app: Express): Promise<Server> {
   setupAuth(app);
 
-  // Document upload route
+  // Document upload route with error handling
   app.post("/api/documents/upload", upload.single('document'), async (req, res) => {
-    if (!req.user) return res.sendStatus(401);
-    if (!req.file) return res.status(400).json({ message: "No file uploaded" });
+    try {
+      if (!req.user) return res.sendStatus(401);
+      if (!req.file) {
+        return res.status(400).json({ 
+          message: "No file uploaded or file type not supported. Please upload a valid image or document." 
+        });
+      }
 
-    const documentType = req.body.type;
-    const filePath = req.file.path;
+      const documentType = req.body.type;
+      const filePath = req.file.path;
 
-    const user = await storage.getUser(req.user.id);
-    if (!user) return res.sendStatus(404);
+      const user = await storage.getUser(req.user.id);
+      if (!user) return res.sendStatus(404);
 
-    if (documentType === 'id') {
-      user.idDocumentUrl = filePath;
-    } else if (documentType === 'license') {
-      user.licenseDocumentUrl = filePath;
+      if (documentType === 'id') {
+        user.idDocumentUrl = filePath;
+      } else if (documentType === 'license') {
+        user.licenseDocumentUrl = filePath;
+      }
+
+      await storage.updateUser(user);
+      res.json(user);
+    } catch (error: any) {
+      res.status(400).json({ 
+        message: error.message || "Error uploading document" 
+      });
     }
-
-    await storage.updateUser(user);
-    res.json(user);
   });
 
-  // Vehicle routes
-  app.post("/api/vehicles", upload.array("photos", 5), async (req, res) => {
-    if (!req.user) return res.sendStatus(401);
+  // Vehicle routes with error handling
+  app.post("/api/vehicles", upload.array("photos", 10), async (req, res) => {
+    try {
+      if (!req.user) return res.sendStatus(401);
 
-    const files = req.files as Express.Multer.File[];
-    const vehicleData = insertVehicleSchema.parse(req.body);
+      const files = req.files as Express.Multer.File[];
+      if (!files || files.length === 0) {
+        return res.status(400).json({ 
+          message: "No files uploaded or file types not supported. Please upload valid images or documents." 
+        });
+      }
 
-    const vehicle = await storage.createVehicle({
-      ...vehicleData,
-      driverId: req.user.id,
-      photoUrls: files?.map(f => f.path) || [],
-      registrationUrl: ""
-    });
+      const vehicleData = insertVehicleSchema.parse(req.body);
 
-    res.status(201).json(vehicle);
+      const vehicle = await storage.createVehicle({
+        ...vehicleData,
+        driverId: req.user.id,
+        photoUrls: files.map(f => f.path) || [],
+        registrationUrl: ""
+      });
+
+      res.status(201).json(vehicle);
+    } catch (error: any) {
+      res.status(400).json({ 
+        message: error.message || "Error creating vehicle" 
+      });
+    }
   });
 
+  // Keep existing routes
   app.get("/api/vehicles/driver", async (req, res) => {
     if (!req.user) return res.sendStatus(401);
     const vehicles = await storage.getVehiclesByDriver(req.user.id);
     res.json(vehicles);
   });
 
-  // Operation order routes
   app.post("/api/operation-orders", async (req, res) => {
     if (!req.user) return res.sendStatus(401);
 
@@ -77,7 +117,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const order = await storage.createOperationOrder({
       ...orderData,
       driverId: req.user.id,
-      qrCode: "", // Generate QR code
+      qrCode: "",
       createdAt: new Date()
     });
 
