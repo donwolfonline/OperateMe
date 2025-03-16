@@ -3,138 +3,98 @@ import { OperationOrder, User } from "@shared/schema";
 import path from 'path';
 import QRCode from 'qrcode';
 import fs from 'fs';
-import { PDFLayoutManager } from './pdfLayoutManager';
+import { renderArabicSection } from './arabicTextRenderer';
 
 export async function generateOrderPDF(order: OperationOrder, driver: User): Promise<string> {
   try {
-    // Create PDF document
     const doc = new PDFDocument({
       size: 'A4',
       margin: 50,
       autoFirstPage: true
     });
 
-    const layoutManager = new PDFLayoutManager(doc);
     const pdfFileName = `order_${order.id}_${Date.now()}.pdf`;
     const pdfPath = path.join(process.cwd(), 'uploads', pdfFileName);
     const stream = fs.createWriteStream(pdfPath);
     doc.pipe(stream);
 
-    // Generate QR Code once
-    if (!layoutManager.hasContent('qr-code')) {
-      const qrCodeData = JSON.stringify({
-        orderId: order.id,
-        passengerName: order.passengerName,
-        fromCity: order.fromCity,
-        toCity: order.toCity,
-        departureTime: order.departureTime
-      });
-      const qrCodeDataUrl = await QRCode.toDataURL(qrCodeData);
-      layoutManager.addSection('qr-code', qrCodeDataUrl);
-      doc.image(Buffer.from(qrCodeDataUrl.split(',')[1], 'base64'), {
-        width: 100,
-        align: 'right'
-      });
-    }
+    // Header - English only
+    doc.fontSize(24)
+       .fillColor('#1e40af')
+       .text('Lightning Road Transport', {
+         align: 'center'
+       });
+    doc.moveDown(2);
 
-    // Add header
-    if (!layoutManager.hasContent('header')) {
-      layoutManager.addSection('header', 'Lightning Road Transport');
-      doc.font('Helvetica-Bold')
-         .fontSize(24)
-         .fillColor('#1d4ed8')
-         .text('Lightning Road Transport', {
-           align: 'center'
-         });
-      doc.moveDown(2);
-    }
-
-    // Format date in Arabic
+    // Format date
     const dateStr = new Date(order.departureTime).toLocaleString('ar-SA', {
+      timeZone: 'Asia/Riyadh',
       dateStyle: 'full',
       timeStyle: 'short'
     });
 
-    // Add trip details with Arabic text
-    if (!layoutManager.hasContent('trip-details')) {
-      layoutManager.addSection('trip-details', 'Trip Details');
-      doc.font('Helvetica-Bold')
-         .fontSize(16)
-         .fillColor('#000000')
-         .text('Trip Details / تفاصيل الرحلة', { align: 'right' });
+    // Trip details section
+    const tripDetails = [
+      `بيانات الراكب / Passenger Name: ${order.passengerName}`,
+      `رقم الهاتف / Phone: ${order.passengerPhone}`,
+      `المدينة / From: ${order.fromCity}`,
+      `الوجهة / To: ${order.toCity}`,
+      `وقت المغادرة / Departure: ${dateStr}`
+    ];
 
-      doc.font('Helvetica')
-         .fontSize(12)
-         .moveDown(0.5);
+    const tripDetailsImg = renderArabicSection('تفاصيل الرحلة / Trip Details', tripDetails);
+    doc.image(tripDetailsImg, {
+      fit: [500, 200],
+      align: 'center'
+    });
+    doc.moveDown(2);
 
-      // Using Arabic numerals and RTL text
-      const details = [
-        `اسم المسافر: ${order.passengerName}`,
-        `رقم الهاتف: ${order.passengerPhone}`,
-        `من: ${order.fromCity}`,
-        `إلى: ${order.toCity}`,
-        `موعد المغادرة: ${dateStr}`
-      ];
+    // Driver details section
+    const driverDetails = [
+      `اسم السائق / Driver Name: ${driver.fullName}`,
+      `رقم الرخصة / License Number: ${driver.licenseNumber}`
+    ];
 
-      details.forEach(detail => {
-        doc.text(detail, {
-          align: 'right',
-          features: ['rtla', 'arab']
-        });
-      });
-      doc.moveDown();
-    }
+    const driverDetailsImg = renderArabicSection('معلومات السائق / Driver Information', driverDetails);
+    doc.image(driverDetailsImg, {
+      fit: [500, 100],
+      align: 'center'
+    });
+    doc.moveDown(2);
 
-    // Add driver details
-    if (!layoutManager.hasContent('driver-details')) {
-      layoutManager.addSection('driver-details', 'Driver Details');
-      doc.font('Helvetica-Bold')
-         .fontSize(16)
-         .text('معلومات السائق', { align: 'right' });
+    // Contract section
+    const contractTerms = [
+      '١. يلتزم السائق بالوصول في الموعد المحدد',
+      '١.١ The driver commits to arrive at the specified time',
+      '',
+      '٢. يجب على الركاب الالتزام بتعليمات السلامة',
+      '٢.١ Passengers must follow safety instructions',
+      '',
+      '٣. يحق للشركة إلغاء الرحلة في حالة الظروف الطارئة',
+      '٣.١ The company reserves the right to cancel trips in emergency situations'
+    ];
 
-      doc.font('Helvetica')
-         .fontSize(12)
-         .moveDown(0.5);
+    const contractImg = renderArabicSection('عقد النقل / Contract Agreement', contractTerms);
+    doc.image(contractImg, {
+      fit: [500, 300],
+      align: 'center'
+    });
+    doc.moveDown(2);
 
-      const driverDetails = [
-        `اسم السائق: ${driver.fullName}`,
-        `رقم الرخصة: ${driver.licenseNumber}`
-      ];
+    // Generate QR Code at the end
+    const qrCodeData = JSON.stringify({
+      orderId: order.id,
+      passengerName: order.passengerName,
+      fromCity: order.fromCity,
+      toCity: order.toCity,
+      departureTime: order.departureTime
+    });
 
-      driverDetails.forEach(detail => {
-        doc.text(detail, {
-          align: 'right',
-          features: ['rtla', 'arab']
-        });
-      });
-      doc.moveDown();
-    }
-
-    // Add contract
-    if (!layoutManager.hasContent('contract')) {
-      layoutManager.addSection('contract', 'Contract');
-      doc.font('Helvetica-Bold')
-         .fontSize(16)
-         .text('عقد النقل', { align: 'right' });
-
-      doc.font('Helvetica')
-         .fontSize(12)
-         .moveDown();
-
-      const contractTerms = [
-        'يلتزم السائق بالوصول في الموعد المحدد',
-        'يجب على الركاب الالتزام بتعليمات السلامة',
-        'يحق للشركة إلغاء الرحلة في حالة الظروف الطارئة'
-      ];
-
-      contractTerms.forEach((term, index) => {
-        doc.text(`${index + 1}. ${term}`, {
-          align: 'right',
-          features: ['rtla', 'arab']
-        });
-        doc.moveDown(0.5);
-      });
-    }
+    const qrCodeDataUrl = await QRCode.toDataURL(qrCodeData);
+    doc.image(Buffer.from(qrCodeDataUrl.split(',')[1], 'base64'), {
+      width: 100,
+      align: 'right'
+    });
 
     // Finalize PDF
     doc.end();
