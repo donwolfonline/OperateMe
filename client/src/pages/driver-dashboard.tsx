@@ -11,15 +11,14 @@ import LanguageToggle from "@/components/LanguageToggle";
 import HomeButton from "@/components/HomeButton";
 import { FileText, Download, Calendar, MapPin, Users } from "lucide-react";
 import { OperationOrder as OperationOrderType } from "@shared/schema";
+import { Badge } from "@/components/ui/badge";
 
 export default function DriverDashboard() {
   const { t } = useTranslation();
   const { user, logoutMutation } = useAuth();
 
   // Query for driver's orders with proper typing
-  const { data: driverOrders } = useQuery<
-    (OperationOrderType & { passengers: any[]; pdfUrl?: string })[]
-  >({
+  const { data: driverOrders } = useQuery<(OperationOrderType & { passengers: any[]; pdfUrl?: string })[]>({
     queryKey: ["/api/driver/orders"],
     enabled: !!user, // Only run query if user is logged in
   });
@@ -35,8 +34,8 @@ export default function DriverDashboard() {
           <HomeButton />
           <div className="flex gap-4">
             <LanguageToggle />
-            <button 
-              onClick={() => logoutMutation.mutate()} 
+            <button
+              onClick={() => logoutMutation.mutate()}
               className="text-sm text-muted-foreground hover:text-foreground"
             >
               {t('common.logout')}
@@ -96,6 +95,13 @@ export default function DriverDashboard() {
                                   <Users className="h-4 w-4" />
                                   {t('order.passengerCount')}: {order.passengers?.length || 0}
                                 </p>
+                              </div>
+
+                              {/* Trip Details */}
+                              <div className="mt-4">
+                                <Badge variant="outline" className="mb-2">
+                                  {order.visaType}
+                                </Badge>
                               </div>
 
                               {/* Passengers Section */}

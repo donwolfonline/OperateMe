@@ -288,6 +288,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
 
+  app.get("/api/driver/orders", async (req, res) => {
+    if (!req.user) return res.sendStatus(401);
+    try {
+      // Get all orders for the driver
+      const orders = await storage.getOperationOrdersByDriver(req.user.id);
+
+      // Get passengers for each order and combine the data
+      const ordersWithDetails = await Promise.all(orders.map(async (order) => {
+        const passengers = await storage.getPassengersByOrder(order.id);
+        return {
+          ...order,
+          passengers,
+        };
+      }));
+
+      console.log('Driver orders fetched:', ordersWithDetails);
+      res.json(ordersWithDetails);
+    } catch (error) {
+      console.error('Error fetching driver orders:', error);
+      res.status(500).json({ message: "Error fetching orders" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
