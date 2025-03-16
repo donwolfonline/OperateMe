@@ -5,6 +5,7 @@ import { storage } from "./storage";
 import multer from "multer";
 import path from "path";
 import { insertVehicleSchema, insertOperationOrderSchema } from "@shared/schema";
+import { generateOrderPDF } from './utils/pdfGenerator';
 
 // Configure multer for file uploads
 const upload = multer({ 
@@ -123,17 +124,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/operation-orders", async (req, res) => {
-    if (!req.user) return res.sendStatus(401);
+    try {
+      if (!req.user) return res.sendStatus(401);
 
-    const orderData = insertOperationOrderSchema.parse(req.body);
-    const order = await storage.createOperationOrder({
-      ...orderData,
-      driverId: req.user.id,
-      qrCode: "",
-      createdAt: new Date()
-    });
+      const orderData = insertOperationOrderSchema.parse(req.body);
 
-    res.status(201).json(order);
+      // Create the order first
+      const order = await storage.createOperationOrder({
+        ...orderData,
+        driverId: req.user.id,
+        qrCode: "",
+        pdfUrl: "",
+        createdAt: new Date()
+      });
+
+      // Generate PDF with QR code
+      const pdfFileName = await generateOrderPDF(order, req.user);
+
+      // Update order with PDF URL
+      order.pdfUrl = pdfFileName;
+      await storage.updateOperationOrder(order);
+
+      res.status(201).json(order);
+    } catch (error: any) {
+      console.error('Operation order creation error:', error);
+      res.status(400).json({ 
+        message: error.message || "Error creating operation order" 
+      });
+    }
   });
 
   app.get("/api/operation-orders/driver", async (req, res) => {

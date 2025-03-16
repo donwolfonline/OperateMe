@@ -36,6 +36,7 @@ export const operationOrders = pgTable("operation_orders", {
   toCity: text("to_city").notNull(),
   departureTime: timestamp("departure_time").notNull(),
   qrCode: text("qr_code"),
+  pdfUrl: text("pdf_url"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 

@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
+import { FileText } from "lucide-react";
 
 // Saudi cities list
 const saudiCities = [
@@ -29,6 +30,7 @@ export default function OperationOrder() {
   const { t } = useTranslation();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
 
   const form = useForm({
     resolver: zodResolver(insertOperationOrderSchema),
@@ -37,27 +39,28 @@ export default function OperationOrder() {
       passengerPhone: '',
       fromCity: '',
       toCity: '',
-      departureTime: new Date().toISOString().slice(0, 16) // Format for datetime-local input
+      departureTime: new Date().toISOString().slice(0, 16)
     }
   });
 
   const onSubmit = async (data: any) => {
     try {
       setIsSubmitting(true);
+      setPdfUrl(null);
 
-      // The date will be automatically transformed by the schema validation
-      await apiRequest("POST", "/api/operation-orders", data);
+      const response = await apiRequest("POST", "/api/operation-orders", data);
+      const order = await response.json();
+
+      if (order.pdfUrl) {
+        setPdfUrl(order.pdfUrl);
+      }
 
       toast({
         title: "Success",
         description: t('order.createSuccess'),
       });
 
-      // Invalidate and refetch orders query
       queryClient.invalidateQueries({ queryKey: ["/api/operation-orders/driver"] });
-
-      // Reset form after successful submission
-      form.reset();
     } catch (error: any) {
       toast({
         title: "Error",
@@ -70,122 +73,150 @@ export default function OperationOrder() {
   };
 
   return (
-    <Card>
-      <CardContent className="p-6">
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="passengerName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('order.passengerName')}</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="passengerPhone"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('order.passengerPhone')}</FormLabel>
-                  <FormControl>
-                    <Input {...field} type="tel" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="fromCity"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('order.fromCity')}</FormLabel>
-                  <Select 
-                    onValueChange={field.onChange} 
-                    defaultValue={field.value}
-                  >
+    <div className="space-y-4">
+      <Card>
+        <CardContent className="p-6">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="passengerName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('order.passengerName')}</FormLabel>
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder={t('order.selectCity')} />
-                      </SelectTrigger>
+                      <Input {...field} />
                     </FormControl>
-                    <SelectContent>
-                      {saudiCities.map((city) => (
-                        <SelectItem key={city} value={city}>
-                          {city}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="toCity"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('order.toCity')}</FormLabel>
-                  <Select 
-                    onValueChange={field.onChange} 
-                    defaultValue={field.value}
-                  >
+              <FormField
+                control={form.control}
+                name="passengerPhone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('order.passengerPhone')}</FormLabel>
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder={t('order.selectCity')} />
-                      </SelectTrigger>
+                      <Input {...field} type="tel" />
                     </FormControl>
-                    <SelectContent>
-                      {saudiCities.map((city) => (
-                        <SelectItem key={city} value={city}>
-                          {city}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="departureTime"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('order.departureTime')}</FormLabel>
-                  <FormControl>
-                    <Input 
-                      type="datetime-local"
-                      min={new Date().toISOString().slice(0, 16)}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="fromCity"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('order.fromCity')}</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder={t('order.selectCity')} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {saudiCities.map((city) => (
+                          <SelectItem key={city} value={city}>
+                            {city}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <Button 
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full"
-            >
-              {isSubmitting ? t('common.saving') : t('order.create')}
-            </Button>
-          </form>
-        </Form>
-      </CardContent>
-    </Card>
+              <FormField
+                control={form.control}
+                name="toCity"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('order.toCity')}</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder={t('order.selectCity')} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {saudiCities.map((city) => (
+                          <SelectItem key={city} value={city}>
+                            {city}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="departureTime"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('order.departureTime')}</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="datetime-local"
+                        min={new Date().toISOString().slice(0, 16)}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full"
+              >
+                {isSubmitting ? t('common.saving') : t('order.create')}
+              </Button>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+
+      {pdfUrl && (
+        <Card>
+          <CardContent className="p-6">
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">{t('order.documentReady')}</h3>
+              <div className="aspect-[16/9] w-full bg-muted rounded-lg overflow-hidden">
+                <iframe
+                  src={`/uploads/${pdfUrl}`}
+                  className="w-full h-full"
+                  title="Order PDF Preview"
+                />
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button
+                  onClick={() => window.open(`/uploads/${pdfUrl}`, '_blank')}
+                  variant="outline"
+                >
+                  <FileText className="mr-2 h-4 w-4" />
+                  {t('order.downloadPdf')}
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
   );
 }

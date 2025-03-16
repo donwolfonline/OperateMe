@@ -23,6 +23,7 @@ export interface IStorage {
   createOperationOrder(order: Omit<OperationOrder, "id">): Promise<OperationOrder>;
   getPendingDrivers(): Promise<User[]>;
   approveDriver(id: number): Promise<User | undefined>;
+  updateOperationOrder(order: OperationOrder): Promise<OperationOrder>;
 }
 
 export class MemStorage implements IStorage {
@@ -169,6 +170,11 @@ export class MemStorage implements IStorage {
       return updatedUser;
     }
     return undefined;
+  }
+
+  async updateOperationOrder(order: OperationOrder): Promise<OperationOrder> {
+    this.operationOrders.set(order.id, order);
+    return order;
   }
 }
 
