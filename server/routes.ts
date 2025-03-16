@@ -251,7 +251,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
-  // Add these new routes to the existing admin routes section
+  // Modify the getAllOperationOrders route to include visa type
   app.get("/api/admin/all-orders", async (req, res) => {
     if (!req.user || req.user.role !== "admin") return res.sendStatus(403);
     const orders = await storage.getAllOperationOrders();

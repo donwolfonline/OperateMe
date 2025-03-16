@@ -102,26 +102,28 @@ export default function DriverProfile() {
               </AvatarFallback>
             )}
           </Avatar>
-          <div>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) uploadDocument(file, 'profile');
-              }}
-              className="hidden"
-              id="profileImage"
-            />
-            <Button 
-              variant="outline" 
-              onClick={() => document.getElementById('profileImage')?.click()}
-              className="w-full"
-            >
-              <Upload className="h-4 w-4 mr-2" />
-              {t('driver.uploadProfileImage')}
-            </Button>
-          </div>
+          {!profilePreview && (
+            <div>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) uploadDocument(file, 'profile');
+                }}
+                className="hidden"
+                id="profileImage"
+              />
+              <Button 
+                variant="outline" 
+                onClick={() => document.getElementById('profileImage')?.click()}
+                className="w-full"
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                {t('driver.uploadProfileImage')}
+              </Button>
+            </div>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -132,49 +134,53 @@ export default function DriverProfile() {
         <div className="space-y-2">
           <Label>{t('auth.idNumber')}</Label>
           <Input value={user.idNumber || ''} disabled />
-          <div className="mt-2">
-            <input
-              type="file"
-              accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.rtf"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) uploadDocument(file, 'id');
-              }}
-              className="hidden"
-              id="idDocument"
-            />
-            <Button 
-              variant="outline" 
-              onClick={() => document.getElementById('idDocument')?.click()}
-            >
-              {t('driver.uploadId')}
-            </Button>
-            {renderPreview(idPreview, 'ID')}
-          </div>
+          {!idPreview && (
+            <div className="mt-2">
+              <input
+                type="file"
+                accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.rtf"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) uploadDocument(file, 'id');
+                }}
+                className="hidden"
+                id="idDocument"
+              />
+              <Button 
+                variant="outline" 
+                onClick={() => document.getElementById('idDocument')?.click()}
+              >
+                {t('driver.uploadId')}
+              </Button>
+            </div>
+          )}
+          {renderPreview(idPreview, 'ID')}
         </div>
 
         <div className="space-y-2">
           <Label>{t('auth.licenseNumber')}</Label>
           <Input value={user.licenseNumber || ''} disabled />
-          <div className="mt-2">
-            <input
-              type="file"
-              accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.rtf"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) uploadDocument(file, 'license');
-              }}
-              className="hidden"
-              id="licenseDocument"
-            />
-            <Button 
-              variant="outline" 
-              onClick={() => document.getElementById('licenseDocument')?.click()}
-            >
-              {t('driver.uploadLicense')}
-            </Button>
-            {renderPreview(licensePreview, 'License')}
-          </div>
+          {!licensePreview && (
+            <div className="mt-2">
+              <input
+                type="file"
+                accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.rtf"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) uploadDocument(file, 'license');
+                }}
+                className="hidden"
+                id="licenseDocument"
+              />
+              <Button 
+                variant="outline" 
+                onClick={() => document.getElementById('licenseDocument')?.click()}
+              >
+                {t('driver.uploadLicense')}
+              </Button>
+            </div>
+          )}
+          {renderPreview(licensePreview, 'License')}
         </div>
       </CardContent>
     </Card>

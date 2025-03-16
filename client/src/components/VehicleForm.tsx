@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 
 // Vehicle types with bilingual names
 const vehicleTypes = [
@@ -27,6 +28,11 @@ export default function VehicleForm() {
   const [photoPreview, setPhotoPreview] = useState<string[]>([]);
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
 
+  // Query to check if user already has vehicles
+  const { data: vehicles } = useQuery({
+    queryKey: ["/api/vehicles/driver"],
+  });
+
   const form = useForm({
     resolver: zodResolver(insertVehicleSchema),
     defaultValues: {
@@ -36,6 +42,22 @@ export default function VehicleForm() {
       plateNumber: ''
     }
   });
+
+  // If user already has vehicles registered, show message instead of form
+  if (vehicles && vehicles.length > 0) {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="text-center space-y-2">
+            <p className="text-lg font-medium">تم تسجيل المركبة / Vehicle Registered</p>
+            <p className="text-sm text-muted-foreground">
+              لا يمكن تسجيل مركبات إضافية / Additional vehicles cannot be registered
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   const onSubmit = async (data: any) => {
     try {
