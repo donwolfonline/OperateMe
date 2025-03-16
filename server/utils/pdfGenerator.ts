@@ -6,32 +6,19 @@ import fs from 'fs';
 
 export async function generateOrderPDF(order: OperationOrder, driver: User): Promise<string> {
   try {
-    const pdfFileName = `order_${order.id}_${Date.now()}.pdf`;
-    const pdfPath = path.join(process.cwd(), 'uploads', pdfFileName);
-
-    // Create PDF document
+    // Create a single instance of PDF document
     const doc = new PDFDocument({
       size: 'A4',
       margin: 50,
       autoFirstPage: true
     });
 
-    // Pipe output to file
+    const pdfFileName = `order_${order.id}_${Date.now()}.pdf`;
+    const pdfPath = path.join(process.cwd(), 'uploads', pdfFileName);
     const stream = fs.createWriteStream(pdfPath);
     doc.pipe(stream);
 
-    // Set up fonts
-    doc.font('Helvetica');
-
-    // Add company header
-    doc.fontSize(24)
-      .fillColor('#1d4ed8')
-      .text('Lightning Road Transport', {
-        align: 'center'
-      });
-    doc.moveDown();
-
-    // Generate and add QR Code (only once)
+    // QR Code generation - do this only once
     const qrCodeData = JSON.stringify({
       orderId: order.id,
       passengerName: order.passengerName,
@@ -40,80 +27,98 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
       departureTime: order.departureTime
     });
 
-    const qrCodeImage = await QRCode.toDataURL(qrCodeData);
-    doc.image(Buffer.from(qrCodeImage.split(',')[1], 'base64'), {
+    // Generate QR code first to avoid duplication
+    const qrCodeDataUrl = await QRCode.toDataURL(qrCodeData);
+
+    // Start with English header
+    doc.font('Helvetica-Bold')
+       .fontSize(24)
+       .fillColor('#1d4ed8')
+       .text('Lightning Road Transport', {
+         align: 'center'
+       });
+
+    // Add QR Code once
+    doc.image(Buffer.from(qrCodeDataUrl.split(',')[1], 'base64'), {
       width: 100,
       align: 'right'
     });
+
     doc.moveDown(2);
 
-    // Add trip details
-    doc.fontSize(14)
-      .fillColor('#000000');
+    // Trip Details Section
+    doc.font('Helvetica-Bold')
+       .fontSize(16)
+       .fillColor('#000000')
+       .text('Trip Details', { align: 'left' });
 
-    const tripDetails = [
-      ['Passenger Name:', order.passengerName],
-      ['Passenger Phone:', order.passengerPhone],
-      ['From:', order.fromCity],
-      ['To:', order.toCity],
-      ['Departure Time:', new Date(order.departureTime).toLocaleString('ar-SA')]
+    doc.font('Helvetica')
+       .fontSize(12)
+       .moveDown(0.5);
+
+    // Trip information in both languages
+    const dateStr = new Date(order.departureTime).toLocaleString('ar-SA', {
+      dateStyle: 'full',
+      timeStyle: 'short'
+    });
+
+    const details = [
+      `Passenger Name / اسم المسافر: ${order.passengerName}`,
+      `Phone / رقم الهاتف: ${order.passengerPhone}`,
+      `From / من: ${order.fromCity}`,
+      `To / إلى: ${order.toCity}`,
+      `Departure / موعد المغادرة: ${dateStr}`
     ];
 
-    tripDetails.forEach(([label, value]) => {
-      doc.text(label, { continued: true })
-         .text(`  ${value}`, { align: 'left' });
+    details.forEach(detail => {
+      doc.text(detail, {
+        align: 'left'
+      });
     });
 
     doc.moveDown(2);
 
-    // Add driver details
-    const driverDetails = [
-      ['Driver Name:', driver.fullName],
-      ['License Number:', driver.licenseNumber]
-    ];
+    // Driver Details
+    doc.font('Helvetica-Bold')
+       .fontSize(16)
+       .text('Driver Information / معلومات السائق', { align: 'left' });
 
-    driverDetails.forEach(([label, value]) => {
-      doc.text(label, { continued: true })
-         .text(`  ${value}`, { align: 'left' });
-    });
+    doc.font('Helvetica')
+       .fontSize(12)
+       .moveDown(0.5)
+       .text(`Driver Name / اسم السائق: ${driver.fullName}`)
+       .text(`License Number / رقم الرخصة: ${driver.licenseNumber}`);
 
     doc.moveDown(2);
 
-    // Contract title
-    doc.fontSize(16)
-      .fillColor('#1e40af')
-      .text('Contract Agreement', { align: 'center' });
+    // Contract Title
+    doc.font('Helvetica-Bold')
+       .fontSize(16)
+       .text('Contract Agreement / عقد النقل', {
+         align: 'center'
+       });
+
     doc.moveDown();
 
-    // Add Arabic contract text
-    doc.fontSize(12)
-      .fillColor('#000000');
+    // Contract terms in simple format
+    doc.font('Helvetica')
+       .fontSize(12);
 
-    function writeRTLText(text: string) {
-      const textOptions = {
-        align: 'right' as const,
-        lineBreak: true,
-        paragraphGap: 10
-      };
-      doc.text(text, textOptions);
-    }
-
-    const arabicText = [
-      'عقد نقل ركاب',
-      `اسم الراكب: ${order.passengerName}`,
-      `رقم الهاتف: ${order.passengerPhone}`,
-      `مدينة الانطلاق: ${order.fromCity}`,
-      `مدينة الوصول: ${order.toCity}`,
-      `موعد المغادرة: ${new Date(order.departureTime).toLocaleString('ar-SA')}`,
-      'شروط وأحكام النقل:',
-      '١. يلتزم السائق بالوصول في الموعد المحدد',
-      '٢. يجب على الركاب الالتزام بتعليمات السلامة',
-      '٣. يحق للشركة إلغاء الرحلة في حالة الظروف الطارئة',
-      'توقيع العقد'
+    const contractTerms = [
+      '1. The driver commits to arrive at the specified time',
+      'يلتزم السائق بالوصول في الموعد المحدد',
+      '',
+      '2. Passengers must follow safety instructions',
+      'يجب على الركاب الالتزام بتعليمات السلامة',
+      '',
+      '3. The company reserves the right to cancel trips in emergency situations',
+      'يحق للشركة إلغاء الرحلة في حالة الظروف الطارئة'
     ];
 
-    arabicText.forEach(text => {
-      writeRTLText(text);
+    contractTerms.forEach(term => {
+      doc.text(term, {
+        align: 'left'
+      });
       doc.moveDown(0.5);
     });
 
