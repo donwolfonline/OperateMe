@@ -11,12 +11,13 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 
+// Vehicle types with bilingual names
 const vehicleTypes = [
-  "Sedan",
-  "SUV",
-  "Van",
-  "Bus",
-  "Truck"
+  { value: "Sedan", label: "سيدان / Sedan" },
+  { value: "SUV", label: "دفع رباعي / SUV" },
+  { value: "Van", label: "فان / Van" },
+  { value: "Bus", label: "حافلة / Bus" },
+  { value: "Truck", label: "شاحنة / Truck" }
 ];
 
 export default function VehicleForm() {
@@ -117,7 +118,7 @@ export default function VehicleForm() {
               name="type"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t('vehicle.type')}</FormLabel>
+                  <FormLabel>نوع المركبة / Vehicle Type</FormLabel>
                   <Select 
                     onValueChange={field.onChange} 
                     defaultValue={field.value}
@@ -129,8 +130,8 @@ export default function VehicleForm() {
                     </FormControl>
                     <SelectContent>
                       {vehicleTypes.map((type) => (
-                        <SelectItem key={type} value={type}>
-                          {type}
+                        <SelectItem key={type.value} value={type.value}>
+                          {type.label}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -145,7 +146,7 @@ export default function VehicleForm() {
               name="model"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t('vehicle.model')}</FormLabel>
+                  <FormLabel>موديل المركبة / Vehicle Model</FormLabel>
                   <FormControl>
                     <Input {...field} placeholder="موديل المركبة / Vehicle Model" />
                   </FormControl>
@@ -159,7 +160,7 @@ export default function VehicleForm() {
               name="year"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t('vehicle.year')}</FormLabel>
+                  <FormLabel>سنة التصنيع / Year</FormLabel>
                   <FormControl>
                     <Input {...field} placeholder="2020" type="number" min="1900" max="2025" />
                   </FormControl>
@@ -173,7 +174,7 @@ export default function VehicleForm() {
               name="plateNumber"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t('vehicle.plateNumber')}</FormLabel>
+                  <FormLabel>رقم اللوحة / Plate Number</FormLabel>
                   <FormControl>
                     <Input {...field} placeholder="رقم اللوحة / Plate Number" />
                   </FormControl>
@@ -183,7 +184,7 @@ export default function VehicleForm() {
             />
 
             <FormItem>
-              <FormLabel>{t('vehicle.photos')}</FormLabel>
+              <FormLabel>صور المركبة / Vehicle Photos</FormLabel>
               <FormControl>
                 <Input 
                   type="file" 
@@ -212,7 +213,7 @@ export default function VehicleForm() {
               disabled={isSubmitting}
               className="w-full"
             >
-              {isSubmitting ? t('common.saving') : t('vehicle.save')}
+              {isSubmitting ? 'جاري الحفظ... / Saving...' : 'حفظ المركبة / Save Vehicle'}
             </Button>
           </form>
         </Form>

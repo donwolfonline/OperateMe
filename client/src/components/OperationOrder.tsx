@@ -12,18 +12,18 @@ import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { FileText, Plus, Trash2 } from "lucide-react";
 
-// Saudi cities list
+// Saudi cities list with bilingual names
 const saudiCities = [
-  "Riyadh",
-  "Jeddah",
-  "Mecca",
-  "Medina",
-  "Dammam",
-  "Khobar",
-  "Dhahran",
-  "Tabuk",
-  "Abha",
-  "Taif"
+  { value: "Riyadh", label: "الرياض / Riyadh" },
+  { value: "Jeddah", label: "جدة / Jeddah" },
+  { value: "Mecca", label: "مكة المكرمة / Mecca" },
+  { value: "Medina", label: "المدينة المنورة / Medina" },
+  { value: "Dammam", label: "الدمام / Dammam" },
+  { value: "Khobar", label: "الخبر / Khobar" },
+  { value: "Dhahran", label: "الظهران / Dhahran" },
+  { value: "Tabuk", label: "تبوك / Tabuk" },
+  { value: "Abha", label: "أبها / Abha" },
+  { value: "Taif", label: "الطائف / Taif" }
 ];
 
 export default function OperationOrder() {
@@ -94,7 +94,6 @@ export default function OperationOrder() {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               {/* Trip Details */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
                 <FormField
                   control={form.control}
                   name="fromCity"
@@ -112,8 +111,8 @@ export default function OperationOrder() {
                         </FormControl>
                         <SelectContent>
                           {saudiCities.map((city) => (
-                            <SelectItem key={city} value={city}>
-                              {city}
+                            <SelectItem key={city.value} value={city.value}>
+                              {city.label}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -140,8 +139,8 @@ export default function OperationOrder() {
                         </FormControl>
                         <SelectContent>
                           {saudiCities.map((city) => (
-                            <SelectItem key={city} value={city}>
-                              {city}
+                            <SelectItem key={city.value} value={city.value}>
+                              {city.label}
                             </SelectItem>
                           ))}
                         </SelectContent>
