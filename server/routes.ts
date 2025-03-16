@@ -53,8 +53,15 @@ const upload = multer({
 export async function registerRoutes(app: Express): Promise<Server> {
   setupAuth(app);
 
-  // Configure static file serving for uploads
-  app.use('/uploads', express.static(uploadsDir));
+  // Configure static file serving for uploads with proper headers
+  app.use('/uploads', express.static(uploadsDir, {
+    setHeaders: (res, path) => {
+      if (path.endsWith('.pdf')) {
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', 'inline');
+      }
+    }
+  }));
 
   // Document upload route
   app.post("/api/documents/upload", upload.single('document'), async (req, res) => {
