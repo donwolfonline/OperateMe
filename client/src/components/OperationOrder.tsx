@@ -160,7 +160,6 @@ export default function OperationOrder() {
                         <Input
                           type="datetime-local"
                           className="w-full"
-                          min={new Date().toISOString().slice(0, 16)}
                           {...field}
                         />
                       </FormControl>
