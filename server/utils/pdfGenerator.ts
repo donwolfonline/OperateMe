@@ -10,7 +10,7 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
   try {
     const doc = new PDFDocument({
       size: 'A4',
-      margin: 30,
+      margin: 50,
       autoFirstPage: true
     });
 
@@ -31,100 +31,88 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
 
     // Title
     doc.fontSize(20)
-       .fillColor('#1e40af')
+       .fillColor('#000000')
        .text('عقد نقل على الطرق البرية', {
          align: 'center'
        });
-    doc.moveDown(0.5);
+    doc.moveDown(1);
 
-    // Contract Agreement Text (concise version)
+    // Contract Agreement Text
     const legalAgreement = [
       'تم ابرام هذا العقد بين المتعاقدين بناء على المادة (39) التاسعة و الثلاثون من اللائحة المنظمة لنشاط النقل المتخصص و تأجير و توجيه الحافلات',
       'و بناء على الفقرة (1) من المادة (39) و التي تنص على ان يجب على الناقل ابرام عقد نقل مع الاطراف المحددين في المادة (40) قبل تنفيذ عمليات النقل على الطرق البرية',
+      '',
       'الطرف الاول : شركة صاعقة الطريق للنقل البري (شخص واحد)',
       `الطرف الثاني : ${passengers[0]?.name || ''}`
     ];
 
     const legalAgreementImg = renderArabicSection('', legalAgreement);
     doc.image(legalAgreementImg, {
-      fit: [500, 120],
+      fit: [500, 150],
       align: 'center'
     });
-    doc.moveDown(0.5);
+    doc.moveDown(1);
 
     // Helper function to draw a box with title
-    const drawBox = (title: string, y: number, height: number) => {
-      doc.rect(30, y, 535, height)
-         .strokeColor('#000000')
-         .lineWidth(1)
+    const drawBox = (title: string, content: string[], height: number) => {
+      // Box outline
+      doc.rect(50, doc.y, 500, height)
          .stroke();
 
       // Title background
-      doc.fillColor('#f3f4f6')
-         .rect(30, y, 535, 25)
+      doc.fillColor('#f0f0f0')
+         .rect(50, doc.y, 500, 25)
          .fill();
+
+      // Reset fill color for text
+      doc.fillColor('#000000');
 
       // Title text
       const titleImg = renderArabicSection('', [title]);
-      doc.image(titleImg, 40, y + 3, {
-        fit: [515, 18],
+      doc.image(titleImg, 60, doc.y + 5, {
+        fit: [480, 20],
         align: 'right'
       });
+
+      // Content
+      const contentImg = renderArabicSection('', content);
+      doc.image(contentImg, 60, doc.y + 30, {
+        fit: [480, height - 35],
+        align: 'right'
+      });
+
+      doc.y += height + 10;
     };
 
     // Trip Information Box
-    let currentY = doc.y;
-    drawBox('معلومات الرحلة / Trip Information', currentY, 90);
-
-    const tripDetails = [
+    drawBox('معلومات الرحلة / Trip Information', [
       `التاريخ / Date: ${dateStr}`,
       `من / From: ${order.fromCity}`,
       `إلى / To: ${order.toCity}`,
       `نوع التأشيرة / Visa Type: ${order.visaType}`,
       `رقم الرحلة / Trip No.: ${order.tripNumber}`
-    ];
-
-    const tripDetailsImg = renderArabicSection('', tripDetails);
-    doc.image(tripDetailsImg, 40, currentY + 30, {
-      fit: [515, 55],
-      align: 'right'
-    });
+    ], 120);
 
     // Driver Information Box
-    currentY += 100;
-    drawBox('معلومات السائق / Driver Information', currentY, 80);
-
-    const driverDetails = [
+    drawBox('معلومات السائق / Driver Information', [
       `اسم السائق / Driver Name: ${driver.fullName}`,
       `رقم الهوية / ID Number: ${driver.idNumber}`,
       `رقم الرخصة / License Number: ${driver.licenseNumber}`
-    ];
-
-    const driverDetailsImg = renderArabicSection('', driverDetails);
-    doc.image(driverDetailsImg, 40, currentY + 30, {
-      fit: [515, 45],
-      align: 'right'
-    });
+    ], 100);
 
     // Passengers Information Box
-    currentY += 90;
-    const passengerBoxHeight = Math.min(250, Math.max(80, passengers.length * 25 + 35));
-    drawBox('معلومات الركاب / Passenger Information', currentY, passengerBoxHeight);
-
     const passengerDetails = passengers.map((passenger, index) => [
-      `${index + 1}. اسم الراكب / Name: ${passenger.name}`,
+      `${index + 1}. ${passenger.name}`,
       `   رقم الهوية / ID: ${passenger.idNumber}`,
       `   الجنسية / Nationality: ${passenger.nationality}`
     ]).flat();
 
-    const passengerDetailsImg = renderArabicSection('', passengerDetails);
-    doc.image(passengerDetailsImg, 40, currentY + 30, {
-      fit: [515, passengerBoxHeight - 35],
-      align: 'right'
-    });
+    drawBox('معلومات الركاب / Passenger Information', 
+      passengerDetails,
+      Math.min(200, Math.max(100, passengers.length * 25 + 40))
+    );
 
     // Add QR Code at the bottom
-    currentY += passengerBoxHeight + 10;
     const qrCodeData = JSON.stringify({
       orderId: order.id,
       fromCity: order.fromCity,
@@ -134,7 +122,7 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
     });
 
     const qrCodeDataUrl = await QRCode.toDataURL(qrCodeData);
-    doc.image(Buffer.from(qrCodeDataUrl.split(',')[1], 'base64'), 30, currentY, {
+    doc.image(Buffer.from(qrCodeDataUrl.split(',')[1], 'base64'), 50, doc.y, {
       fit: [80, 80]
     });
 

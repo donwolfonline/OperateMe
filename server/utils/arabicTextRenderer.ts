@@ -9,26 +9,26 @@ function createRTLCanvas(width: number, height: number) {
   ctx.textAlign = 'right';
   ctx.textBaseline = 'middle';
   ctx.direction = 'rtl';
+  ctx.font = '14px Arial';
 
   return { canvas, ctx };
 }
 
 export function renderArabicSection(title: string, items: string[]): Buffer {
-  // Calculate dimensions with more space for text
+  // Calculate dimensions
   const fontSize = 14;
-  const titleSize = fontSize + 6;
-  const lineHeight = fontSize * 1.8; // Increased line height for better readability
+  const lineHeight = fontSize * 1.5;
   const padding = 20;
   const width = 600;
 
-  // Calculate required height based on text content
+  // Calculate total height needed
   let totalLines = items.reduce((acc, item) => {
-    // Estimate number of lines needed for each item based on text length and width
-    const estimatedLines = Math.ceil((item.length * fontSize * 0.6) / (width - (padding * 3)));
-    return acc + (estimatedLines + (item === '' ? 1 : 0)); // Add extra space for empty lines
+    const estimatedWidth = item.length * (fontSize * 0.6);
+    const linesNeeded = Math.ceil(estimatedWidth / (width - (padding * 2)));
+    return acc + linesNeeded;
   }, 0);
 
-  const height = titleSize + (totalLines * lineHeight) + (padding * 4);
+  const height = (totalLines * lineHeight) + (padding * 2);
 
   const { canvas, ctx } = createRTLCanvas(width, height);
 
@@ -36,47 +36,38 @@ export function renderArabicSection(title: string, items: string[]): Buffer {
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, width, height);
 
-  // Draw title
-  ctx.font = `bold ${titleSize}px Arial`;
-  ctx.fillStyle = '#1e40af';
-  ctx.fillText(title, width - padding, padding + titleSize/2);
-
-  // Draw items with text wrapping
-  ctx.font = `${fontSize}px Arial`;
+  // Draw text
   ctx.fillStyle = '#000000';
+  let currentY = padding;
 
-  let currentY = (padding * 2) + titleSize;
   items.forEach(item => {
-    if (item === '') {
-      // Add extra space for empty lines
-      currentY += lineHeight * 0.8;
+    if (!item.trim()) {
+      currentY += lineHeight * 0.5;
       return;
     }
 
-    // Word wrapping for Arabic text
-    const words = item.split(' ');
+    // Word wrapping
+    const words = item.split(' ').reverse(); // Reverse for RTL
     let line = '';
-    let firstLine = true;
+    let testLine = '';
 
     for (let i = 0; i < words.length; i++) {
-      const testLine = line + (line ? ' ' : '') + words[i];
+      testLine = words[i] + (line ? ' ' : '') + line;
       const metrics = ctx.measureText(testLine);
 
-      if (metrics.width > width - (padding * 3) && i > 0) {
-        // Add indentation for wrapped lines
-        const xPosition = width - padding - (firstLine ? 0 : 20);
-        ctx.fillText(line, xPosition, currentY);
+      if (metrics.width > width - (padding * 2) && i > 0) {
+        // Draw the line before it gets too long
+        ctx.fillText(line, width - padding, currentY);
         line = words[i];
         currentY += lineHeight;
-        firstLine = false;
       } else {
         line = testLine;
       }
     }
+
     // Draw remaining text
-    const xPosition = width - padding - (firstLine ? 0 : 20);
-    ctx.fillText(line, xPosition, currentY);
-    currentY += lineHeight * 1.2; // Add extra space between items
+    ctx.fillText(line, width - padding, currentY);
+    currentY += lineHeight;
   });
 
   return canvas.toBuffer('image/png');
