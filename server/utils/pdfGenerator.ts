@@ -29,104 +29,105 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
       timeStyle: 'short'
     });
 
-    // First Page: Trip and Passenger Details
+    // Title
     doc.fontSize(24)
        .fillColor('#1e40af')
-       .text('Lightning Road Transport', {
+       .text('عقد نقل على الطرق البرية', {
          align: 'center'
        });
-    doc.moveDown(2);
+    doc.moveDown(1);
 
-    // Trip details section
-    const tripDetails = [
-      `من / From: ${order.fromCity}`,
-      `إلى / To: ${order.toCity}`,
-      `موعد المغادرة / Departure: ${dateStr}`
+    // Contract Agreement Text (before boxes)
+    const legalAgreement = [
+      'تم ابرام هذا العقد بين المتعاقدين بناء على المادة (39) التاسعة و الثلاثون من اللائحة المنظمة لنشاط النقل المتخصص و تأجير و توجيه الحافلات',
+      'و بناء على الفقرة (1) من المادة (39) و التي تنص على ان يجب على الناقل ابرام عقد نقل مع الاطراف المحددين في المادة (40) قبل تنفيذ عمليات النقل على الطرق البرية',
+      'و بما يخالف احكام هذه الائحة التي تحددها هيئة النقل و بناء على ما سبق تم ابرام عقد النقل بين الاطراف الاتية :',
+      '',
+      'الطرف الاول : شركة صاعقة الطريق للنقل البري (شخص واحد)',
+      `الطرف الثاني : ${passengers[0]?.name || ''}`
     ];
 
-    const tripDetailsImg = renderArabicSection('تفاصيل الرحلة / Trip Details', tripDetails);
-    doc.image(tripDetailsImg, {
-      fit: [500, 120],
+    const legalAgreementImg = renderArabicSection('', legalAgreement);
+    doc.image(legalAgreementImg, {
+      fit: [500, 200],
       align: 'center'
     });
-    doc.moveDown(2);
+    doc.moveDown(1);
 
-    // Draw a separator line
-    doc.strokeColor('#e5e7eb')
-       .lineWidth(1)
-       .moveTo(50, doc.y)
-       .lineTo(545, doc.y)
-       .stroke();
-    doc.moveDown(2);
-
-    // Passenger details section
-    if (passengers.length > 0) {
-      const passengerDetails = passengers.map(passenger => [
-        `اسم الراكب / Passenger Name: ${passenger.name}`,
-        `رقم الهوية / ID Number: ${passenger.idNumber}`,
-        `الجنسية / Nationality: ${passenger.nationality}`,
-        `رقم الهاتف / Phone: ${passenger.phone || 'N/A'}`
-      ]).flat();
-
-      const passengerDetailsImg = renderArabicSection('بيانات الركاب / Passenger Details', passengerDetails);
-      doc.image(passengerDetailsImg, {
-        fit: [500, 200],
-        align: 'center'
-      });
-      doc.moveDown(2);
-
-      // Draw a separator line
-      doc.strokeColor('#e5e7eb')
+    // Draw boxes for information
+    // Helper function to draw a box with title
+    const drawBox = (title: string, y: number, height: number) => {
+      doc.rect(50, y, 495, height)
+         .strokeColor('#000000')
          .lineWidth(1)
-         .moveTo(50, doc.y)
-         .lineTo(545, doc.y)
          .stroke();
-      doc.moveDown(2);
-    }
 
-    // Driver details section
+      // Title background
+      doc.fillColor('#f3f4f6')
+         .rect(50, y, 495, 30)
+         .fill();
+
+      // Title text
+      const titleImg = renderArabicSection('', [title]);
+      doc.image(titleImg, 60, y + 5, {
+        fit: [475, 20],
+        align: 'right'
+      });
+    };
+
+    // Trip Information Box
+    let currentY = doc.y + 20;
+    drawBox('معلومات الرحلة / Trip Information', currentY, 120);
+
+    const tripDetails = [
+      `التاريخ / Date: ${dateStr}`,
+      `من / From: ${order.fromCity}`,
+      `إلى / To: ${order.toCity}`,
+      `نوع التأشيرة / Visa Type: ${order.visaType}`,
+      `رقم الرحلة / Trip No.: ${order.tripNumber}`
+    ];
+
+    const tripDetailsImg = renderArabicSection('', tripDetails);
+    doc.image(tripDetailsImg, 60, currentY + 40, {
+      fit: [475, 70],
+      align: 'right'
+    });
+
+    // Driver Information Box
+    currentY += 140;
+    drawBox('معلومات السائق / Driver Information', currentY, 100);
+
     const driverDetails = [
       `اسم السائق / Driver Name: ${driver.fullName}`,
+      `رقم الهوية / ID Number: ${driver.idNumber}`,
       `رقم الرخصة / License Number: ${driver.licenseNumber}`
     ];
 
-    const driverDetailsImg = renderArabicSection('معلومات السائق / Driver Information', driverDetails);
-    doc.image(driverDetailsImg, {
-      fit: [500, 100],
-      align: 'center'
+    const driverDetailsImg = renderArabicSection('', driverDetails);
+    doc.image(driverDetailsImg, 60, currentY + 40, {
+      fit: [475, 50],
+      align: 'right'
     });
 
-    // Legal Agreement on a new page
-    doc.addPage();
+    // Passengers Information Box
+    currentY += 120;
+    const passengerBoxHeight = Math.max(100, passengers.length * 30 + 40);
+    drawBox('معلومات الركاب / Passenger Information', currentY, passengerBoxHeight);
 
-    const legalAgreement = [
-      'تم ابرام هذا العقد بين المتعاقدين بناء على المادة (39) التاسعة و الثلاثون من اللائحة المنظمة لنشاط النقل المتخصص و تأجير و توجيه الحافلات و بناء على الفقرة (1) من المادة (39) و التي تنص على ان يجب على الناقل',
-      '',
-      'ابرام عقد نقل مع الاطراف المحددين في المادة (40) قبل تنفيذ عمليات النقل على الطرق البرية و بما يخالف احكام هذه الائحة التي تحددها هيئة النقل و بناء على ما سبق تم ابرام عقد النقل بين الاطراف الاتية :',
-      '',
-      'الطرف الاول : شركة صاعقة الطريق للنقل البري (شخص واحد)',
-      `الطرف الثاني : ${passengers[0]?.name || ''}`,
-      '',
-      'اتفق الطرفان على أن ينفذ الطرف اول عملية النقل للطرف الثاني مع مرافقيه و ذويهم من الموقع المحدد مسبقا مع الطرف الثاني و توصيلهم الى الجهه المحدده بالعقد ۔',
-      '',
-      `النقل من : ${order.fromCity}`,
-      `الوصول الى : ${order.toCity}`,
-      '',
-      'في حالة الغاء التعاقد الى سبب شخصى او أسباب أخرى تتعلق في الحجوزات او الانظمة تكون سياسة إلالغاء و الاستبدال حسب نظام وزارة التجارة السعودى في حالة الحجز و تم الإلغاء قبل موعد الرحله بأكثر من 24 ساعه يتم استرداد المبلغ كامل .',
-      '',
-      'وفي حالة طلب المبلغ كامل الطرف الثاني الحجز من خلال الموقع الالكتروني لشركة يعتبر هذا الحجز و موافقته على الشروط و الحكام بالموقع الالكتروني هو موافقة على هذا العقد لتنفيذ عملية النقل المتفق عليها مع الطرف الاول'
-    ];
+    const passengerDetails = passengers.map((passenger, index) => [
+      `${index + 1}. اسم الراكب / Name: ${passenger.name}`,
+      `   رقم الهوية / ID: ${passenger.idNumber}`,
+      `   الجنسية / Nationality: ${passenger.nationality}`
+    ]).flat();
 
-    const legalAgreementImg = renderArabicSection('عقد النقل / Contract Agreement', legalAgreement);
-    doc.image(legalAgreementImg, {
-      fit: [500, 600],
-      align: 'center'
+    const passengerDetailsImg = renderArabicSection('', passengerDetails);
+    doc.image(passengerDetailsImg, 60, currentY + 40, {
+      fit: [475, passengerBoxHeight - 50],
+      align: 'right'
     });
 
-    // Terms and QR Code on a new page
-    doc.addPage();
-
-    // Generate QR Code
+    // Add QR Code at the bottom
+    currentY += passengerBoxHeight + 20;
     const qrCodeData = JSON.stringify({
       orderId: order.id,
       fromCity: order.fromCity,
@@ -136,31 +137,8 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
     });
 
     const qrCodeDataUrl = await QRCode.toDataURL(qrCodeData);
-
-    // Contract terms section
-    const contractTerms = [
-      '١. يلتزم السائق بالوصول في الموعد المحدد',
-      '١.١ The driver commits to arrive at the specified time',
-      '',
-      '٢. يجب على الركاب الالتزام بتعليمات السلامة',
-      '٢.١ Passengers must follow safety instructions',
-      '',
-      '٣. يحق للشركة إلغاء الرحلة في حالة الظروف الطارئة',
-      '٣.١ The company reserves the right to cancel trips in emergency situations'
-    ];
-
-    const contractTermsImg = renderArabicSection('الشروط والأحكام / Terms and Conditions', contractTerms);
-    doc.image(contractTermsImg, {
-      fit: [500, 250],
-      align: 'center'
-    });
-    doc.moveDown(4);
-
-    // Add QR Code at the bottom left with proper spacing
-    doc.image(Buffer.from(qrCodeDataUrl.split(',')[1], 'base64'), {
-      width: 100,
-      x: 50,
-      y: doc.page.height - 150
+    doc.image(Buffer.from(qrCodeDataUrl.split(',')[1], 'base64'), 50, currentY, {
+      fit: [100, 100]
     });
 
     // Finalize the PDF
