@@ -1,12 +1,12 @@
-import puppeteer from 'puppeteer';
+import html_to_pdf from 'html-pdf-node';
 import { OperationOrder, User } from "@shared/schema";
 import path from 'path';
 import QRCode from 'qrcode';
-import Handlebars from 'handlebars';
+import fs from 'fs';
 
 const template = `
 <!DOCTYPE html>
-<html dir="rtl">
+<html>
 <head>
     <meta charset="UTF-8">
     <style>
@@ -15,7 +15,7 @@ const template = `
         body {
             font-family: 'Noto Naskh Arabic', Arial, sans-serif;
             margin: 40px;
-            color: #333;
+            direction: rtl;
         }
 
         .header {
@@ -38,7 +38,7 @@ const template = `
 
         .section-title {
             color: #1e40af;
-            font-size: 1.25rem;
+            font-size: 18px;
             font-weight: bold;
             margin-bottom: 15px;
         }
@@ -48,13 +48,7 @@ const template = `
         }
 
         .contract {
-            text-align: right;
             line-height: 1.8;
-        }
-
-        .rtl {
-            direction: rtl;
-            text-align: right;
         }
     </style>
 </head>
@@ -69,7 +63,7 @@ const template = `
 
     <div class="section">
         <div class="section-title">تفاصيل الرحلة</div>
-        <div class="details rtl">
+        <div class="details">
             <p>اسم المسافر: {{order.passengerName}}</p>
             <p>رقم الهاتف: {{order.passengerPhone}}</p>
             <p>من: {{order.fromCity}}</p>
@@ -80,7 +74,7 @@ const template = `
 
     <div class="section">
         <div class="section-title">معلومات السائق</div>
-        <div class="details rtl">
+        <div class="details">
             <p>اسم السائق: {{driver.fullName}}</p>
             <p>رقم الرخصة: {{driver.licenseNumber}}</p>
         </div>
@@ -106,66 +100,54 @@ const template = `
 `;
 
 export async function generateOrderPDF(order: OperationOrder, driver: User): Promise<string> {
-    try {
-        // Generate QR Code
-        const qrCodeData = JSON.stringify({
-            orderId: order.id,
-            passengerName: order.passengerName,
-            fromCity: order.fromCity,
-            toCity: order.toCity,
-            departureTime: order.departureTime
-        });
-        const qrCodeDataUrl = await QRCode.toDataURL(qrCodeData);
+  try {
+    // Generate QR Code
+    const qrCodeData = JSON.stringify({
+      orderId: order.id,
+      passengerName: order.passengerName,
+      fromCity: order.fromCity,
+      toCity: order.toCity,
+      departureTime: order.departureTime
+    });
+    const qrCodeDataUrl = await QRCode.toDataURL(qrCodeData);
 
-        // Format departure time
-        const departureTime = new Date(order.departureTime).toLocaleDateString('ar-SA', {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
+    // Format departure time
+    const departureTime = new Date(order.departureTime).toLocaleDateString('ar-SA', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
 
-        // Compile template
-        const compiledTemplate = Handlebars.compile(template);
-        const html = compiledTemplate({
-            order,
-            driver,
-            qrCodeDataUrl,
-            departureTime
-        });
+    // Compile template
+    const compiledTemplate = Handlebars.compile(template);
+    const html = compiledTemplate({
+        order,
+        driver,
+        qrCodeDataUrl,
+        departureTime
+    });
 
-        // Launch browser
-        const browser = await puppeteer.launch({
-            args: ['--no-sandbox', '--disable-setuid-sandbox']
-        });
-        const page = await browser.newPage();
-        await page.setContent(html, {
-            waitUntil: 'networkidle0'
-        });
 
-        // Generate PDF
-        const pdfFileName = `order_${order.id}_${Date.now()}.pdf`;
-        const pdfPath = path.join(process.cwd(), 'uploads', pdfFileName);
+    const options = {
+      format: 'A4',
+      margin: { top: 20, right: 20, bottom: 20, left: 20 },
+      printBackground: true
+    };
 
-        await page.pdf({
-            path: pdfPath,
-            format: 'A4',
-            printBackground: true,
-            margin: {
-                top: '20px',
-                right: '20px',
-                bottom: '20px',
-                left: '20px'
-            }
-        });
+    const pdfFileName = `order_${order.id}_${Date.now()}.pdf`;
+    const pdfPath = path.join(process.cwd(), 'uploads', pdfFileName);
 
-        await browser.close();
-        return pdfFileName;
+    const file = { content: html };
+    const buffer = await html_to_pdf.generatePdf(file, options);
 
-    } catch (error) {
-        console.error('Error generating PDF:', error);
-        throw new Error('Failed to generate PDF');
-    }
+    fs.writeFileSync(pdfPath, buffer);
+    return pdfFileName;
+
+  } catch (error) {
+    console.error('Error generating PDF:', error);
+    throw new Error('Failed to generate PDF');
+  }
 }
