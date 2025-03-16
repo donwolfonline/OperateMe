@@ -22,6 +22,10 @@ const upload = multer({
       'image/webp',
       'image/heic',
       'image/heif',
+      'image/svg+xml',
+      'image/tiff',
+      'image/bmp',
+      'image/x-icon',
       // Documents
       'application/pdf',
       'application/msword',
