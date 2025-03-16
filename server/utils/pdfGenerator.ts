@@ -10,7 +10,7 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
   try {
     const doc = new PDFDocument({
       size: 'A4',
-      margin: 50,
+      margin: 30,
       autoFirstPage: true
     });
 
@@ -30,54 +30,51 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
     });
 
     // Title
-    doc.fontSize(24)
+    doc.fontSize(20)
        .fillColor('#1e40af')
        .text('عقد نقل على الطرق البرية', {
          align: 'center'
        });
-    doc.moveDown(1);
+    doc.moveDown(0.5);
 
-    // Contract Agreement Text (before boxes)
+    // Contract Agreement Text (concise version)
     const legalAgreement = [
       'تم ابرام هذا العقد بين المتعاقدين بناء على المادة (39) التاسعة و الثلاثون من اللائحة المنظمة لنشاط النقل المتخصص و تأجير و توجيه الحافلات',
       'و بناء على الفقرة (1) من المادة (39) و التي تنص على ان يجب على الناقل ابرام عقد نقل مع الاطراف المحددين في المادة (40) قبل تنفيذ عمليات النقل على الطرق البرية',
-      'و بما يخالف احكام هذه الائحة التي تحددها هيئة النقل و بناء على ما سبق تم ابرام عقد النقل بين الاطراف الاتية :',
-      '',
       'الطرف الاول : شركة صاعقة الطريق للنقل البري (شخص واحد)',
       `الطرف الثاني : ${passengers[0]?.name || ''}`
     ];
 
     const legalAgreementImg = renderArabicSection('', legalAgreement);
     doc.image(legalAgreementImg, {
-      fit: [500, 200],
+      fit: [500, 120],
       align: 'center'
     });
-    doc.moveDown(1);
+    doc.moveDown(0.5);
 
-    // Draw boxes for information
     // Helper function to draw a box with title
     const drawBox = (title: string, y: number, height: number) => {
-      doc.rect(50, y, 495, height)
+      doc.rect(30, y, 535, height)
          .strokeColor('#000000')
          .lineWidth(1)
          .stroke();
 
       // Title background
       doc.fillColor('#f3f4f6')
-         .rect(50, y, 495, 30)
+         .rect(30, y, 535, 25)
          .fill();
 
       // Title text
       const titleImg = renderArabicSection('', [title]);
-      doc.image(titleImg, 60, y + 5, {
-        fit: [475, 20],
+      doc.image(titleImg, 40, y + 3, {
+        fit: [515, 18],
         align: 'right'
       });
     };
 
     // Trip Information Box
-    let currentY = doc.y + 20;
-    drawBox('معلومات الرحلة / Trip Information', currentY, 120);
+    let currentY = doc.y;
+    drawBox('معلومات الرحلة / Trip Information', currentY, 90);
 
     const tripDetails = [
       `التاريخ / Date: ${dateStr}`,
@@ -88,14 +85,14 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
     ];
 
     const tripDetailsImg = renderArabicSection('', tripDetails);
-    doc.image(tripDetailsImg, 60, currentY + 40, {
-      fit: [475, 70],
+    doc.image(tripDetailsImg, 40, currentY + 30, {
+      fit: [515, 55],
       align: 'right'
     });
 
     // Driver Information Box
-    currentY += 140;
-    drawBox('معلومات السائق / Driver Information', currentY, 100);
+    currentY += 100;
+    drawBox('معلومات السائق / Driver Information', currentY, 80);
 
     const driverDetails = [
       `اسم السائق / Driver Name: ${driver.fullName}`,
@@ -104,14 +101,14 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
     ];
 
     const driverDetailsImg = renderArabicSection('', driverDetails);
-    doc.image(driverDetailsImg, 60, currentY + 40, {
-      fit: [475, 50],
+    doc.image(driverDetailsImg, 40, currentY + 30, {
+      fit: [515, 45],
       align: 'right'
     });
 
     // Passengers Information Box
-    currentY += 120;
-    const passengerBoxHeight = Math.max(100, passengers.length * 30 + 40);
+    currentY += 90;
+    const passengerBoxHeight = Math.min(250, Math.max(80, passengers.length * 25 + 35));
     drawBox('معلومات الركاب / Passenger Information', currentY, passengerBoxHeight);
 
     const passengerDetails = passengers.map((passenger, index) => [
@@ -121,13 +118,13 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
     ]).flat();
 
     const passengerDetailsImg = renderArabicSection('', passengerDetails);
-    doc.image(passengerDetailsImg, 60, currentY + 40, {
-      fit: [475, passengerBoxHeight - 50],
+    doc.image(passengerDetailsImg, 40, currentY + 30, {
+      fit: [515, passengerBoxHeight - 35],
       align: 'right'
     });
 
     // Add QR Code at the bottom
-    currentY += passengerBoxHeight + 20;
+    currentY += passengerBoxHeight + 10;
     const qrCodeData = JSON.stringify({
       orderId: order.id,
       fromCity: order.fromCity,
@@ -137,8 +134,8 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
     });
 
     const qrCodeDataUrl = await QRCode.toDataURL(qrCodeData);
-    doc.image(Buffer.from(qrCodeDataUrl.split(',')[1], 'base64'), 50, currentY, {
-      fit: [100, 100]
+    doc.image(Buffer.from(qrCodeDataUrl.split(',')[1], 'base64'), 30, currentY, {
+      fit: [80, 80]
     });
 
     // Finalize the PDF
