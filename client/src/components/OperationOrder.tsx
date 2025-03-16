@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 
 // Saudi cities list
 const saudiCities = [
@@ -25,13 +27,47 @@ const saudiCities = [
 
 export default function OperationOrder() {
   const { t } = useTranslation();
-  
+  const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const form = useForm({
-    resolver: zodResolver(insertOperationOrderSchema)
+    resolver: zodResolver(insertOperationOrderSchema),
+    defaultValues: {
+      passengerName: '',
+      passengerPhone: '',
+      fromCity: '',
+      toCity: '',
+      departureTime: new Date().toISOString().slice(0, 16)
+    }
   });
 
   const onSubmit = async (data: any) => {
-    await apiRequest("POST", "/api/operation-orders", data);
+    try {
+      setIsSubmitting(true);
+      // Format the date properly
+      const formattedData = {
+        ...data,
+        departureTime: new Date(data.departureTime).toISOString()
+      };
+
+      await apiRequest("POST", "/api/operation-orders", formattedData);
+
+      toast({
+        title: "Success",
+        description: t('order.createSuccess'),
+      });
+
+      // Reset form after successful submission
+      form.reset();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || t('order.createError'),
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -126,14 +162,15 @@ export default function OperationOrder() {
             <FormField
               control={form.control}
               name="departureTime"
-              render={({ field }) => (
+              render={({ field: { onChange, value, ...field } }) => (
                 <FormItem>
                   <FormLabel>{t('order.departureTime')}</FormLabel>
                   <FormControl>
                     <Input 
                       type="datetime-local" 
-                      {...field}
+                      onChange={(e) => onChange(e.target.value)}
                       min={new Date().toISOString().slice(0, 16)}
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
@@ -141,7 +178,13 @@ export default function OperationOrder() {
               )}
             />
 
-            <Button type="submit">{t('order.create')}</Button>
+            <Button 
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full"
+            >
+              {isSubmitting ? t('common.saving') : t('order.create')}
+            </Button>
           </form>
         </Form>
       </CardContent>
