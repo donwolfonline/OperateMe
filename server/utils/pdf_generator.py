@@ -18,11 +18,11 @@ def generate_qr_code(pdf_filename):
     """Generate QR code and return as base64 string"""
     try:
         # Get Replit environment variables
+        repl_id = os.getenv('REPL_ID', '')
         repl_slug = os.getenv('REPL_SLUG', '')
-        repl_owner = os.getenv('REPL_OWNER', '')
 
-        # Construct the Replit URL
-        base_url = f"https://{repl_slug}.{repl_owner}.repl.co"
+        # Construct the Replit URL using the proper format
+        base_url = f"https://{repl_slug}.id.repl.co"
         logger.info(f"Base URL for QR: {base_url}")
 
         # Create a full URL to the PDF

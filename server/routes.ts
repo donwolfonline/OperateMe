@@ -53,6 +53,14 @@ const upload = multer({
 export async function registerRoutes(app: Express): Promise<Server> {
   setupAuth(app);
 
+  // Configure CORS for PDF access
+  app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PATCH'); //Added POST and PATCH
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization'); // Added Authorization
+    next();
+  });
+
   // Configure static file serving for uploads with proper headers
   app.use('/uploads', express.static(uploadsDir, {
     setHeaders: (res, path) => {
@@ -60,6 +68,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', 'inline; filename="' + path.split('/').pop() + '"');
         res.setHeader('Cache-Control', 'public, max-age=3600');
+        res.setHeader('Access-Control-Allow-Origin', '*');
       }
     }
   }));
