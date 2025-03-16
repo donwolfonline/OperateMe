@@ -5,6 +5,7 @@ import DriverProfile from "@/components/DriverProfile";
 import VehicleForm from "@/components/VehicleForm";
 import OperationOrder from "@/components/OperationOrder";
 import LanguageToggle from "@/components/LanguageToggle";
+import HomeButton from "@/components/HomeButton";
 
 export default function DriverDashboard() {
   const { t } = useTranslation();
@@ -16,7 +17,7 @@ export default function DriverDashboard() {
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-2xl font-bold">{t('driver.dashboard')}</h1>
+          <HomeButton />
           <div className="flex gap-4">
             <LanguageToggle />
             <button 

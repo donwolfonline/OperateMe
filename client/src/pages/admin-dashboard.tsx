@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { apiRequest } from "@/lib/queryClient";
 import { User } from "@shared/schema";
 import LanguageToggle from "@/components/LanguageToggle";
+import HomeButton from "@/components/HomeButton";
 
 export default function AdminDashboard() {
   const { t } = useTranslation();
@@ -25,7 +26,7 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-2xl font-bold">{t('admin.dashboard')}</h1>
+          <HomeButton />
           <div className="flex gap-4">
             <LanguageToggle />
             <button 
@@ -43,7 +44,7 @@ export default function AdminDashboard() {
               <h2 className="text-xl font-semibold mb-4">
                 {t('admin.pendingDrivers')}
               </h2>
-              
+
               <div className="space-y-4">
                 {pendingDrivers?.map((driver) => (
                   <div 
