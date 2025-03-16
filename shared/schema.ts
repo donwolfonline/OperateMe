@@ -42,13 +42,13 @@ export const passengers = pgTable("passengers", {
 export const operationOrders = pgTable("operation_orders", {
   id: serial("id").primaryKey(),
   driverId: integer("driver_id").notNull(),
-  vehicleId: integer("vehicle_id").notNull(),
+  vehicleId: integer("vehicle_id"),  
   fromCity: text("from_city").notNull(),
   toCity: text("to_city").notNull(),
   departureTime: timestamp("departure_time").notNull(),
   qrCode: text("qr_code"),
   pdfUrl: text("pdf_url"),
-  status: text("status").notNull().default("active"), // active, completed, cancelled
+  status: text("status").notNull().default("active"), 
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -79,7 +79,6 @@ export const insertOperationOrderSchema = createInsertSchema(operationOrders)
     fromCity: true,
     toCity: true,
     departureTime: true,
-    vehicleId: true,
   })
   .extend({
     departureTime: z.string()

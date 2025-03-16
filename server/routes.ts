@@ -148,7 +148,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           toCity: orderData.toCity,
           departureTime: new Date(orderData.departureTime),
           driverId: req.user.id,
-          vehicleId: orderData.vehicleId,
+          vehicleId: null,  // Set to null since it's optional now
           qrCode: "",
           pdfUrl: "",
           status: "active",
