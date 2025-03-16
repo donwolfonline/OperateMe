@@ -77,6 +77,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         user.idDocumentUrl = filePath;
       } else if (documentType === 'license') {
         user.licenseDocumentUrl = filePath;
+      } else if (documentType === 'profile') {
+        user.profileImageUrl = filePath;
       }
 
       await storage.updateUser(user);

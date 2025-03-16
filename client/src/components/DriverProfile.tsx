@@ -4,9 +4,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { UserCircle2, Upload } from "lucide-react";
 
 export default function DriverProfile() {
   const { t } = useTranslation();
@@ -14,13 +16,14 @@ export default function DriverProfile() {
   const { toast } = useToast();
   const [idPreview, setIdPreview] = useState<string | null>(user?.idDocumentUrl || null);
   const [licensePreview, setLicensePreview] = useState<string | null>(user?.licenseDocumentUrl || null);
+  const [profilePreview, setProfilePreview] = useState<string | null>(user?.profileImageUrl || null);
 
   const isImageFile = (url: string) => {
     const extension = url.split('.').pop()?.toLowerCase();
     return ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp'].includes(extension || '');
   };
 
-  const uploadDocument = async (file: File, type: 'id' | 'license') => {
+  const uploadDocument = async (file: File, type: 'id' | 'license' | 'profile') => {
     try {
       const formData = new FormData();
       formData.append('document', file);
@@ -32,9 +35,14 @@ export default function DriverProfile() {
       // Update preview based on document type
       if (type === 'id') {
         setIdPreview(updatedUser.idDocumentUrl);
-      } else {
+      } else if (type === 'license') {
         setLicensePreview(updatedUser.licenseDocumentUrl);
+      } else if (type === 'profile') {
+        setProfilePreview(updatedUser.profileImageUrl);
       }
+
+      // Update the user data in the cache
+      queryClient.setQueryData(["/api/user"], updatedUser);
 
       toast({
         title: "Success",
@@ -56,7 +64,7 @@ export default function DriverProfile() {
       return (
         <div className="mt-2">
           <img 
-            src={`/${url}`} 
+            src={`/uploads/${url}`} 
             alt={`${type} preview`} 
             className="max-w-sm rounded-lg shadow-lg"
           />
@@ -66,7 +74,7 @@ export default function DriverProfile() {
       return (
         <div className="mt-2">
           <a 
-            href={`/${url}`} 
+            href={`/uploads/${url}`} 
             target="_blank" 
             rel="noopener noreferrer"
             className="text-primary hover:underline"
@@ -83,6 +91,39 @@ export default function DriverProfile() {
   return (
     <Card>
       <CardContent className="p-6 space-y-6">
+        {/* Profile Image Section */}
+        <div className="flex flex-col items-center space-y-4">
+          <Avatar className="h-24 w-24">
+            {profilePreview ? (
+              <AvatarImage src={`/uploads/${profilePreview}`} alt="Profile" />
+            ) : (
+              <AvatarFallback>
+                <UserCircle2 className="h-16 w-16" />
+              </AvatarFallback>
+            )}
+          </Avatar>
+          <div>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) uploadDocument(file, 'profile');
+              }}
+              className="hidden"
+              id="profileImage"
+            />
+            <Button 
+              variant="outline" 
+              onClick={() => document.getElementById('profileImage')?.click()}
+              className="w-full"
+            >
+              <Upload className="h-4 w-4 mr-2" />
+              {t('driver.uploadProfileImage')}
+            </Button>
+          </div>
+        </div>
+
         <div className="space-y-2">
           <Label>{t('auth.fullName')}</Label>
           <Input value={user.fullName || ''} disabled />

@@ -14,6 +14,7 @@ export const users = pgTable("users", {
   licenseNumber: text("license_number"),
   idDocumentUrl: text("id_document_url"),
   licenseDocumentUrl: text("license_document_url"),
+  profileImageUrl: text("profile_image_url"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
