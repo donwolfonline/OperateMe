@@ -39,11 +39,7 @@ const resources = {
         photos: "Vehicle Photos",
         save: "Save Vehicle",
         saving: "Saving...",
-        registered: "Vehicle Registered",
-        noAdditional: "Additional vehicles cannot be registered",
-        selectType: "Select Vehicle Type",
-        modelPlaceholder: "Enter vehicle model",
-        plateNumberPlaceholder: "Enter plate number"
+        registered: "Vehicle Registered"
       },
       order: {
         fromCity: "From City",
@@ -61,11 +57,11 @@ const resources = {
         passengerIdNumber: "ID Number",
         documentReady: "Document Ready",
         downloadPdf: "Download PDF",
-        success: "Success",
-        orderCreated: "Order created successfully",
-        maxPassengers: "Maximum limit reached",
-        maxPassengersMessage: "Maximum 12 passengers allowed",
-        errorCreating: "Error creating order"
+        viewDocument: "View Document",
+        download: "Download",
+        route: "Route",
+        driver: "Driver",
+        passengerCount: "Passenger Count"
       },
       admin: {
         dashboard: "Admin Dashboard",
@@ -80,7 +76,9 @@ const resources = {
         noSuspendedDrivers: "No suspended drivers",
         allOrders: "All Orders",
         noOrders: "No orders found",
-        orders: "Orders"
+        orders: "Orders",
+        documents: "Document History",
+        noDocuments: "No documents found"
       },
       common: {
         logout: "Logout",
@@ -126,11 +124,7 @@ const resources = {
         photos: "صور المركبة",
         save: "حفظ المركبة",
         saving: "جاري الحفظ...",
-        registered: "تم تسجيل المركبة",
-        noAdditional: "لا يمكن تسجيل مركبات إضافية",
-        selectType: "اختر نوع المركبة",
-        modelPlaceholder: "أدخل موديل المركبة",
-        plateNumberPlaceholder: "أدخل رقم اللوحة"
+        registered: "تم تسجيل المركبة"
       },
       order: {
         fromCity: "مدينة الانطلاق",
@@ -148,11 +142,11 @@ const resources = {
         passengerIdNumber: "رقم الهوية",
         documentReady: "المستند جاهز",
         downloadPdf: "تحميل PDF",
-        success: "تم بنجاح",
-        orderCreated: "تم إنشاء الطلب بنجاح",
-        maxPassengers: "تم الوصول للحد الأقصى",
-        maxPassengersMessage: "الحد الأقصى 12 راكب",
-        errorCreating: "خطأ في إنشاء الطلب"
+        viewDocument: "عرض المستند",
+        download: "تحميل",
+        route: "المسار",
+        driver: "السائق",
+        passengerCount: "عدد الركاب"
       },
       admin: {
         dashboard: "لوحة تحكم المشرف",
@@ -167,7 +161,9 @@ const resources = {
         noSuspendedDrivers: "لا يوجد سائقين موقوفين",
         allOrders: "جميع الطلبات",
         noOrders: "لا يوجد طلبات",
-        orders: "الطلبات"
+        orders: "الطلبات",
+        documents: "سجل المستندات",
+        noDocuments: "لا توجد مستندات"
       },
       common: {
         logout: "تسجيل الخروج",
@@ -213,11 +209,7 @@ const resources = {
         photos: "گاڑی کی تصاویر",
         save: "گاڑی محفوظ کریں",
         saving: "محفوظ کیا جا رہا ہے...",
-        registered: "گاڑی رجسٹرڈ ہے",
-        noAdditional: "مزید گاڑیاں رجسٹر نہیں کی جا سکتیں",
-        selectType: "گاڑی کی قسم منتخب کریں",
-        modelPlaceholder: "گاڑی کا ماڈل درج کریں",
-        plateNumberPlaceholder: "پلیٹ نمبر درج کریں"
+        registered: "گاڑی رجسٹرڈ ہے"
       },
       order: {
         fromCity: "کس شہر سے",
@@ -235,11 +227,11 @@ const resources = {
         passengerIdNumber: "شناختی نمبر",
         documentReady: "دستاویز تیار ہے",
         downloadPdf: "PDF ڈاؤنلوڈ کریں",
-        success: "کامیابی",
-        orderCreated: "آرڈر کامیابی سے بنایا گیا",
-        maxPassengers: "زیادہ سے زیادہ حد تک پہنچ گئے",
-        maxPassengersMessage: "زیادہ سے زیادہ 12 مسافر",
-        errorCreating: "آرڈر بنانے میں خطا"
+        viewDocument: "دستاویز دیکھیں",
+        download: "ڈاؤنلوڈ کریں",
+        route: "روٹ",
+        driver: "ڈرائیور",
+        passengerCount: "مسافروں کی تعداد"
       },
       admin: {
         dashboard: "ایڈمن ڈیش بورڈ",
@@ -254,7 +246,9 @@ const resources = {
         noSuspendedDrivers: "کوئی معطل ڈرائیور نہیں",
         allOrders: "تمام آرڈرز",
         noOrders: "کوئی آرڈر نہیں ملا",
-        orders: "آرڈرز"
+        orders: "آرڈرز",
+        documents: "دستاویزات کی تاریخ",
+        noDocuments: "کوئی دستاویز نہیں ملی"
       },
       common: {
         logout: "لاگ آؤٹ",
