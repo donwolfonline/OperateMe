@@ -7,6 +7,7 @@ export const users = pgTable("users", {
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
   role: text("role").notNull().default("driver"),
+  status: text("status").notNull().default("pending"), // pending, active, suspended
   isApproved: boolean("is_approved").notNull().default(false),
   fullName: text("full_name"),
   idNumber: text("id_number"),
@@ -25,6 +26,8 @@ export const vehicles = pgTable("vehicles", {
   plateNumber: text("plate_number").notNull(),
   registrationUrl: text("registration_url"),
   photoUrls: json("photo_urls").$type<string[]>(),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 export const passengers = pgTable("passengers", {
@@ -39,11 +42,13 @@ export const passengers = pgTable("passengers", {
 export const operationOrders = pgTable("operation_orders", {
   id: serial("id").primaryKey(),
   driverId: integer("driver_id").notNull(),
+  vehicleId: integer("vehicle_id").notNull(),
   fromCity: text("from_city").notNull(),
   toCity: text("to_city").notNull(),
   departureTime: timestamp("departure_time").notNull(),
   qrCode: text("qr_code"),
   pdfUrl: text("pdf_url"),
+  status: text("status").notNull().default("active"), // active, completed, cancelled
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -74,6 +79,7 @@ export const insertOperationOrderSchema = createInsertSchema(operationOrders)
     fromCity: true,
     toCity: true,
     departureTime: true,
+    vehicleId: true,
   })
   .extend({
     departureTime: z.string()

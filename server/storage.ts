@@ -22,7 +22,15 @@ export interface IStorage {
   getOperationOrdersByDriver(driverId: number): Promise<OperationOrder[]>;
   createOperationOrder(order: Omit<OperationOrder, "id">, passengers: Omit<Passenger, "id" | "orderId">[]): Promise<OperationOrder>;
   getPendingDrivers(): Promise<User[]>;
-  approveDriver(id: number): Promise<User | undefined>;
+  getActiveDrivers(): Promise<User[]>;
+  getSuspendedDrivers(): Promise<User[]>;
+  updateDriverStatus(id: number, status: string): Promise<User | undefined>;
+  updateVehicleStatus(id: number, driverId: number, isActive: boolean): Promise<Vehicle | undefined>;
+  getDriverDetails(id: number): Promise<{
+    driver: User,
+    vehicles: Vehicle[],
+    orders: OperationOrder[]
+  } | undefined>;
   updateOperationOrder(order: OperationOrder): Promise<OperationOrder>;
   getPassengersByOrder(orderId: number): Promise<Passenger[]>;
 }
@@ -46,6 +54,7 @@ export class MemStorage implements IStorage {
       username: "admin",
       password: adminHashedPassword,
       role: "admin",
+      status: "active",
       isApproved: true,
       fullName: "Admin User",
       idNumber: null,
@@ -65,6 +74,7 @@ export class MemStorage implements IStorage {
       username: "driver",
       password: driverHashedPassword,
       role: "driver",
+      status: "active",
       isApproved: true,
       fullName: "Test Driver",
       idNumber: "DRV123",
@@ -113,6 +123,7 @@ export class MemStorage implements IStorage {
       ...insertUser,
       id,
       role: "driver",
+      status: "pending",
       isApproved: false,
       fullName: insertUser.fullName || null,
       idNumber: insertUser.idNumber || null,
@@ -140,6 +151,16 @@ export class MemStorage implements IStorage {
     const newVehicle = { ...vehicle, id };
     this.vehicles.set(id, newVehicle);
     return newVehicle;
+  }
+
+  async updateVehicleStatus(id: number, driverId: number, isActive: boolean): Promise<Vehicle | undefined> {
+    const vehicle = await this.getVehicle(id);
+    if (vehicle && vehicle.driverId === driverId) {
+      const updatedVehicle = { ...vehicle, isActive };
+      this.vehicles.set(id, updatedVehicle);
+      return updatedVehicle;
+    }
+    return undefined;
   }
 
   async getOperationOrder(id: number): Promise<OperationOrder | undefined> {
@@ -176,18 +197,48 @@ export class MemStorage implements IStorage {
 
   async getPendingDrivers(): Promise<User[]> {
     return Array.from(this.users.values()).filter(
-      (user) => user.role === "driver" && !user.isApproved
+      (user) => user.role === "driver" && user.status === "pending"
     );
   }
 
-  async approveDriver(id: number): Promise<User | undefined> {
+  async getActiveDrivers(): Promise<User[]> {
+    return Array.from(this.users.values()).filter(
+      (user) => user.role === "driver" && user.status === "active"
+    );
+  }
+
+  async getSuspendedDrivers(): Promise<User[]> {
+    return Array.from(this.users.values()).filter(
+      (user) => user.role === "driver" && user.status === "suspended"
+    );
+  }
+
+  async updateDriverStatus(id: number, status: string): Promise<User | undefined> {
     const user = await this.getUser(id);
     if (user && user.role === "driver") {
-      const updatedUser = { ...user, isApproved: true };
+      const updatedUser = { ...user, status };
       this.users.set(id, updatedUser);
       return updatedUser;
     }
     return undefined;
+  }
+
+  async getDriverDetails(id: number): Promise<{ 
+    driver: User;
+    vehicles: Vehicle[];
+    orders: OperationOrder[];
+  } | undefined> {
+    const driver = await this.getUser(id);
+    if (!driver) return undefined;
+
+    const vehicles = await this.getVehiclesByDriver(id);
+    const orders = await this.getOperationOrdersByDriver(id);
+
+    return {
+      driver,
+      vehicles,
+      orders
+    };
   }
 
   async updateOperationOrder(order: OperationOrder): Promise<OperationOrder> {

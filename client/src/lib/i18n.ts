@@ -44,32 +44,30 @@ const resources = {
         fromCity: "From City",
         toCity: "To City",
         departureTime: "Departure Time",
-        create: "Create Order"
+        create: "Create Order",
+        selectCity: "Select City",
+        passengers: "Passengers",
+        addPassenger: "Add Passenger",
+        removePassenger: "Remove Passenger",
+        nationality: "Nationality",
+        documentReady: "Document Ready",
+        downloadPdf: "Download PDF"
       },
       admin: {
         dashboard: "Admin Dashboard",
         pendingDrivers: "Pending Drivers",
         activeDrivers: "Active Drivers",
         suspendedDrivers: "Suspended Drivers",
-        tripRequests: "Trip Requests",
         approve: "Approve",
         suspend: "Suspend",
         activate: "Activate",
         noDrivers: "No pending drivers",
         noActiveDrivers: "No active drivers",
-        noSuspendedDrivers: "No suspended drivers",
-        noTripRequests: "No pending trip requests",
-        approveTrip: "Approve Trip",
-        rejectTrip: "Reject Trip"
-      },
-      trips: {
-        from: "From",
-        to: "To",
-        status: "Status",
-        date: "Date"
+        noSuspendedDrivers: "No suspended drivers"
       },
       common: {
-        logout: "Logout"
+        logout: "Logout",
+        saving: "Saving..."
       }
     }
   },
@@ -93,6 +91,14 @@ const resources = {
         idNumber: "رقم الهوية",
         licenseNumber: "رقم الرخصة"
       },
+      driver: {
+        profile: "ملف السائق",
+        vehicles: "مركباتي",
+        orders: "أوامر التشغيل",
+        newOrder: "أمر تشغيل جديد",
+        uploadId: "رفع صورة الهوية",
+        uploadLicense: "رفع صورة الرخصة"
+      },
       vehicle: {
         type: "نوع المركبة",
         model: "موديل المركبة",
@@ -107,40 +113,30 @@ const resources = {
         fromCity: "مدينة الانطلاق",
         toCity: "مدينة الوصول",
         departureTime: "وقت المغادرة",
-        create: "إنشاء الطلب"
-      },
-      driver: {
-        profile: "ملف السائق",
-        vehicles: "مركباتي",
-        orders: "أوامر التشغيل",
-        newOrder: "أمر تشغيل جديد",
-        uploadId: "رفع صورة الهوية",
-        uploadLicense: "رفع صورة الرخصة"
+        create: "إنشاء الطلب",
+        selectCity: "اختر المدينة",
+        passengers: "الركاب",
+        addPassenger: "إضافة راكب",
+        removePassenger: "حذف الراكب",
+        nationality: "الجنسية",
+        documentReady: "المستند جاهز",
+        downloadPdf: "تحميل PDF"
       },
       admin: {
         dashboard: "لوحة تحكم المشرف",
         pendingDrivers: "السائقين المعلقين",
         activeDrivers: "السائقين النشطين",
         suspendedDrivers: "السائقين الموقوفين",
-        tripRequests: "طلبات الرحلات",
         approve: "موافقة",
         suspend: "إيقاف",
         activate: "تفعيل",
         noDrivers: "لا يوجد سائقين معلقين",
         noActiveDrivers: "لا يوجد سائقين نشطين",
-        noSuspendedDrivers: "لا يوجد سائقين موقوفين",
-        noTripRequests: "لا يوجد طلبات رحلات معلقة",
-        approveTrip: "الموافقة على الرحلة",
-        rejectTrip: "رفض الرحلة"
-      },
-      trips: {
-        from: "من",
-        to: "إلى",
-        status: "الحالة",
-        date: "التاريخ"
+        noSuspendedDrivers: "لا يوجد سائقين موقوفين"
       },
       common: {
-        logout: "تسجيل الخروج"
+        logout: "تسجيل الخروج",
+        saving: "جاري الحفظ..."
       }
     }
   }

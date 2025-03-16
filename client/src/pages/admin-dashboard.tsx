@@ -27,38 +27,23 @@ export default function AdminDashboard() {
     queryKey: ["/api/admin/suspended-drivers"],
   });
 
-  const { data: tripRequests } = useQuery<any[]>({
-    queryKey: ["/api/admin/trip-requests"],
-  });
-
   // Driver management functions
   const approveDriver = async (driverId: number) => {
-    await apiRequest("POST", `/api/admin/approve-driver/${driverId}`);
+    await apiRequest("POST", `/api/admin/drivers/${driverId}/status`, { status: 'active' });
     queryClient.invalidateQueries({ queryKey: ["/api/admin/pending-drivers"] });
     queryClient.invalidateQueries({ queryKey: ["/api/admin/active-drivers"] });
   };
 
   const suspendDriver = async (driverId: number) => {
-    await apiRequest("POST", `/api/admin/suspend-driver/${driverId}`);
+    await apiRequest("POST", `/api/admin/drivers/${driverId}/status`, { status: 'suspended' });
     queryClient.invalidateQueries({ queryKey: ["/api/admin/active-drivers"] });
     queryClient.invalidateQueries({ queryKey: ["/api/admin/suspended-drivers"] });
   };
 
   const activateDriver = async (driverId: number) => {
-    await apiRequest("POST", `/api/admin/activate-driver/${driverId}`);
+    await apiRequest("POST", `/api/admin/drivers/${driverId}/status`, { status: 'active' });
     queryClient.invalidateQueries({ queryKey: ["/api/admin/suspended-drivers"] });
     queryClient.invalidateQueries({ queryKey: ["/api/admin/active-drivers"] });
-  };
-
-  // Trip management functions
-  const approveTripRequest = async (tripId: number) => {
-    await apiRequest("POST", `/api/admin/approve-trip/${tripId}`);
-    queryClient.invalidateQueries({ queryKey: ["/api/admin/trip-requests"] });
-  };
-
-  const rejectTripRequest = async (tripId: number) => {
-    await apiRequest("POST", `/api/admin/reject-trip/${tripId}`);
-    queryClient.invalidateQueries({ queryKey: ["/api/admin/trip-requests"] });
   };
 
   if (!user || user.role !== "admin") return null;
@@ -106,12 +91,6 @@ export default function AdminDashboard() {
             </TabsTrigger>
             <TabsTrigger value="active">{t('admin.activeDrivers')}</TabsTrigger>
             <TabsTrigger value="suspended">{t('admin.suspendedDrivers')}</TabsTrigger>
-            <TabsTrigger value="trips">
-              {t('admin.tripRequests')}
-              {tripRequests?.length ? (
-                <Badge variant="destructive" className="ml-2">{tripRequests.length}</Badge>
-              ) : null}
-            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="pending">
@@ -169,44 +148,6 @@ export default function AdminDashboard() {
                         {t('admin.activate')}
                       </Button>
                     )))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="trips">
-            <Card>
-              <CardContent className="p-6">
-                <h2 className="text-xl font-semibold mb-4">{t('admin.tripRequests')}</h2>
-                {tripRequests?.length === 0 ? (
-                  <p className="text-muted-foreground text-center py-4">{t('admin.noTripRequests')}</p>
-                ) : (
-                  <div className="space-y-4">
-                    {tripRequests?.map((trip) => (
-                      <div key={trip.id} className="flex items-center justify-between p-4 border rounded-lg">
-                        <div>
-                          <p className="font-medium">{trip.driver.fullName}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {t('trips.from')}: {trip.origin}
-                          </p>
-                          <p className="text-sm text-muted-foreground">
-                            {t('trips.to')}: {trip.destination}
-                          </p>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button onClick={() => approveTripRequest(trip.id)}>
-                            {t('admin.approveTrip')}
-                          </Button>
-                          <Button 
-                            variant="destructive" 
-                            onClick={() => rejectTripRequest(trip.id)}
-                          >
-                            {t('admin.rejectTrip')}
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
                   </div>
                 )}
               </CardContent>

@@ -14,9 +14,7 @@ const upload = multer({
     fileSize: 10 * 1024 * 1024, // 10MB limit
   },
   fileFilter: (_req, file, cb) => {
-    // Allow a wide range of document and image formats
     const allowedTypes = [
-      // Images
       'image/jpeg',
       'image/png',
       'image/gif',
@@ -27,7 +25,6 @@ const upload = multer({
       'image/tiff',
       'image/bmp',
       'image/x-icon',
-      // Documents
       'application/pdf',
       'application/msword',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
@@ -48,13 +45,13 @@ const upload = multer({
 export async function registerRoutes(app: Express): Promise<Server> {
   setupAuth(app);
 
-  // Document upload route with error handling
+  // Document upload route
   app.post("/api/documents/upload", upload.single('document'), async (req, res) => {
     try {
       if (!req.user) return res.sendStatus(401);
       if (!req.file) {
         return res.status(400).json({ 
-          message: "No file uploaded or file type not supported. Please upload a valid image or document." 
+          message: "No file uploaded or file type not supported" 
         });
       }
 
@@ -73,13 +70,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.updateUser(user);
       res.json(user);
     } catch (error: any) {
-      res.status(400).json({ 
-        message: error.message || "Error uploading document" 
-      });
+      res.status(400).json({ message: error.message });
     }
   });
 
-  // Vehicle routes with error handling
+  // Vehicle management routes
   app.post("/api/vehicles", upload.array("photos", 10), async (req, res) => {
     try {
       if (!req.user) return res.sendStatus(401);
@@ -87,7 +82,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const files = req.files as Express.Multer.File[];
       if (!files || files.length === 0) {
         return res.status(400).json({ 
-          message: "No files uploaded or file types not supported. Please upload valid images." 
+          message: "No files uploaded or file types not supported" 
         });
       }
 
@@ -104,15 +99,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ...parsedData,
         driverId: req.user.id,
         photoUrls: files.map(f => f.path),
-        registrationUrl: ""
+        registrationUrl: "",
+        isActive: true,
+        createdAt: new Date()
       });
 
       res.status(201).json(vehicle);
     } catch (error: any) {
       console.error('Vehicle creation error:', error);
-      res.status(400).json({ 
-        message: error.message || "Error creating vehicle" 
-      });
+      res.status(400).json({ message: error.message });
     }
   });
 
@@ -122,7 +117,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(vehicles);
   });
 
-  // Update the operation order creation route to handle passengers
+  app.patch("/api/vehicles/:id/status", async (req, res) => {
+    try {
+      if (!req.user) return res.sendStatus(401);
+      const vehicle = await storage.updateVehicleStatus(
+        parseInt(req.params.id),
+        req.user.id,
+        req.body.isActive
+      );
+      if (!vehicle) return res.sendStatus(404);
+      res.json(vehicle);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  // Operation orders routes
   app.post("/api/operation-orders", async (req, res) => {
     try {
       if (!req.user) return res.sendStatus(401);
@@ -132,39 +142,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
         departureTime: new Date(req.body.departureTime).toISOString()
       });
 
-      // Create the order with passengers
       const order = await storage.createOperationOrder(
         {
           fromCity: orderData.fromCity,
           toCity: orderData.toCity,
           departureTime: new Date(orderData.departureTime),
           driverId: req.user.id,
+          vehicleId: orderData.vehicleId,
           qrCode: "",
           pdfUrl: "",
+          status: "active",
           createdAt: new Date()
         },
         orderData.passengers
       );
 
       try {
-        // Generate PDF with QR code
         const pdfFileName = await generateOrderPDF(order, req.user);
-
-        // Update order with PDF URL
         order.pdfUrl = pdfFileName;
         await storage.updateOperationOrder(order);
-
         res.status(201).json(order);
       } catch (pdfError) {
         console.error('PDF generation error:', pdfError);
-        // Still return the order even if PDF generation fails
         res.status(201).json(order);
       }
     } catch (error: any) {
       console.error('Operation order creation error:', error);
-      res.status(400).json({ 
-        message: error.message || "Error creating operation order" 
-      });
+      res.status(400).json({ message: error.message });
     }
   });
 
@@ -174,7 +178,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(orders);
   });
 
-  // Get passengers for an order
   app.get("/api/operation-orders/:id/passengers", async (req, res) => {
     if (!req.user) return res.sendStatus(401);
     const passengers = await storage.getPassengersByOrder(parseInt(req.params.id));
@@ -188,11 +191,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(drivers);
   });
 
-  app.post("/api/admin/approve-driver/:id", async (req, res) => {
+  app.get("/api/admin/active-drivers", async (req, res) => {
     if (!req.user || req.user.role !== "admin") return res.sendStatus(403);
-    const user = await storage.approveDriver(parseInt(req.params.id));
+    const drivers = await storage.getActiveDrivers();
+    res.json(drivers);
+  });
+
+  app.get("/api/admin/suspended-drivers", async (req, res) => {
+    if (!req.user || req.user.role !== "admin") return res.sendStatus(403);
+    const drivers = await storage.getSuspendedDrivers();
+    res.json(drivers);
+  });
+
+  app.post("/api/admin/drivers/:id/status", async (req, res) => {
+    if (!req.user || req.user.role !== "admin") return res.sendStatus(403);
+    const { status } = req.body;
+    if (!["pending", "active", "suspended"].includes(status)) {
+      return res.status(400).json({ message: "Invalid status" });
+    }
+    const user = await storage.updateDriverStatus(parseInt(req.params.id), status);
     if (!user) return res.sendStatus(404);
     res.json(user);
+  });
+
+  app.get("/api/admin/driver/:id/details", async (req, res) => {
+    if (!req.user || req.user.role !== "admin") return res.sendStatus(403);
+    const details = await storage.getDriverDetails(parseInt(req.params.id));
+    if (!details) return res.sendStatus(404);
+    res.json(details);
   });
 
   const httpServer = createServer(app);
