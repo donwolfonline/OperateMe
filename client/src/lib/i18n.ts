@@ -4,6 +4,23 @@ import { initReactI18next } from 'react-i18next';
 const resources = {
   en: {
     translation: {
+      notifications: {
+        success: "Success",
+        error: "Error",
+        warning: "Warning",
+        info: "Information",
+        vehicleRegistered: "Vehicle registration successful",
+        vehicleUpdated: "Vehicle updated successfully",
+        noMoreVehicles: "No additional vehicles can be registered",
+        orderCreated: "Operation order created successfully",
+        documentGenerated: "Document generated successfully",
+        uploadSuccess: "File uploaded successfully",
+        uploadError: "Error uploading file",
+        invalidFile: "Invalid file type",
+        maxFileSize: "File size exceeds limit",
+        savingChanges: "Saving changes...",
+        changesSaved: "Changes saved successfully"
+      },
       landing: {
         title: "Road Lightning Transport",
         subtitle: "Professional Transportation Services",
@@ -96,6 +113,23 @@ const resources = {
   },
   ar: {
     translation: {
+      notifications: {
+        success: "نجاح",
+        error: "خطأ",
+        warning: "تحذير",
+        info: "معلومات",
+        vehicleRegistered: "تم تسجيل المركبة بنجاح",
+        vehicleUpdated: "تم تحديث المركبة بنجاح",
+        noMoreVehicles: "لا يمكن تسجيل مركبات إضافية",
+        orderCreated: "تم إنشاء أمر التشغيل بنجاح",
+        documentGenerated: "تم إنشاء المستند بنجاح",
+        uploadSuccess: "تم رفع الملف بنجاح",
+        uploadError: "خطأ في رفع الملف",
+        invalidFile: "نوع الملف غير صالح",
+        maxFileSize: "حجم الملف يتجاوز الحد المسموح",
+        savingChanges: "جاري حفظ التغييرات...",
+        changesSaved: "تم حفظ التغييرات بنجاح"
+      },
       landing: {
         title: "صاعقة الطريق للنقل",
         subtitle: "خدمات نقل احترافية",
@@ -188,6 +222,23 @@ const resources = {
   },
   ur: {
     translation: {
+      notifications: {
+        success: "کامیابی",
+        error: "خطا",
+        warning: "انتباہ",
+        info: "معلومات",
+        vehicleRegistered: "گاڑی کی رجسٹریشن کامیاب ہو گئی",
+        vehicleUpdated: "گاڑی کی معلومات کامیابی سے اپ ڈیٹ ہو گئیں",
+        noMoreVehicles: "مزید گاڑیاں رجسٹر نہیں کی جا سکتیں",
+        orderCreated: "آپریشن آرڈر کامیابی سے بنایا گیا",
+        documentGenerated: "دستاویز کامیابی سے تیار ہو گئی",
+        uploadSuccess: "فائل کامیابی سے اپ لوڈ ہو گئی",
+        uploadError: "فائل اپ لوڈ کرنے میں خطا",
+        invalidFile: "غلط فائل کی قسم",
+        maxFileSize: "فائل کا سائز حد سے زیادہ ہے",
+        savingChanges: "تبدیلیاں محفوظ کی جا رہی ہیں...",
+        changesSaved: "تبدیلیاں کامیابی سے محفوظ ہو گئیں"
+      },
       landing: {
         title: "روڈ لائٹننگ ٹرانسپورٹ",
         subtitle: "پیشہ ورانہ ٹرانسپورٹ سروسز",
