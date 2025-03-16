@@ -65,7 +65,9 @@ export const insertOperationOrderSchema = createInsertSchema(operationOrders)
   })
   .extend({
     departureTime: z.string()
-      .datetime({ offset: true })
+      .refine((val) => !isNaN(Date.parse(val)), {
+        message: "Invalid date format"
+      })
       .transform((val) => new Date(val))
   });
 

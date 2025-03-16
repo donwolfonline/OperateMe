@@ -39,7 +39,7 @@ export default function OperationOrder() {
       passengerPhone: '',
       fromCity: '',
       toCity: '',
-      departureTime: new Date().toISOString().slice(0, 16)
+      departureTime: new Date().toISOString().slice(0, 16) // Format: YYYY-MM-DDTHH:mm
     }
   });
 
@@ -48,7 +48,13 @@ export default function OperationOrder() {
       setIsSubmitting(true);
       setPdfUrl(null);
 
-      const response = await apiRequest("POST", "/api/operation-orders", data);
+      // Ensure proper date formatting
+      const formattedData = {
+        ...data,
+        departureTime: new Date(data.departureTime).toISOString()
+      };
+
+      const response = await apiRequest("POST", "/api/operation-orders", formattedData);
       const order = await response.json();
 
       if (order.pdfUrl) {
