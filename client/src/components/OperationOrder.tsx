@@ -70,16 +70,18 @@ export default function OperationOrder() {
         setPdfUrl(order.pdfUrl);
       }
 
+      // Updated to use the correct notification translation keys
       toast({
-        title: t('order.success'),
-        description: t('order.orderCreated'),
+        title: t('notifications.orderSuccess'),
+        description: t('notifications.orderCreated'),
       });
 
       queryClient.invalidateQueries({ queryKey: ["/api/operation-orders/driver"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/driver/orders"] });
     } catch (error: any) {
       toast({
-        title: t('common.error'),
-        description: error.message || t('order.errorCreating'),
+        title: t('notifications.error'),
+        description: error.message || t('common.error'),
         variant: "destructive",
       });
     } finally {
