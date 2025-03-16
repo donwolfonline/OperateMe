@@ -19,8 +19,8 @@ function Router() {
       <Route path="/auth" component={DriverLoginPage} />
       <Route path="/admin" component={AdminLoginPage} />
       <Route path="/register" component={RegisterPage} />
-      <ProtectedRoute path="/driver" component={DriverDashboard} />
-      <ProtectedRoute path="/admin-dashboard" component={AdminDashboard} />
+      <ProtectedRoute path="/driver" component={DriverDashboard} requiredRole="driver" />
+      <ProtectedRoute path="/admin-dashboard" component={AdminDashboard} requiredRole="admin" />
       <Route component={NotFound} />
     </Switch>
   );
