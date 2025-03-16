@@ -1,6 +1,5 @@
 import { useTranslation } from "react-i18next";
 import { useForm, useFieldArray } from "react-hook-form";
-import { useQuery } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertOperationOrderSchema } from "@shared/schema";
 import { Card, CardContent } from "@/components/ui/card";
@@ -33,18 +32,12 @@ export default function OperationOrder() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
 
-  // Get user's vehicles
-  const { data: vehicles } = useQuery({
-    queryKey: ["/api/vehicles/driver"],
-  });
-
   const form = useForm({
     resolver: zodResolver(insertOperationOrderSchema),
     defaultValues: {
       fromCity: '',
       toCity: '',
       departureTime: new Date().toISOString().slice(0, 16),
-      vehicleId: '',
       passengers: [{
         name: '',
         idNumber: '',
@@ -61,21 +54,11 @@ export default function OperationOrder() {
 
   const onSubmit = async (data: any) => {
     try {
-      if (!data.vehicleId) {
-        toast({
-          title: "Error",
-          description: "Please select a vehicle",
-          variant: "destructive",
-        });
-        return;
-      }
-
       setIsSubmitting(true);
       setPdfUrl(null);
 
       const formattedData = {
         ...data,
-        vehicleId: parseInt(data.vehicleId),
         departureTime: new Date(data.departureTime).toISOString()
       };
 
@@ -111,34 +94,6 @@ export default function OperationOrder() {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               {/* Trip Details */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Vehicle Selection */}
-                <FormField
-                  control={form.control}
-                  name="vehicleId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-right">المركبة / Vehicle</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="اختر المركبة / Select Vehicle" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {vehicles?.map((vehicle: any) => (
-                            <SelectItem key={vehicle.id} value={String(vehicle.id)}>
-                              {vehicle.model} - {vehicle.plateNumber}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
 
                 <FormField
                   control={form.control}
