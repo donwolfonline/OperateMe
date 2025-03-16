@@ -17,8 +17,8 @@ logger = logging.getLogger(__name__)
 def generate_qr_code(pdf_filename):
     """Generate QR code and return as base64 string"""
     try:
-        # Get base URL from environment or use default
-        base_url = os.getenv('BASE_URL', 'https://vehicle-management.replit.app')
+        # Use localhost with port 5000 since that's our running server
+        base_url = 'http://0.0.0.0:5000'
 
         # Create a full URL to the PDF
         pdf_url = f"{base_url}/uploads/{pdf_filename}"
