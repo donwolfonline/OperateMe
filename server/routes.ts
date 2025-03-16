@@ -6,18 +6,53 @@ import multer from "multer";
 import path from "path";
 import { insertVehicleSchema, insertOperationOrderSchema } from "@shared/schema";
 
-const upload = multer({ dest: 'uploads/' });
+// Configure multer for file uploads
+const upload = multer({ 
+  dest: 'uploads/',
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit
+  },
+  fileFilter: (_req, file, cb) => {
+    const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf'];
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(null, false);
+    }
+  }
+});
 
 export async function registerRoutes(app: Express): Promise<Server> {
   setupAuth(app);
 
-  // Vehicle routes
-  app.post("/api/vehicles", upload.array("photos"), async (req, res) => {
+  // Document upload route
+  app.post("/api/documents/upload", upload.single('document'), async (req, res) => {
     if (!req.user) return res.sendStatus(401);
-    
-    const vehicleData = insertVehicleSchema.parse(req.body);
+    if (!req.file) return res.status(400).json({ message: "No file uploaded" });
+
+    const documentType = req.body.type;
+    const filePath = req.file.path;
+
+    const user = await storage.getUser(req.user.id);
+    if (!user) return res.sendStatus(404);
+
+    if (documentType === 'id') {
+      user.idDocumentUrl = filePath;
+    } else if (documentType === 'license') {
+      user.licenseDocumentUrl = filePath;
+    }
+
+    await storage.updateUser(user);
+    res.json(user);
+  });
+
+  // Vehicle routes
+  app.post("/api/vehicles", upload.array("photos", 5), async (req, res) => {
+    if (!req.user) return res.sendStatus(401);
+
     const files = req.files as Express.Multer.File[];
-    
+    const vehicleData = insertVehicleSchema.parse(req.body);
+
     const vehicle = await storage.createVehicle({
       ...vehicleData,
       driverId: req.user.id,
@@ -37,7 +72,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Operation order routes
   app.post("/api/operation-orders", async (req, res) => {
     if (!req.user) return res.sendStatus(401);
-    
+
     const orderData = insertOperationOrderSchema.parse(req.body);
     const order = await storage.createOperationOrder({
       ...orderData,

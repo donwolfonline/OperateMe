@@ -14,6 +14,7 @@ export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  updateUser(user: User): Promise<User>;
   getVehicle(id: number): Promise<Vehicle | undefined>;
   getVehiclesByDriver(driverId: number): Promise<Vehicle[]>;
   createVehicle(vehicle: Omit<Vehicle, "id">): Promise<Vehicle>;
@@ -85,6 +86,11 @@ export class MemStorage implements IStorage {
 
     // Create default users
     this.createDefaultUsers();
+  }
+
+  async updateUser(user: User): Promise<User> {
+    this.users.set(user.id, user);
+    return user;
   }
 
   async getUser(id: number): Promise<User | undefined> {
