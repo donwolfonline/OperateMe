@@ -3,57 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <style>
+        @font-face {
+            font-family: 'Madani Arabic';
+            src: url('https://fonts.gstatic.com/s/madaniarabic/v2/web-fonts/madani-arabic-v2.woff2') format('woff2');
+        }
+
         @page {
             size: A4;
-            margin: 2cm;
+            margin: 1.5cm;
         }
+
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Madani Arabic', Arial, sans-serif;
             direction: rtl;
             padding: 0;
             margin: 0;
+            font-size: 11pt;
+            line-height: 1.4;
         }
+
         .title {
             text-align: center;
-            font-size: 24px;
+            font-size: 18pt;
             font-weight: bold;
-            margin-bottom: 30px;
-        }
-        .agreement {
-            margin-bottom: 40px;
-            line-height: 1.6;
-        }
-        .info-box {
-            border: 1px solid #000;
             margin-bottom: 20px;
         }
+
+        .agreement {
+            margin-bottom: 20px;
+            text-align: justify;
+        }
+
+        .info-box {
+            border: 1px solid #000;
+            margin-bottom: 15px;
+        }
+
         .info-box-header {
             background-color: #f0f0f0;
-            padding: 8px 15px;
+            padding: 6px 12px;
             font-weight: bold;
             border-bottom: 1px solid #000;
+            font-size: 10pt;
         }
+
         .info-box-content {
-            padding: 15px;
+            padding: 10px 12px;
         }
+
         .info-box-content p {
-            margin: 5px 0;
+            margin: 3px 0;
+            font-size: 10pt;
         }
+
         .qr-code {
-            margin-top: 20px;
-            width: 100px;
-            height: 100px;
+            margin-top: 15px;
+            width: 80px;
+            height: 80px;
         }
     </style>
 </head>
 <body>
     <div class="title">عقد نقل على الطرق البرية</div>
-    
+
     <div class="agreement">
-        <p>تم ابرام هذا العقد بين المتعاقدين بناء على المادة (39) التاسعة و الثلاثون من اللائحة المنظمة لنشاط النقل المتخصص و تأجير و توجيه الحافلات</p>
-        <p>و بناء على الفقرة (1) من المادة (39) و التي تنص على ان يجب على الناقل ابرام عقد نقل مع الاطراف المحددين في المادة (40) قبل تنفيذ عمليات النقل على الطرق البرية</p>
+        <p>التاريخ: {{ date }}</p>
+        <p>تم ابرام هذا العقد بين المتعاقدين بناء على المادة (39) التاسعة و الثلاثون من اللائحة المنظمة لنشاط النقل المتخصص و تأجير و توجيه الحافلات و بناء على الفقرة (1) من المادة (39) و التي تنص على ان يجب على الناقل ابرام عقد نقل مع الاطراف المحددين في المادة (40) قبل تنفيذ عمليات النقل على الطرق البرية و بما يخالف احكام هذه الائحة التي تحددها هيئة النقل و بناء على ما سبق تم ابرام عقد النقل بين الاطراف الاتية :</p>
         <p>الطرف الاول : شركة صاعقة الطريق للنقل البري (شخص واحد)</p>
         <p>الطرف الثاني : {{ main_passenger }}</p>
+        <p>اتفق الطرفان على أن ينفذ الطرف اول عملية النقل للطرف الثاني مع مرافقيه و ذويهم من الموقع المحدد مسبقا مع الطرف الثاني و توصيلهم الى الجهه المحدده بالعقد ۔</p>
+        <p>النقل من : {{ from_city }}</p>
+        <p>الوصول الى : {{ to_city }}</p>
+        <p>في حالة الغاء التعاقد الى سبب شخصى او أسباب أخرى تتعلق في الحجوزات او الانظمة تكون سياسة إلالغاء و الاستبدال حسب نظام وزارة التجارة السعودى في حالة الحجز و تم الإلغاء قبل موعد الرحله بأكثر من 24 ساعه يتم استرداد المبلغ كامل .</p>
+        <p>وفي حالة طلب المبلغ كامل الطرف الثاني الحجز من خلال الموقع الالكتروني لشركة يعتبر هذا الحجز و موافقته على الشروط و الحكام بالموقع الالكتروني هو موافقة على هذا العقد لتنفيذ عملية النقل المتفق عليها مع الطرف الاول بواسطة حافلات الشركة المرخصه و المتوافقه مع الاشتراطات المقررة من هيئة النقل ۔</p>
     </div>
 
     <div class="info-box">
