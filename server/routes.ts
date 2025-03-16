@@ -221,6 +221,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(details);
   });
 
+  // Add these new routes to the existing admin routes section
+  app.get("/api/admin/all-orders", async (req, res) => {
+    if (!req.user || req.user.role !== "admin") return res.sendStatus(403);
+    const orders = await storage.getAllOperationOrders();
+    res.json(orders);
+  });
+
+  app.get("/api/admin/driver/:id/orders", async (req, res) => {
+    if (!req.user || req.user.role !== "admin") return res.sendStatus(403);
+    const orders = await storage.getOperationOrdersByDriver(parseInt(req.params.id));
+
+    // Get passengers for each order
+    const ordersWithPassengers = await Promise.all(orders.map(async (order) => {
+      const passengers = await storage.getPassengersByOrder(order.id);
+      return { ...order, passengers };
+    }));
+
+    res.json(ordersWithPassengers);
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

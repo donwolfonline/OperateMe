@@ -63,7 +63,10 @@ const resources = {
         activate: "Activate",
         noDrivers: "No pending drivers",
         noActiveDrivers: "No active drivers",
-        noSuspendedDrivers: "No suspended drivers"
+        noSuspendedDrivers: "No suspended drivers",
+        allOrders: "All Orders",
+        noOrders: "No orders found",
+        orders: "Orders"
       },
       common: {
         logout: "Logout",
@@ -132,7 +135,10 @@ const resources = {
         activate: "تفعيل",
         noDrivers: "لا يوجد سائقين معلقين",
         noActiveDrivers: "لا يوجد سائقين نشطين",
-        noSuspendedDrivers: "لا يوجد سائقين موقوفين"
+        noSuspendedDrivers: "لا يوجد سائقين موقوفين",
+        allOrders: "جميع الطلبات",
+        noOrders: "لا يوجد طلبات",
+        orders: "الطلبات"
       },
       common: {
         logout: "تسجيل الخروج",

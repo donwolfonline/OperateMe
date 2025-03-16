@@ -33,6 +33,7 @@ export interface IStorage {
   } | undefined>;
   updateOperationOrder(order: OperationOrder): Promise<OperationOrder>;
   getPassengersByOrder(orderId: number): Promise<Passenger[]>;
+  getAllOperationOrders(): Promise<OperationOrder[]>;
 }
 
 export class MemStorage implements IStorage {
@@ -250,6 +251,10 @@ export class MemStorage implements IStorage {
     return Array.from(this.passengers.values()).filter(
       (passenger) => passenger.orderId === orderId
     );
+  }
+
+  async getAllOperationOrders(): Promise<OperationOrder[]> {
+    return Array.from(this.operationOrders.values());
   }
 }
 

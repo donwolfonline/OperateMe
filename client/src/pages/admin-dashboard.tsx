@@ -5,10 +5,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { User } from "@shared/schema";
+import { User, OperationOrder } from "@shared/schema";
 import LanguageToggle from "@/components/LanguageToggle";
 import HomeButton from "@/components/HomeButton";
 import { Badge } from "@/components/ui/badge";
+import { FileText } from "lucide-react";
 
 export default function AdminDashboard() {
   const { t } = useTranslation();
@@ -25,6 +26,11 @@ export default function AdminDashboard() {
 
   const { data: suspendedDrivers } = useQuery<User[]>({
     queryKey: ["/api/admin/suspended-drivers"],
+  });
+
+  // Query for orders
+  const { data: allOrders } = useQuery<(OperationOrder & { passengers: any[] })[]>({
+    queryKey: ["/api/admin/all-orders"],
   });
 
   // Driver management functions
@@ -65,6 +71,54 @@ export default function AdminDashboard() {
     </div>
   );
 
+  const renderOrderCard = (order: OperationOrder & { passengers: any[] }) => (
+    <Card key={order.id} className="mb-4">
+      <CardContent className="p-4">
+        <div className="flex justify-between items-start mb-4">
+          <div>
+            <h3 className="font-semibold">
+              {t('order.fromCity')}: {order.fromCity} → {order.toCity}
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              {new Date(order.departureTime).toLocaleString()}
+            </p>
+          </div>
+          {order.pdfUrl && (
+            <a
+              href={`/uploads/${order.pdfUrl}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center text-sm text-primary hover:underline"
+            >
+              <FileText className="h-4 w-4 mr-1" />
+              {t('order.downloadPdf')}
+            </a>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <h4 className="font-medium">{t('order.passengers')}:</h4>
+          {order.passengers?.map((passenger, index) => (
+            <div key={index} className="pl-4 border-l-2 border-muted">
+              <p className="text-sm">{passenger.name}</p>
+              <p className="text-xs text-muted-foreground">
+                {t('order.idNumber')}: {passenger.idNumber}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {t('order.nationality')}: {passenger.nationality}
+              </p>
+              {passenger.phone && (
+                <p className="text-xs text-muted-foreground">
+                  {t('order.passengerPhone')}: {passenger.phone}
+                </p>
+              )}
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
@@ -91,6 +145,7 @@ export default function AdminDashboard() {
             </TabsTrigger>
             <TabsTrigger value="active">{t('admin.activeDrivers')}</TabsTrigger>
             <TabsTrigger value="suspended">{t('admin.suspendedDrivers')}</TabsTrigger>
+            <TabsTrigger value="orders">{t('admin.orders')}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="pending">
@@ -148,6 +203,21 @@ export default function AdminDashboard() {
                         {t('admin.activate')}
                       </Button>
                     )))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="orders">
+            <Card>
+              <CardContent className="p-6">
+                <h2 className="text-xl font-semibold mb-4">{t('admin.allOrders')}</h2>
+                {allOrders?.length === 0 ? (
+                  <p className="text-muted-foreground text-center py-4">{t('admin.noOrders')}</p>
+                ) : (
+                  <div className="space-y-4">
+                    {allOrders?.map(renderOrderCard)}
                   </div>
                 )}
               </CardContent>
