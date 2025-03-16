@@ -7,7 +7,7 @@ import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 
@@ -37,25 +37,24 @@ export default function OperationOrder() {
       passengerPhone: '',
       fromCity: '',
       toCity: '',
-      departureTime: new Date().toISOString().slice(0, 16)
+      departureTime: new Date().toISOString().slice(0, 16) // Format for datetime-local input
     }
   });
 
   const onSubmit = async (data: any) => {
     try {
       setIsSubmitting(true);
-      // Format the date properly
-      const formattedData = {
-        ...data,
-        departureTime: new Date(data.departureTime).toISOString()
-      };
 
-      await apiRequest("POST", "/api/operation-orders", formattedData);
+      // The date will be automatically transformed by the schema validation
+      await apiRequest("POST", "/api/operation-orders", data);
 
       toast({
         title: "Success",
         description: t('order.createSuccess'),
       });
+
+      // Invalidate and refetch orders query
+      queryClient.invalidateQueries({ queryKey: ["/api/operation-orders/driver"] });
 
       // Reset form after successful submission
       form.reset();
@@ -162,13 +161,12 @@ export default function OperationOrder() {
             <FormField
               control={form.control}
               name="departureTime"
-              render={({ field: { onChange, value, ...field } }) => (
+              render={({ field }) => (
                 <FormItem>
                   <FormLabel>{t('order.departureTime')}</FormLabel>
                   <FormControl>
                     <Input 
-                      type="datetime-local" 
-                      onChange={(e) => onChange(e.target.value)}
+                      type="datetime-local"
                       min={new Date().toISOString().slice(0, 16)}
                       {...field}
                     />

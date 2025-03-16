@@ -54,13 +54,21 @@ export const insertVehicleSchema = createInsertSchema(vehicles).pick({
   plateNumber: true,
 });
 
-export const insertOperationOrderSchema = createInsertSchema(operationOrders).pick({
-  passengerName: true,
-  passengerPhone: true,
-  fromCity: true,
-  toCity: true,
-  departureTime: true,
-});
+export const insertOperationOrderSchema = createInsertSchema(operationOrders)
+  .pick({
+    passengerName: true,
+    passengerPhone: true,
+    fromCity: true,
+    toCity: true,
+    departureTime: true,
+  })
+  .extend({
+    departureTime: z.string()
+      .refine((val) => !isNaN(Date.parse(val)), {
+        message: "Invalid date format"
+      })
+      .transform((val) => new Date(val))
+  });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
