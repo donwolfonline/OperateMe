@@ -24,6 +24,7 @@ export default function VehicleForm() {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [photoPreview, setPhotoPreview] = useState<string[]>([]);
+  const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
 
   const form = useForm({
     resolver: zodResolver(insertVehicleSchema),
@@ -31,8 +32,7 @@ export default function VehicleForm() {
       type: '',
       model: '',
       year: '',
-      plateNumber: '',
-      photos: undefined
+      plateNumber: ''
     }
   });
 
@@ -48,8 +48,8 @@ export default function VehicleForm() {
       formData.append('plateNumber', data.plateNumber);
 
       // Handle multiple files
-      if (data.photos) {
-        Array.from(data.photos).forEach((file: File) => {
+      if (selectedFiles) {
+        Array.from(selectedFiles).forEach((file) => {
           formData.append('photos', file);
         });
       }
@@ -67,6 +67,7 @@ export default function VehicleForm() {
       // Reset form and preview after successful submission
       form.reset();
       setPhotoPreview([]);
+      setSelectedFiles(null);
     } catch (error: any) {
       toast({
         title: "Error",
@@ -80,6 +81,8 @@ export default function VehicleForm() {
 
   const handleFileChange = (files: FileList | null) => {
     if (files) {
+      setSelectedFiles(files);
+      // Create preview URLs
       const previews = Array.from(files).map(file => URL.createObjectURL(file));
       setPhotoPreview(previews);
     }
@@ -160,40 +163,30 @@ export default function VehicleForm() {
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="photos"
-              render={({ field: { onChange, ...field } }) => (
-                <FormItem>
-                  <FormLabel>{t('vehicle.photos')}</FormLabel>
-                  <FormControl>
-                    <Input 
-                      type="file" 
-                      accept="image/*"
-                      multiple
-                      onChange={(e) => {
-                        onChange(e.target.files);
-                        handleFileChange(e.target.files);
-                      }}
-                      {...field}
+            <FormItem>
+              <FormLabel>{t('vehicle.photos')}</FormLabel>
+              <FormControl>
+                <Input 
+                  type="file" 
+                  accept="image/*"
+                  multiple
+                  onChange={(e) => handleFileChange(e.target.files)}
+                />
+              </FormControl>
+              <FormMessage />
+              {photoPreview.length > 0 && (
+                <div className="grid grid-cols-2 gap-2 mt-2">
+                  {photoPreview.map((url, index) => (
+                    <img 
+                      key={index}
+                      src={url}
+                      alt={`Preview ${index + 1}`}
+                      className="w-full h-40 object-cover rounded-lg"
                     />
-                  </FormControl>
-                  <FormMessage />
-                  {photoPreview.length > 0 && (
-                    <div className="grid grid-cols-2 gap-2 mt-2">
-                      {photoPreview.map((url, index) => (
-                        <img 
-                          key={index}
-                          src={url}
-                          alt={`Preview ${index + 1}`}
-                          className="w-full h-40 object-cover rounded-lg"
-                        />
-                      ))}
-                    </div>
-                  )}
-                </FormItem>
+                  ))}
+                </div>
               )}
-            />
+            </FormItem>
 
             <Button 
               type="submit"
