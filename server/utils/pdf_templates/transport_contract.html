@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @page {
+            size: A4;
+            margin: 2cm;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            direction: rtl;
+            padding: 0;
+            margin: 0;
+        }
+        .title {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 30px;
+        }
+        .agreement {
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+        .info-box {
+            border: 1px solid #000;
+            margin-bottom: 20px;
+        }
+        .info-box-header {
+            background-color: #f0f0f0;
+            padding: 8px 15px;
+            font-weight: bold;
+            border-bottom: 1px solid #000;
+        }
+        .info-box-content {
+            padding: 15px;
+        }
+        .info-box-content p {
+            margin: 5px 0;
+        }
+        .qr-code {
+            margin-top: 20px;
+            width: 100px;
+            height: 100px;
+        }
+    </style>
+</head>
+<body>
+    <div class="title">عقد نقل على الطرق البرية</div>
+    
+    <div class="agreement">
+        <p>تم ابرام هذا العقد بين المتعاقدين بناء على المادة (39) التاسعة و الثلاثون من اللائحة المنظمة لنشاط النقل المتخصص و تأجير و توجيه الحافلات</p>
+        <p>و بناء على الفقرة (1) من المادة (39) و التي تنص على ان يجب على الناقل ابرام عقد نقل مع الاطراف المحددين في المادة (40) قبل تنفيذ عمليات النقل على الطرق البرية</p>
+        <p>الطرف الاول : شركة صاعقة الطريق للنقل البري (شخص واحد)</p>
+        <p>الطرف الثاني : {{ main_passenger }}</p>
+    </div>
+
+    <div class="info-box">
+        <div class="info-box-header">معلومات الرحلة / Trip Information</div>
+        <div class="info-box-content">
+            <p>التاريخ / Date: {{ date }}</p>
+            <p>من / From: {{ from_city }}</p>
+            <p>إلى / To: {{ to_city }}</p>
+            <p>نوع التأشيرة / Visa Type: {{ visa_type }}</p>
+            <p>رقم الرحلة / Trip No.: {{ trip_number }}</p>
+        </div>
+    </div>
+
+    <div class="info-box">
+        <div class="info-box-header">معلومات السائق / Driver Information</div>
+        <div class="info-box-content">
+            <p>اسم السائق / Driver Name: {{ driver_name }}</p>
+            <p>رقم الهوية / ID Number: {{ driver_id }}</p>
+            <p>رقم الرخصة / License Number: {{ license_number }}</p>
+        </div>
+    </div>
+
+    <div class="info-box">
+        <div class="info-box-header">معلومات الركاب / Passenger Information</div>
+        <div class="info-box-content">
+            {% for passenger in passengers %}
+            <p>{{ loop.index }}. {{ passenger.name }}</p>
+            <p>رقم الهوية / ID: {{ passenger.id_number }}</p>
+            <p>الجنسية / Nationality: {{ passenger.nationality }}</p>
+            {% if not loop.last %}<br>{% endif %}
+            {% endfor %}
+        </div>
+    </div>
+
+    <img class="qr-code" src="{{ qr_code }}" alt="QR Code">
+</body>
+</html>

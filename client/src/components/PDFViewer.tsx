@@ -1,20 +1,27 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { FileText, Download, RefreshCw } from 'lucide-react';
+import { FileText, Download, RefreshCw, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface PDFViewerProps {
   pdfUrl: string;
   title?: string;
+  onError?: (error: Error) => void;
 }
 
-export function PDFViewer({ pdfUrl, title }: PDFViewerProps) {
+export function PDFViewer({ pdfUrl, title, onError }: PDFViewerProps) {
   const { t } = useTranslation();
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
+
+  useEffect(() => {
+    setIsLoading(true);
+    setHasError(false);
+  }, [pdfUrl]);
 
   const handleDownload = async () => {
     try {
@@ -42,37 +49,64 @@ export function PDFViewer({ pdfUrl, title }: PDFViewerProps) {
   const handleRetry = () => {
     setIsLoading(true);
     setHasError(false);
-    // Force iframe reload
-    const iframe = document.getElementById('pdf-viewer') as HTMLIFrameElement;
-    if (iframe) {
-      iframe.src = iframe.src;
+    setRetryCount(prev => prev + 1);
+  };
+
+  const handleError = () => {
+    setHasError(true);
+    setIsLoading(false);
+    if (onError) {
+      onError(new Error('PDF loading failed'));
     }
+    toast({
+      title: t('pdf.loadError'),
+      description: t('pdf.tryAgain'),
+      variant: "destructive",
+    });
   };
 
   return (
-    <Card className="p-6">
+    <Card className="p-6 bg-background">
       <div className="space-y-4">
-        {title && <h3 className="text-lg font-semibold">{title}</h3>}
-        
+        {title && (
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold">{title}</h3>
+            <Button
+              onClick={handleDownload}
+              variant="outline"
+              size="sm"
+              className="ml-2"
+            >
+              <Download className="mr-2 h-4 w-4" />
+              {t('pdf.download')}
+            </Button>
+          </div>
+        )}
+
         <div className="relative aspect-[16/9] w-full bg-muted rounded-lg overflow-hidden">
           {hasError ? (
-            <div className="absolute inset-0 flex flex-col items-center justify-center space-y-4">
-              <p className="text-destructive">{t('pdf.loadError')}</p>
-              <Button onClick={handleRetry} variant="outline" size="sm">
+            <div className="absolute inset-0 flex flex-col items-center justify-center space-y-4 p-4 text-center">
+              <AlertCircle className="h-8 w-8 text-destructive" />
+              <p className="text-destructive font-medium">
+                {t('pdf.loadError')}
+              </p>
+              <Button 
+                onClick={handleRetry} 
+                variant="outline" 
+                size="sm"
+                className="mt-2"
+              >
                 <RefreshCw className="mr-2 h-4 w-4" />
                 {t('common.retry')}
               </Button>
             </div>
           ) : (
             <iframe
-              id="pdf-viewer"
-              src={`/uploads/${pdfUrl}`}
+              key={`${pdfUrl}-${retryCount}`}
+              src={`/uploads/${pdfUrl}#view=FitH`}
               className="w-full h-full"
               onLoad={() => setIsLoading(false)}
-              onError={() => {
-                setHasError(true);
-                setIsLoading(false);
-              }}
+              onError={handleError}
             />
           )}
 
@@ -81,17 +115,6 @@ export function PDFViewer({ pdfUrl, title }: PDFViewerProps) {
               <RefreshCw className="h-8 w-8 animate-spin text-primary" />
             </div>
           )}
-        </div>
-
-        <div className="flex justify-end space-x-2">
-          <Button
-            onClick={handleDownload}
-            variant="outline"
-            className="w-full sm:w-auto"
-          >
-            <Download className="mr-2 h-4 w-4" />
-            {t('pdf.download')}
-          </Button>
         </div>
       </div>
     </Card>
