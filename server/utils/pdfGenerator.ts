@@ -39,7 +39,7 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
   doc.image(qrCodeImage, { width: 100, align: 'right' });
   doc.moveDown();
 
-  // Add trip details section
+  // Add trip details
   doc.fontSize(16)
     .fillColor('#1e40af')
     .text('Trip Details:', { underline: true });
@@ -49,10 +49,10 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
     .text(`Passenger Phone: ${order.passengerPhone}`)
     .text(`From: ${order.fromCity}`)
     .text(`To: ${order.toCity}`)
-    .text(`Departure Time: ${order.departureTime.toLocaleString('ar-SA')}`)
+    .text(`Departure Time: ${order.departureTime.toLocaleDateString('ar-SA')}`)
     .moveDown();
 
-  // Add driver details section
+  // Add driver details
   doc.fontSize(16)
     .fillColor('#1e40af')
     .text('Driver Details:', { underline: true });
