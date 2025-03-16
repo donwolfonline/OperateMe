@@ -4,14 +4,16 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { FileText, Download, RefreshCw, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { QRCodePreview } from './QRCodePreview';
 
 interface PDFViewerProps {
   pdfUrl: string;
   title?: string;
+  qrData?: string;
   onError?: (error: Error) => void;
 }
 
-export function PDFViewer({ pdfUrl, title, onError }: PDFViewerProps) {
+export function PDFViewer({ pdfUrl, title, qrData, onError }: PDFViewerProps) {
   const { t } = useTranslation();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
@@ -71,15 +73,22 @@ export function PDFViewer({ pdfUrl, title, onError }: PDFViewerProps) {
         {title && (
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold">{title}</h3>
-            <Button
-              onClick={handleDownload}
-              variant="outline"
-              size="sm"
-              className="ml-2"
-            >
-              <Download className="mr-2 h-4 w-4" />
-              {t('pdf.download')}
-            </Button>
+            <div className="flex gap-2">
+              {qrData && (
+                <QRCodePreview 
+                  qrData={qrData} 
+                  title={t('qr.documentTitle', { title })}
+                />
+              )}
+              <Button
+                onClick={handleDownload}
+                variant="outline"
+                size="sm"
+              >
+                <Download className="mr-2 h-4 w-4" />
+                {t('pdf.download')}
+              </Button>
+            </div>
           </div>
         )}
 
