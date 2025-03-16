@@ -144,6 +144,9 @@ export default function AdminDashboard() {
             <p className="text-sm text-muted-foreground">
               {new Date(order.departureTime).toLocaleString()}
             </p>
+            <p className="text-sm text-muted-foreground">
+              نوع التأشيرة / Visa Type: {order.visaType}
+            </p>
             {order.driver && (
               <p className="text-sm text-muted-foreground mt-1">
                 Driver: {order.driver.fullName} ({order.driver.idNumber})
@@ -179,11 +182,6 @@ export default function AdminDashboard() {
                   <p className="text-xs text-muted-foreground">
                     {t('order.nationality')}: {passenger.nationality}
                   </p>
-                  {passenger.phone && (
-                    <p className="text-xs text-muted-foreground col-span-full">
-                      {t('order.passengerPhone')}: {passenger.phone}
-                    </p>
-                  )}
                 </div>
               </div>
             ))}
