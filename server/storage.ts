@@ -1,18 +1,34 @@
-import { IStorage } from "./storage";
-import { User, Vehicle, OperationOrder, InsertUser } from "@shared/schema";
+import type { Session } from "express-session";
+import type { SessionData } from "express-session";
 import createMemoryStore from "memorystore";
 import session from "express-session";
 import { scrypt, randomBytes } from "crypto";
 import { promisify } from "util";
+import { User, Vehicle, OperationOrder, InsertUser } from "@shared/schema";
 
 const MemoryStore = createMemoryStore(session);
 const scryptAsync = promisify(scrypt);
+
+export interface IStorage {
+  sessionStore: session.Store;
+  getUser(id: number): Promise<User | undefined>;
+  getUserByUsername(username: string): Promise<User | undefined>;
+  createUser(user: InsertUser): Promise<User>;
+  getVehicle(id: number): Promise<Vehicle | undefined>;
+  getVehiclesByDriver(driverId: number): Promise<Vehicle[]>;
+  createVehicle(vehicle: Omit<Vehicle, "id">): Promise<Vehicle>;
+  getOperationOrder(id: number): Promise<OperationOrder | undefined>;
+  getOperationOrdersByDriver(driverId: number): Promise<OperationOrder[]>;
+  createOperationOrder(order: Omit<OperationOrder, "id">): Promise<OperationOrder>;
+  getPendingDrivers(): Promise<User[]>;
+  approveDriver(id: number): Promise<User | undefined>;
+}
 
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
   private vehicles: Map<number, Vehicle>;
   private operationOrders: Map<number, OperationOrder>;
-  sessionStore: session.SessionStore;
+  sessionStore: session.Store;
   currentId: number;
 
   constructor() {
@@ -21,7 +37,7 @@ export class MemStorage implements IStorage {
     this.operationOrders = new Map();
     this.currentId = 1;
     this.sessionStore = new MemoryStore({
-      checkPeriod: 86400000,
+      checkPeriod: 86400000, // Prune expired entries every 24h
     });
 
     // Create default admin user
@@ -39,7 +55,7 @@ export class MemStorage implements IStorage {
       password: hashedPassword,
       role: "admin",
       isApproved: true,
-      fullName: null,
+      fullName: "Admin User",
       idNumber: null,
       licenseNumber: null,
       idDocumentUrl: null,
@@ -62,11 +78,14 @@ export class MemStorage implements IStorage {
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.currentId++;
-    const user: User = { 
-      ...insertUser, 
+    const user: User = {
+      ...insertUser,
       id,
-      role: "driver",
-      isApproved: false,
+      role: insertUser.role || "driver",
+      isApproved: insertUser.role === "admin",
+      fullName: insertUser.fullName || null,
+      idNumber: insertUser.idNumber || null,
+      licenseNumber: insertUser.licenseNumber || null,
       idDocumentUrl: null,
       licenseDocumentUrl: null,
       createdAt: new Date()
