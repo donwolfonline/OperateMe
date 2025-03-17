@@ -1,0 +1,909 @@
+// server/index.ts
+import express3 from "express";
+
+// server/routes.ts
+import { createServer } from "http";
+
+// server/auth.ts
+import passport from "passport";
+import { Strategy as LocalStrategy } from "passport-local";
+import session2 from "express-session";
+import { scrypt as scrypt2, randomBytes as randomBytes2, timingSafeEqual } from "crypto";
+import { promisify as promisify2 } from "util";
+
+// server/storage.ts
+import createMemoryStore from "memorystore";
+import session from "express-session";
+import { scrypt, randomBytes } from "crypto";
+import { promisify } from "util";
+var MemoryStore = createMemoryStore(session);
+var scryptAsync = promisify(scrypt);
+function generateUID(role, id) {
+  const prefix = role === "admin" ? "ADM" : "DRV";
+  const timestamp2 = Date.now().toString(36);
+  const randomSuffix = Math.random().toString(36).substring(2, 5);
+  return `${prefix}-${id}${timestamp2}${randomSuffix}`.toUpperCase();
+}
+var MemStorage = class {
+  users;
+  vehicles;
+  operationOrders;
+  passengers;
+  sessionStore;
+  currentId;
+  async createDefaultUsers() {
+    const adminSalt = randomBytes(16).toString("hex");
+    const adminBuf = await scryptAsync("admin123", adminSalt, 64);
+    const adminHashedPassword = `${adminBuf.toString("hex")}.${adminSalt}`;
+    const adminUser = {
+      id: this.currentId++,
+      uid: generateUID("admin", 1),
+      username: "admin",
+      password: adminHashedPassword,
+      role: "admin",
+      status: "active",
+      isApproved: true,
+      fullName: "Admin User",
+      idNumber: null,
+      licenseNumber: null,
+      idDocumentUrl: null,
+      licenseDocumentUrl: null,
+      profileImageUrl: null,
+      createdAt: /* @__PURE__ */ new Date()
+    };
+    const driverSalt = randomBytes(16).toString("hex");
+    const driverBuf = await scryptAsync("driver123", driverSalt, 64);
+    const driverHashedPassword = `${driverBuf.toString("hex")}.${driverSalt}`;
+    const driverUser = {
+      id: this.currentId++,
+      uid: generateUID("driver", 2),
+      username: "driver",
+      password: driverHashedPassword,
+      role: "driver",
+      status: "active",
+      isApproved: true,
+      fullName: "Test Driver",
+      idNumber: "DRV123",
+      licenseNumber: "LIC456",
+      idDocumentUrl: null,
+      licenseDocumentUrl: null,
+      profileImageUrl: null,
+      createdAt: /* @__PURE__ */ new Date()
+    };
+    this.users.set(adminUser.id, adminUser);
+    this.users.set(driverUser.id, driverUser);
+  }
+  constructor() {
+    this.users = /* @__PURE__ */ new Map();
+    this.vehicles = /* @__PURE__ */ new Map();
+    this.operationOrders = /* @__PURE__ */ new Map();
+    this.passengers = /* @__PURE__ */ new Map();
+    this.currentId = 1;
+    this.sessionStore = new MemoryStore({
+      checkPeriod: 864e5
+      // Prune expired entries every 24h
+    });
+    this.createDefaultUsers();
+  }
+  async updateUser(user) {
+    this.users.set(user.id, user);
+    return user;
+  }
+  async getUser(id) {
+    return this.users.get(id);
+  }
+  async getUserByUsername(username) {
+    return Array.from(this.users.values()).find(
+      (user) => user.username === username
+    );
+  }
+  async createUser(insertUser) {
+    const id = this.currentId++;
+    const user = {
+      ...insertUser,
+      id,
+      uid: generateUID(insertUser.role || "driver", id),
+      role: "driver",
+      status: "pending",
+      isApproved: false,
+      fullName: insertUser.fullName || null,
+      idNumber: insertUser.idNumber || null,
+      licenseNumber: insertUser.licenseNumber || null,
+      idDocumentUrl: null,
+      licenseDocumentUrl: null,
+      profileImageUrl: null,
+      createdAt: /* @__PURE__ */ new Date()
+    };
+    this.users.set(id, user);
+    return user;
+  }
+  async getVehicle(id) {
+    return this.vehicles.get(id);
+  }
+  async getVehiclesByDriver(driverId) {
+    return Array.from(this.vehicles.values()).filter(
+      (vehicle) => vehicle.driverId === driverId
+    );
+  }
+  async createVehicle(vehicle) {
+    const id = this.currentId++;
+    const newVehicle = { ...vehicle, id };
+    this.vehicles.set(id, newVehicle);
+    return newVehicle;
+  }
+  async updateVehicleStatus(id, driverId, isActive) {
+    const vehicle = await this.getVehicle(id);
+    if (vehicle && vehicle.driverId === driverId) {
+      const updatedVehicle = { ...vehicle, isActive };
+      this.vehicles.set(id, updatedVehicle);
+      return updatedVehicle;
+    }
+    return void 0;
+  }
+  async getOperationOrder(id) {
+    return this.operationOrders.get(id);
+  }
+  async getOperationOrdersByDriver(driverId) {
+    return Array.from(this.operationOrders.values()).filter(
+      (order) => order.driverId === driverId
+    );
+  }
+  async createOperationOrder(order, passengers2) {
+    const orderId = this.currentId++;
+    const newOrder = { ...order, id: orderId };
+    this.operationOrders.set(orderId, newOrder);
+    passengers2.forEach((passenger) => {
+      const passengerId = this.currentId++;
+      const newPassenger = {
+        ...passenger,
+        id: passengerId,
+        orderId
+      };
+      this.passengers.set(passengerId, newPassenger);
+    });
+    return newOrder;
+  }
+  async getPendingDrivers() {
+    return Array.from(this.users.values()).filter(
+      (user) => user.role === "driver" && user.status === "pending"
+    );
+  }
+  async getActiveDrivers() {
+    return Array.from(this.users.values()).filter(
+      (user) => user.role === "driver" && user.status === "active"
+    );
+  }
+  async getSuspendedDrivers() {
+    return Array.from(this.users.values()).filter(
+      (user) => user.role === "driver" && user.status === "suspended"
+    );
+  }
+  async updateDriverStatus(id, status) {
+    return this.updateDriver(id, { status, isApproved: status === "active" });
+  }
+  async getDriverDetails(id) {
+    const driver = await this.getUser(id);
+    if (!driver) return void 0;
+    const vehicles2 = await this.getVehiclesByDriver(id);
+    const orders = await this.getOperationOrdersByDriver(id);
+    return {
+      driver,
+      vehicles: vehicles2,
+      orders
+    };
+  }
+  async updateOperationOrder(order) {
+    this.operationOrders.set(order.id, order);
+    return order;
+  }
+  async getPassengersByOrder(orderId) {
+    return Array.from(this.passengers.values()).filter(
+      (passenger) => passenger.orderId === orderId
+    );
+  }
+  async getAllOperationOrders() {
+    return Array.from(this.operationOrders.values());
+  }
+  async updateDriver(id, updates) {
+    const user = await this.getUser(id);
+    if (user && user.role === "driver") {
+      const updatedUser = {
+        ...user,
+        status: updates.status,
+        isApproved: updates.isApproved
+      };
+      this.users.set(id, updatedUser);
+      return updatedUser;
+    }
+    return void 0;
+  }
+};
+var storage = new MemStorage();
+
+// server/auth.ts
+var scryptAsync2 = promisify2(scrypt2);
+async function hashPassword(password) {
+  const salt = randomBytes2(16).toString("hex");
+  const buf = await scryptAsync2(password, salt, 64);
+  return `${buf.toString("hex")}.${salt}`;
+}
+async function comparePasswords(supplied, stored) {
+  const [hashed, salt] = stored.split(".");
+  const hashedBuf = Buffer.from(hashed, "hex");
+  const suppliedBuf = await scryptAsync2(supplied, salt, 64);
+  return timingSafeEqual(hashedBuf, suppliedBuf);
+}
+function setupAuth(app2) {
+  if (!process.env.SESSION_SECRET) {
+    process.env.SESSION_SECRET = randomBytes2(32).toString("hex");
+  }
+  const sessionSettings = {
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    store: storage.sessionStore,
+    name: "sid",
+    cookie: {
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 24 * 60 * 60 * 1e3
+      // 24 hours
+    }
+  };
+  app2.set("trust proxy", 1);
+  app2.use(session2(sessionSettings));
+  app2.use(passport.initialize());
+  app2.use(passport.session());
+  passport.use(
+    new LocalStrategy(async (username, password, done) => {
+      try {
+        const user = await storage.getUserByUsername(username);
+        if (!user || !await comparePasswords(password, user.password)) {
+          return done(null, false, { message: "Invalid credentials" });
+        }
+        return done(null, user);
+      } catch (error) {
+        return done(error);
+      }
+    })
+  );
+  passport.serializeUser((user, done) => {
+    done(null, user.id);
+  });
+  passport.deserializeUser(async (id, done) => {
+    try {
+      const user = await storage.getUser(id);
+      done(null, user);
+    } catch (error) {
+      done(error);
+    }
+  });
+  app2.post("/api/login", (req, res, next) => {
+    passport.authenticate("local", (err, user, info) => {
+      if (err) return next(err);
+      if (!user) {
+        return res.status(401).json({ message: info?.message || "Authentication failed" });
+      }
+      req.logIn(user, (err2) => {
+        if (err2) return next(err2);
+        res.json(user);
+      });
+    })(req, res, next);
+  });
+  app2.post("/api/register", async (req, res, next) => {
+    try {
+      const existingUser = await storage.getUserByUsername(req.body.username);
+      if (existingUser) {
+        return res.status(400).json({ message: "Username already exists" });
+      }
+      const user = await storage.createUser({
+        ...req.body,
+        password: await hashPassword(req.body.password)
+      });
+      req.login(user, (err) => {
+        if (err) return next(err);
+        res.status(201).json(user);
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
+  app2.post("/api/logout", (req, res, next) => {
+    req.logout((err) => {
+      if (err) return next(err);
+      res.sendStatus(200);
+    });
+  });
+  app2.get("/api/user", (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    res.json(req.user);
+  });
+}
+
+// server/routes.ts
+import multer from "multer";
+import path2 from "path";
+
+// shared/schema.ts
+import { pgTable, text, serial, integer, boolean, timestamp, json } from "drizzle-orm/pg-core";
+import { createInsertSchema } from "drizzle-zod";
+import { z } from "zod";
+var users = pgTable("users", {
+  id: serial("id").primaryKey(),
+  uid: text("uid").notNull().unique(),
+  username: text("username").notNull().unique(),
+  password: text("password").notNull(),
+  role: text("role").notNull().default("driver"),
+  status: text("status").notNull().default("pending"),
+  isApproved: boolean("is_approved").notNull().default(false),
+  fullName: text("full_name"),
+  idNumber: text("id_number"),
+  licenseNumber: text("license_number"),
+  idDocumentUrl: text("id_document_url"),
+  licenseDocumentUrl: text("license_document_url"),
+  profileImageUrl: text("profile_image_url"),
+  createdAt: timestamp("created_at").notNull().defaultNow()
+});
+var vehicles = pgTable("vehicles", {
+  id: serial("id").primaryKey(),
+  driverId: integer("driver_id").notNull(),
+  type: text("type").notNull(),
+  model: text("model").notNull(),
+  year: text("year").notNull(),
+  plateNumber: text("plate_number").notNull(),
+  registrationUrl: text("registration_url"),
+  photoUrls: json("photo_urls").$type(),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow()
+});
+var passengers = pgTable("passengers", {
+  id: serial("id").primaryKey(),
+  orderId: integer("order_id").notNull(),
+  name: text("name").notNull(),
+  idNumber: text("id_number").notNull(),
+  nationality: text("nationality").notNull()
+});
+var operationOrders = pgTable("operation_orders", {
+  id: serial("id").primaryKey(),
+  driverId: integer("driver_id").notNull(),
+  vehicleId: integer("vehicle_id"),
+  fromCity: text("from_city").notNull(),
+  toCity: text("to_city").notNull(),
+  departureTime: timestamp("departure_time").notNull(),
+  visaType: text("visa_type").notNull(),
+  tripNumber: text("trip_number").notNull(),
+  qrCode: text("qr_code"),
+  pdfUrl: text("pdf_url"),
+  status: text("status").notNull().default("active"),
+  createdAt: timestamp("created_at").notNull().defaultNow()
+});
+var insertUserSchema = createInsertSchema(users).pick({
+  username: true,
+  password: true,
+  fullName: true,
+  idNumber: true,
+  licenseNumber: true
+});
+var insertVehicleSchema = createInsertSchema(vehicles).pick({
+  type: true,
+  model: true,
+  year: true,
+  plateNumber: true
+});
+var insertPassengerSchema = createInsertSchema(passengers).pick({
+  name: true,
+  idNumber: true,
+  nationality: true
+});
+var insertOperationOrderSchema = createInsertSchema(operationOrders).pick({
+  fromCity: true,
+  toCity: true,
+  departureTime: true,
+  visaType: true,
+  tripNumber: true
+}).extend({
+  departureTime: z.string().refine((val) => !isNaN(Date.parse(val)), {
+    message: "Invalid date format"
+  }).transform((val) => new Date(val)),
+  passengers: z.array(insertPassengerSchema).min(1, "At least one passenger is required").max(12, "Maximum 12 passengers allowed")
+});
+
+// server/utils/pdfGenerator.ts
+import path from "path";
+import fs from "fs";
+import { spawn } from "child_process";
+import { promisify as promisify3 } from "util";
+async function generateOrderPDF(order, driver) {
+  try {
+    const passengers2 = await storage.getPassengersByOrder(order.id);
+    const dateStr = new Date(order.departureTime).toLocaleString("ar-SA", {
+      timeZone: "Asia/Riyadh",
+      dateStyle: "full",
+      timeStyle: "short"
+    });
+    const data = {
+      date: dateStr,
+      from_city: order.fromCity,
+      to_city: order.toCity,
+      visa_type: order.visaType,
+      trip_number: order.tripNumber,
+      driver_name: driver.fullName,
+      driver_id: driver.idNumber,
+      license_number: driver.licenseNumber,
+      main_passenger: passengers2[0]?.name || "",
+      passengers: passengers2.map((p) => ({
+        name: p.name,
+        id_number: p.idNumber,
+        nationality: p.nationality
+      }))
+    };
+    const pdfFileName = `order_${order.id}_${Date.now()}.pdf`;
+    const pdfPath = path.join(process.cwd(), "uploads", pdfFileName);
+    const tempDataPath = path.join(process.cwd(), "uploads", `temp_${Date.now()}.json`);
+    await promisify3(fs.writeFile)(tempDataPath, JSON.stringify(data));
+    await new Promise((resolve, reject) => {
+      const pythonProcess = spawn("python", [
+        path.join(process.cwd(), "server/utils/pdf_generator.py"),
+        tempDataPath,
+        pdfPath
+      ]);
+      pythonProcess.on("close", (code) => {
+        fs.unlink(tempDataPath, () => {
+        });
+        if (code === 0) {
+          resolve(null);
+        } else {
+          reject(new Error(`Python process exited with code ${code}`));
+        }
+      });
+      pythonProcess.on("error", (err) => {
+        reject(err);
+      });
+    });
+    return pdfFileName;
+  } catch (error) {
+    console.error("Error generating PDF:", error);
+    throw new Error("Failed to generate PDF");
+  }
+}
+
+// server/routes.ts
+import express from "express";
+import fs2 from "fs";
+var uploadsDir = path2.join(process.cwd(), "uploads");
+if (!fs2.existsSync(uploadsDir)) {
+  fs2.mkdirSync(uploadsDir, { recursive: true });
+}
+var upload = multer({
+  dest: uploadsDir,
+  limits: {
+    fileSize: 10 * 1024 * 1024
+    // 10MB limit
+  },
+  fileFilter: (_req, file, cb) => {
+    const allowedTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/gif",
+      "image/webp",
+      "image/heic",
+      "image/heif",
+      "image/svg+xml",
+      "image/tiff",
+      "image/bmp",
+      "image/x-icon",
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "application/vnd.ms-excel",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "text/plain",
+      "application/rtf"
+    ];
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(null, false);
+    }
+  }
+});
+async function registerRoutes(app2) {
+  setupAuth(app2);
+  app2.use("/uploads", express.static(uploadsDir, {
+    setHeaders: (res, path6) => {
+      if (path6.endsWith(".pdf")) {
+        res.setHeader("Content-Type", "application/pdf");
+        res.setHeader("Content-Disposition", 'inline; filename="' + path6.split("/").pop() + '"');
+        res.setHeader("Cache-Control", "public, max-age=3600");
+        res.setHeader("Access-Control-Allow-Origin", "*");
+        res.setHeader("X-Content-Type-Options", "nosniff");
+      }
+    },
+    fallthrough: true,
+    maxAge: "1h"
+  }));
+  app2.post("/api/documents/upload", upload.single("document"), async (req, res) => {
+    try {
+      if (!req.user) return res.sendStatus(401);
+      if (!req.file) {
+        return res.status(400).json({
+          message: "No file uploaded or file type not supported"
+        });
+      }
+      const documentType = req.body.type;
+      const filePath = req.file.filename;
+      const user = await storage.getUser(req.user.id);
+      if (!user) return res.sendStatus(404);
+      if (documentType === "id") {
+        user.idDocumentUrl = filePath;
+      } else if (documentType === "license") {
+        user.licenseDocumentUrl = filePath;
+      } else if (documentType === "profile") {
+        user.profileImageUrl = filePath;
+      }
+      await storage.updateUser(user);
+      res.json(user);
+    } catch (error) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+  app2.post("/api/vehicles", upload.array("photos", 10), async (req, res) => {
+    try {
+      if (!req.user) return res.sendStatus(401);
+      const files = req.files;
+      if (!files || files.length === 0) {
+        return res.status(400).json({
+          message: "No files uploaded or file types not supported"
+        });
+      }
+      const vehicleData = {
+        type: req.body.type,
+        model: req.body.model,
+        year: req.body.year,
+        plateNumber: req.body.plateNumber
+      };
+      const parsedData = insertVehicleSchema.parse(vehicleData);
+      const vehicle = await storage.createVehicle({
+        ...parsedData,
+        driverId: req.user.id,
+        photoUrls: files.map((f) => f.filename),
+        registrationUrl: "",
+        isActive: true,
+        createdAt: /* @__PURE__ */ new Date()
+      });
+      res.status(201).json(vehicle);
+    } catch (error) {
+      console.error("Vehicle creation error:", error);
+      res.status(400).json({ message: error.message });
+    }
+  });
+  app2.get("/api/vehicles/driver", async (req, res) => {
+    if (!req.user) return res.sendStatus(401);
+    const vehicles2 = await storage.getVehiclesByDriver(req.user.id);
+    res.json(vehicles2);
+  });
+  app2.patch("/api/vehicles/:id/status", async (req, res) => {
+    try {
+      if (!req.user) return res.sendStatus(401);
+      const vehicle = await storage.updateVehicleStatus(
+        parseInt(req.params.id),
+        req.user.id,
+        req.body.isActive
+      );
+      if (!vehicle) return res.sendStatus(404);
+      res.json(vehicle);
+    } catch (error) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+  app2.post("/api/operation-orders", async (req, res) => {
+    try {
+      if (!req.user) return res.sendStatus(401);
+      const orderData = insertOperationOrderSchema.parse({
+        ...req.body,
+        departureTime: new Date(req.body.departureTime).toISOString()
+      });
+      const order = await storage.createOperationOrder(
+        {
+          fromCity: orderData.fromCity,
+          toCity: orderData.toCity,
+          departureTime: new Date(orderData.departureTime),
+          visaType: orderData.visaType,
+          tripNumber: orderData.tripNumber,
+          driverId: req.user.id,
+          vehicleId: null,
+          // Set to null since it's optional now
+          qrCode: "",
+          pdfUrl: "",
+          status: "active",
+          createdAt: /* @__PURE__ */ new Date()
+        },
+        orderData.passengers
+      );
+      try {
+        const pdfFileName = await generateOrderPDF(order, req.user);
+        order.pdfUrl = pdfFileName;
+        await storage.updateOperationOrder(order);
+        res.status(201).json(order);
+      } catch (pdfError) {
+        console.error("PDF generation error:", pdfError);
+        res.status(201).json(order);
+      }
+    } catch (error) {
+      console.error("Operation order creation error:", error);
+      res.status(400).json({ message: error.message });
+    }
+  });
+  app2.get("/api/operation-orders/driver", async (req, res) => {
+    if (!req.user) return res.sendStatus(401);
+    const orders = await storage.getOperationOrdersByDriver(req.user.id);
+    res.json(orders);
+  });
+  app2.get("/api/operation-orders/:id/passengers", async (req, res) => {
+    if (!req.user) return res.sendStatus(401);
+    const passengers2 = await storage.getPassengersByOrder(parseInt(req.params.id));
+    res.json(passengers2);
+  });
+  app2.get("/api/admin/pending-drivers", async (req, res) => {
+    if (!req.user || req.user.role !== "admin") return res.sendStatus(403);
+    const drivers = await storage.getPendingDrivers();
+    res.json(drivers);
+  });
+  app2.get("/api/admin/active-drivers", async (req, res) => {
+    if (!req.user || req.user.role !== "admin") return res.sendStatus(403);
+    const drivers = await storage.getActiveDrivers();
+    res.json(drivers);
+  });
+  app2.get("/api/admin/suspended-drivers", async (req, res) => {
+    if (!req.user || req.user.role !== "admin") return res.sendStatus(403);
+    const drivers = await storage.getSuspendedDrivers();
+    res.json(drivers);
+  });
+  app2.post("/api/admin/drivers/:id/status", async (req, res) => {
+    if (!req.user || req.user.role !== "admin") return res.sendStatus(403);
+    const { status } = req.body;
+    if (!["pending", "active", "suspended"].includes(status)) {
+      return res.status(400).json({ message: "Invalid status" });
+    }
+    const user = await storage.updateDriver(parseInt(req.params.id), {
+      status,
+      isApproved: status === "active"
+    });
+    if (!user) return res.sendStatus(404);
+    res.json(user);
+  });
+  app2.get("/api/admin/driver/:id/details", async (req, res) => {
+    if (!req.user || req.user.role !== "admin") return res.sendStatus(403);
+    const details = await storage.getDriverDetails(parseInt(req.params.id));
+    if (!details) return res.sendStatus(404);
+    const ordersWithPassengers = await Promise.all(details.orders.map(async (order) => {
+      const passengers2 = await storage.getPassengersByOrder(order.id);
+      return { ...order, passengers: passengers2 };
+    }));
+    res.json({
+      ...details,
+      orders: ordersWithPassengers
+    });
+  });
+  app2.get("/api/admin/all-orders", async (req, res) => {
+    if (!req.user || req.user.role !== "admin") return res.sendStatus(403);
+    const orders = await storage.getAllOperationOrders();
+    const ordersWithDetails = await Promise.all(orders.map(async (order) => {
+      const passengers2 = await storage.getPassengersByOrder(order.id);
+      const driver = await storage.getUser(order.driverId);
+      return {
+        ...order,
+        passengers: passengers2,
+        driver: {
+          fullName: driver?.fullName,
+          uid: driver?.uid
+        }
+      };
+    }));
+    res.json(ordersWithDetails);
+  });
+  app2.get("/api/driver/orders", async (req, res) => {
+    if (!req.user) return res.sendStatus(401);
+    try {
+      const orders = await storage.getOperationOrdersByDriver(req.user.id);
+      const ordersWithDetails = await Promise.all(orders.map(async (order) => {
+        const passengers2 = await storage.getPassengersByOrder(order.id);
+        return {
+          ...order,
+          passengers: passengers2
+        };
+      }));
+      console.log("Driver orders fetched:", ordersWithDetails);
+      res.json(ordersWithDetails);
+    } catch (error) {
+      console.error("Error fetching driver orders:", error);
+      res.status(500).json({ message: "Error fetching orders" });
+    }
+  });
+  const httpServer = createServer(app2);
+  return httpServer;
+}
+
+// server/vite.ts
+import express2 from "express";
+import fs3 from "fs";
+import path4, { dirname as dirname2 } from "path";
+import { fileURLToPath as fileURLToPath2 } from "url";
+import { createServer as createViteServer, createLogger } from "vite";
+
+// vite.config.ts
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import themePlugin from "@replit/vite-plugin-shadcn-theme-json";
+import path3, { dirname } from "path";
+import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
+import { fileURLToPath } from "url";
+var __filename = fileURLToPath(import.meta.url);
+var __dirname = dirname(__filename);
+var vite_config_default = defineConfig({
+  plugins: [
+    react(),
+    runtimeErrorOverlay(),
+    themePlugin(),
+    ...process.env.NODE_ENV !== "production" && process.env.REPL_ID !== void 0 ? [
+      await import("@replit/vite-plugin-cartographer").then(
+        (m) => m.cartographer()
+      )
+    ] : []
+  ],
+  resolve: {
+    alias: {
+      "@": path3.resolve(__dirname, "client", "src"),
+      "@shared": path3.resolve(__dirname, "shared")
+    }
+  },
+  root: path3.resolve(__dirname, "client"),
+  build: {
+    outDir: path3.resolve(__dirname, "dist/public"),
+    emptyOutDir: true
+  }
+});
+
+// server/vite.ts
+import { nanoid } from "nanoid";
+var __filename2 = fileURLToPath2(import.meta.url);
+var __dirname2 = dirname2(__filename2);
+var viteLogger = createLogger();
+function log(message, source = "express") {
+  const formattedTime = (/* @__PURE__ */ new Date()).toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true
+  });
+  console.log(`${formattedTime} [${source}] ${message}`);
+}
+async function setupVite(app2, server) {
+  const serverOptions = {
+    middlewareMode: true,
+    hmr: { server },
+    allowedHosts: true
+  };
+  const vite = await createViteServer({
+    ...vite_config_default,
+    configFile: false,
+    customLogger: {
+      ...viteLogger,
+      error: (msg, options) => {
+        viteLogger.error(msg, options);
+        process.exit(1);
+      }
+    },
+    server: serverOptions,
+    appType: "custom"
+  });
+  app2.use(vite.middlewares);
+  app2.use("*", async (req, res, next) => {
+    const url = req.originalUrl;
+    try {
+      const clientTemplate = path4.resolve(
+        __dirname2,
+        "..",
+        "client",
+        "index.html"
+      );
+      let template = await fs3.promises.readFile(clientTemplate, "utf-8");
+      template = template.replace(
+        `src="/src/main.tsx"`,
+        `src="/src/main.tsx?v=${nanoid()}"`
+      );
+      const page = await vite.transformIndexHtml(url, template);
+      res.status(200).set({ "Content-Type": "text/html" }).end(page);
+    } catch (e) {
+      vite.ssrFixStacktrace(e);
+      next(e);
+    }
+  });
+}
+function serveStatic(app2) {
+  const distPath = path4.resolve(__dirname2, "public");
+  if (!fs3.existsSync(distPath)) {
+    throw new Error(
+      `Could not find the build directory: ${distPath}, make sure to build the client first`
+    );
+  }
+  app2.use(express2.static(distPath));
+  app2.use("*", (_req, res) => {
+    res.sendFile(path4.resolve(distPath, "index.html"));
+  });
+}
+
+// server/index.ts
+import path5 from "path";
+import { mkdir } from "fs/promises";
+import { existsSync } from "fs";
+var app = express3();
+app.use(express3.json());
+app.use(express3.urlencoded({ extended: false }));
+app.use("/uploads", express3.static(path5.join(process.cwd(), "uploads")));
+app.use((req, res, next) => {
+  const start = Date.now();
+  const path6 = req.path;
+  let capturedJsonResponse = void 0;
+  const originalResJson = res.json;
+  res.json = function(bodyJson, ...args) {
+    capturedJsonResponse = bodyJson;
+    return originalResJson.apply(res, [bodyJson, ...args]);
+  };
+  res.on("finish", () => {
+    const duration = Date.now() - start;
+    if (path6.startsWith("/api")) {
+      let logLine = `${req.method} ${path6} ${res.statusCode} in ${duration}ms`;
+      if (capturedJsonResponse) {
+        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
+      }
+      if (logLine.length > 80) {
+        logLine = logLine.slice(0, 79) + "\u2026";
+      }
+      log(logLine);
+    }
+  });
+  next();
+});
+(async () => {
+  try {
+    if (!existsSync("uploads")) {
+      await mkdir("uploads", { recursive: true });
+    }
+    const server = await registerRoutes(app);
+    if (app.get("env") === "development") {
+      await setupVite(app, server);
+    } else {
+      serveStatic(app);
+    }
+    const port = 5e3;
+    server.listen({
+      port,
+      host: "0.0.0.0",
+      reusePort: true
+    }, () => {
+      log(`Server running on port ${port}`);
+    });
+    server.on("error", (error) => {
+      log(`Server error: ${error.message}`);
+      if (error.syscall !== "listen") {
+        throw error;
+      }
+      switch (error.code) {
+        case "EACCES":
+          log(`Port ${port} requires elevated privileges`);
+          process.exit(1);
+          break;
+        case "EADDRINUSE":
+          log(`Port ${port} is already in use`);
+          process.exit(1);
+          break;
+        default:
+          throw error;
+      }
+    });
+  } catch (error) {
+    log(`Failed to start server: ${error.message}`);
+    process.exit(1);
+  }
+})();
