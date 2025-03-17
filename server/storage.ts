@@ -9,6 +9,14 @@ import { User, Vehicle, OperationOrder, Passenger, InsertUser } from "@shared/sc
 const MemoryStore = createMemoryStore(session);
 const scryptAsync = promisify(scrypt);
 
+// Function to generate unique identifier
+function generateUID(role: string, id: number): string {
+  const prefix = role === 'admin' ? 'ADM' : 'DRV';
+  const timestamp = Date.now().toString(36);
+  const randomSuffix = Math.random().toString(36).substring(2, 5);
+  return `${prefix}-${id}${timestamp}${randomSuffix}`.toUpperCase();
+}
+
 export interface IStorage {
   sessionStore: session.Store;
   getUser(id: number): Promise<User | undefined>;
@@ -53,6 +61,7 @@ export class MemStorage implements IStorage {
 
     const adminUser: User = {
       id: this.currentId++,
+      uid: generateUID('admin', 1),
       username: "admin",
       password: adminHashedPassword,
       role: "admin",
@@ -63,6 +72,7 @@ export class MemStorage implements IStorage {
       licenseNumber: null,
       idDocumentUrl: null,
       licenseDocumentUrl: null,
+      profileImageUrl: null,
       createdAt: new Date()
     };
 
@@ -73,6 +83,7 @@ export class MemStorage implements IStorage {
 
     const driverUser: User = {
       id: this.currentId++,
+      uid: generateUID('driver', 2),
       username: "driver",
       password: driverHashedPassword,
       role: "driver",
@@ -83,6 +94,7 @@ export class MemStorage implements IStorage {
       licenseNumber: "LIC456",
       idDocumentUrl: null,
       licenseDocumentUrl: null,
+      profileImageUrl: null,
       createdAt: new Date()
     };
 
@@ -124,6 +136,7 @@ export class MemStorage implements IStorage {
     const user: User = {
       ...insertUser,
       id,
+      uid: generateUID(insertUser.role || 'driver', id),
       role: "driver",
       status: "pending",
       isApproved: false,
@@ -132,6 +145,7 @@ export class MemStorage implements IStorage {
       licenseNumber: insertUser.licenseNumber || null,
       idDocumentUrl: null,
       licenseDocumentUrl: null,
+      profileImageUrl: null,
       createdAt: new Date()
     };
     this.users.set(id, user);
@@ -219,7 +233,7 @@ export class MemStorage implements IStorage {
     return this.updateDriver(id, { status, isApproved: status === "active" });
   }
 
-  async getDriverDetails(id: number): Promise<{ 
+  async getDriverDetails(id: number): Promise<{
     driver: User;
     vehicles: Vehicle[];
     orders: OperationOrder[];
@@ -254,8 +268,8 @@ export class MemStorage implements IStorage {
   async updateDriver(id: number, updates: { status: string; isApproved: boolean }): Promise<User | undefined> {
     const user = await this.getUser(id);
     if (user && user.role === "driver") {
-      const updatedUser = { 
-        ...user, 
+      const updatedUser = {
+        ...user,
         status: updates.status,
         isApproved: updates.isApproved
       };

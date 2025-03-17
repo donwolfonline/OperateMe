@@ -4,6 +4,7 @@ import { z } from "zod";
 
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
+  uid: text("uid").notNull().unique(),  // New unique identifier field
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
   role: text("role").notNull().default("driver"),
