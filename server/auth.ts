@@ -62,7 +62,7 @@ export function setupAuth(app: Express) {
       } catch (error) {
         return done(error);
       }
-    }),
+    })
   );
 
   passport.serializeUser((user, done) => {
@@ -80,12 +80,16 @@ export function setupAuth(app: Express) {
 
   app.post("/api/login", (req, res, next) => {
     passport.authenticate("local", (err, user, info) => {
-      if (err) return next(err);
+      if (err) {
+        console.error("Login error:", err);
+        return next(err);
+      }
       if (!user) {
         return res.status(401).json({ message: info?.message || 'Authentication failed' });
       }
       req.logIn(user, (err) => {
         if (err) return next(err);
+        console.log("Login successful for user:", user.username);
         res.json(user);
       });
     })(req, res, next);

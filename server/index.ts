@@ -1,4 +1,4 @@
-import express, { type Request, Response, NextFunction } from "express";
+import express from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import path from "path";
@@ -6,8 +6,10 @@ import { mkdir } from 'fs/promises';
 import { existsSync } from 'fs';
 
 const app = express();
+
+// Body parsing middleware should come before any routes
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: true }));
 
 // Serve uploaded files
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
@@ -16,12 +18,12 @@ app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
-  let capturedJsonResponse: Record<string, any> | undefined = undefined;
+  let capturedJsonResponse: any = undefined;
 
-  const originalResJson = res.json;
-  res.json = function (bodyJson, ...args) {
-    capturedJsonResponse = bodyJson;
-    return originalResJson.apply(res, [bodyJson, ...args]);
+  const originalJson = res.json;
+  res.json = function(body) {
+    capturedJsonResponse = body;
+    return originalJson.call(this, body);
   };
 
   res.on("finish", () => {
@@ -50,22 +52,12 @@ app.use((req, res, next) => {
 
     const server = await registerRoutes(app);
 
-    // Setup vite in development, serve static files in production
     if (process.env.NODE_ENV !== "production") {
       await setupVite(app, server);
     } else {
-      const staticPath = path.join(process.cwd(), 'dist', 'public');
-      app.use(express.static(staticPath));
-
-      // Serve index.html for all non-API routes in production
-      app.get('*', (req, res) => {
-        if (!req.path.startsWith('/api')) {
-          res.sendFile(path.join(staticPath, 'index.html'));
-        }
-      });
+      serveStatic(app);
     }
 
-    // ALWAYS serve on port 5000 and bind to all network interfaces
     const port = process.env.PORT || 5000;
     server.listen({
       port,
@@ -75,7 +67,6 @@ app.use((req, res, next) => {
       log(`Server running on port ${port}`);
     });
 
-    // Handle server errors
     server.on('error', (error: any) => {
       log(`Server error: ${error.message}`);
       if (error.syscall !== 'listen') {
