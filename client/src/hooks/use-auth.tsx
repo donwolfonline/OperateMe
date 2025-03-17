@@ -74,6 +74,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return userData;
     },
     onSuccess: (user: SelectUser) => {
+      // Clear any existing user data first
+      queryClient.clear();
+      // Set the new user data
       queryClient.setQueryData(["/api/user"], user);
       // After registration, redirect to driver dashboard
       window.location.href = "/driver";
@@ -92,6 +95,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await apiRequest("POST", "/api/logout");
     },
     onSuccess: () => {
+      // Clear all queries on logout
+      queryClient.clear();
       queryClient.setQueryData(["/api/user"], null);
       // After logout, redirect to home
       window.location.href = "/";
