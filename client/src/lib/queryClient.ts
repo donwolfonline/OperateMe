@@ -1,76 +1,47 @@
-import { QueryClient, QueryFunction } from "@tanstack/react-query";
+import { QueryClient } from "@tanstack/react-query";
 
 export async function apiRequest(
   method: string,
   url: string,
   data?: unknown,
 ): Promise<any> {
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json'
-  };
-
   const config: RequestInit = {
     method,
-    headers,
-    credentials: "include",
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    },
+    credentials: 'include',
+    body: data ? JSON.stringify(data) : undefined
   };
-
-  if (data) {
-    config.body = JSON.stringify(data);
-  }
 
   const response = await fetch(url, config);
+  const contentType = response.headers.get('content-type');
 
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({
-      message: response.statusText
-    }));
-    throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    if (contentType?.includes('application/json')) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+    }
+    throw new Error(`HTTP error! status: ${response.status}`);
   }
 
-  return response.json();
-}
-
-type UnauthorizedBehavior = "returnNull" | "throw";
-
-export const getQueryFn: <T>(options: {
-  on401: UnauthorizedBehavior;
-}) => QueryFunction<T> =
-  ({ on401: unauthorizedBehavior }) =>
-  async ({ queryKey }) => {
-    const response = await fetch(queryKey[0] as string, {
-      credentials: "include",
-      headers: {
-        'Accept': 'application/json'
-      }
-    });
-
-    if (unauthorizedBehavior === "returnNull" && response.status === 401) {
-      return null;
-    }
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({
-        message: response.statusText
-      }));
-      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-    }
-
+  if (contentType?.includes('application/json')) {
     return response.json();
-  };
+  }
+
+  return null;
+}
 
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      queryFn: getQueryFn({ on401: "throw" }),
-      refetchInterval: false,
-      refetchOnWindowFocus: false,
-      staleTime: Infinity,
       retry: false,
+      refetchOnWindowFocus: false,
+      staleTime: Infinity
     },
     mutations: {
-      retry: false,
-    },
-  },
+      retry: false
+    }
+  }
 });
