@@ -17,7 +17,15 @@ setupAuth(app);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok' });
+  res.json({ status: 'ok', environment: process.env.NODE_ENV });
 });
 
+// Export the Express app
 export default app;
+
+// Export handler for serverless functions
+export const config = {
+  api: {
+    bodyParser: false, // Disable the built-in parser
+  },
+};
