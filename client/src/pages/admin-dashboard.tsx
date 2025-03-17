@@ -160,7 +160,7 @@ export default function AdminDashboard() {
             </p>
             {order.driver && (
               <p className="text-sm text-muted-foreground mt-1">
-                Driver: {order.driver.fullName} ({order.driver.idNumber})
+                Driver: {order.driver.fullName} ({order.driver.uid})
               </p>
             )}
           </div>
