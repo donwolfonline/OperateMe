@@ -1,10 +1,8 @@
 {
   "version": 2,
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
   "builds": [
-    {
-      "src": "client/index.html",
-      "use": "@vercel/static"
-    },
     {
       "src": "server/api/**/*.ts",
       "use": "@vercel/node"
@@ -17,7 +15,7 @@
     },
     {
       "src": "/(.*)",
-      "dest": "client/index.html"
+      "dest": "/dist/$1"
     }
   ],
   "env": {
