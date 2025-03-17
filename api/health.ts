@@ -11,12 +11,15 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
+    // Basic health check response
     res.status(200).json({
       status: 'ok',
       timestamp: new Date().toISOString(),
-      message: 'Health check endpoint is working'
+      message: 'Health check endpoint is working',
+      path: req.url
     });
   } catch (error) {
+    console.error('Health check error:', error);
     res.status(500).json({
       error: 'Internal Server Error',
       message: error instanceof Error ? error.message : 'Unknown error'
