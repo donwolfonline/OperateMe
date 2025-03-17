@@ -13,32 +13,20 @@ import { FileText, Download, Calendar, MapPin, Users } from "lucide-react";
 import { OperationOrder as OperationOrderType } from "@shared/schema";
 import { Badge } from "@/components/ui/badge";
 import { useLocation } from "wouter";
-import { useEffect } from "react";
 
 export default function DriverDashboard() {
+  // All hooks at the top level
   const { t } = useTranslation();
   const { user, logoutMutation } = useAuth();
   const [, setLocation] = useLocation();
 
-  // Query for driver's orders with proper typing
   const { data: driverOrders } = useQuery<(OperationOrderType & { passengers: any[]; pdfUrl?: string })[]>({
     queryKey: ["/api/driver/orders"],
     enabled: !!user && user.role === "driver",
   });
 
-  // Handle authentication redirect
-  useEffect(() => {
-    if (!user || user.role !== "driver") {
-      setLocation("/auth");
-    }
-  }, [user, setLocation]);
-
-  // If not authenticated, render nothing while redirect happens
-  if (!user || user.role !== "driver") {
-    return null;
-  }
-
-  return (
+  // Use a single return with conditional rendering
+  return user && user.role === "driver" ? (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
@@ -174,5 +162,10 @@ export default function DriverDashboard() {
         </Tabs>
       </div>
     </div>
+  ) : (
+    (() => {
+      setLocation("/auth");
+      return null;
+    })()
   );
 }
