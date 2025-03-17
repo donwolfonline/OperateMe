@@ -12,11 +12,12 @@ import HomeButton from "@/components/HomeButton";
 import { FileText, Download, Calendar, MapPin, Users } from "lucide-react";
 import { OperationOrder as OperationOrderType } from "@shared/schema";
 import { Badge } from "@/components/ui/badge";
+import { Redirect } from "wouter";
 
-export default function DriverDashboard() {
+function DriverDashboardContent() {
   const { t } = useTranslation();
   const { user, logoutMutation } = useAuth();
-  
+
   const { data: driverOrders } = useQuery<(OperationOrderType & { passengers: any[]; pdfUrl?: string })[]>({
     queryKey: ["/api/driver/orders"],
     enabled: !!user && user.role === "driver",
@@ -159,4 +160,14 @@ export default function DriverDashboard() {
       </div>
     </div>
   );
+}
+
+export default function DriverDashboard() {
+  const { user } = useAuth();
+
+  if (!user || user.role !== "driver") {
+    return <Redirect to="/auth" />;
+  }
+
+  return <DriverDashboardContent />;
 }
