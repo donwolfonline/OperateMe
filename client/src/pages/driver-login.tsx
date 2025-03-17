@@ -9,15 +9,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { insertUserSchema } from "@shared/schema";
 import LanguageToggle from "@/components/LanguageToggle";
 import HomeButton from "@/components/HomeButton";
+import { Redirect } from "wouter";
 
 export default function DriverLoginPage() {
   const { t } = useTranslation();
   const { user, loginMutation } = useAuth();
-
-  if (user) {
-    window.location.href = "/driver";
-    return null;
-  }
 
   const loginForm = useForm({
     resolver: zodResolver(
@@ -25,7 +21,11 @@ export default function DriverLoginPage() {
         username: true, 
         password: true 
       })
-    )
+    ),
+    defaultValues: {
+      username: "",
+      password: ""
+    }
   });
 
   const onLogin = async (data: any) => {
@@ -34,6 +34,10 @@ export default function DriverLoginPage() {
       role: "driver"
     });
   };
+
+  if (user) {
+    return <Redirect to="/driver" />;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-secondary p-4">
@@ -88,9 +92,11 @@ export default function DriverLoginPage() {
                 <div className="text-center mt-4">
                   <Button 
                     variant="link" 
-                    onClick={() => window.location.href = "/register"}
+                    asChild
                   >
-                    {t('auth.registerAsDriver')}
+                    <a href="/register">
+                      {t('auth.registerAsDriver')}
+                    </a>
                   </Button>
                 </div>
               </form>
