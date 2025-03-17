@@ -91,7 +91,8 @@ const resources = {
         download: "Download",
         route: "Route",
         driver: "Driver",
-        passengerCount: "Passenger Count"
+        passengerCount: "Passenger Count",
+        issuedBy: "Issued By"
       },
       admin: {
         dashboard: "Admin Dashboard",
@@ -206,7 +207,8 @@ const resources = {
         download: "تحميل",
         route: "المسار",
         driver: "السائق",
-        passengerCount: "عدد الركاب"
+        passengerCount: "عدد الركاب",
+        issuedBy: "صادر من قبل"
       },
       admin: {
         dashboard: "لوحة تحكم المشرف",
@@ -321,7 +323,8 @@ const resources = {
         download: "ڈاؤنلوڈ کریں",
         route: "روٹ",
         driver: "ڈرائیور",
-        passengerCount: "مسافروں کی تعداد"
+        passengerCount: "مسافروں کی تعداد",
+        issuedBy: "جاری کردہ از"
       },
       admin: {
         dashboard: "ایڈمن ڈیش بورڈ",

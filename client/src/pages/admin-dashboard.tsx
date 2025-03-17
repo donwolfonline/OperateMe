@@ -341,6 +341,13 @@ export default function AdminDashboard() {
                                       <Users className="h-4 w-4" />
                                       {t('order.passengerCount')}: {order.passengers?.length || 0}
                                     </p>
+                                    {/* Add driver information */}
+                                    {order.driver && (
+                                      <p className="flex items-center gap-2">
+                                        <UserIcon className="h-4 w-4" />
+                                        {t('order.issuedBy')}: {order.driver.fullName} ({order.driver.uid})
+                                      </p>
+                                    )}
                                   </div>
                                 </div>
                                 <div className="flex flex-col sm:flex-row gap-2">
