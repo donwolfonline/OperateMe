@@ -311,6 +311,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Add user preferences update endpoint
+  app.patch("/api/user/preferences", async (req, res) => {
+    try {
+      if (!req.user) return res.sendStatus(401);
+
+      const user = await storage.getUser(req.user.id);
+      if (!user) return res.sendStatus(404);
+
+      // Update dashboard preferences
+      user.dashboardPreferences = req.body.dashboardPreferences;
+      const updatedUser = await storage.updateUser(user);
+
+      res.json(updatedUser);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
