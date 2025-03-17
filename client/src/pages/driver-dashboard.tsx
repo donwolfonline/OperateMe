@@ -16,7 +16,7 @@ import { Badge } from "@/components/ui/badge";
 export default function DriverDashboard() {
   const { t } = useTranslation();
   const { user, logoutMutation } = useAuth();
-
+  
   const { data: driverOrders } = useQuery<(OperationOrderType & { passengers: any[]; pdfUrl?: string })[]>({
     queryKey: ["/api/driver/orders"],
     enabled: !!user && user.role === "driver",

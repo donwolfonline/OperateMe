@@ -1,6 +1,6 @@
 import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
-import { Route, useLocation } from "wouter";
+import { Redirect } from "wouter";
 
 type ProtectedRouteProps = {
   component: () => React.JSX.Element;
@@ -12,9 +12,8 @@ export function ProtectedRoute({
   requiredRole,
 }: ProtectedRouteProps) {
   const { user, isLoading } = useAuth();
-  const [, setLocation] = useLocation();
 
-  // First render the loading state if auth is still loading
+  // Show loading state while checking auth
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -23,22 +22,17 @@ export function ProtectedRoute({
     );
   }
 
-  // Once loaded, check authentication
+  // Handle unauthenticated users
   if (!user) {
-    // Use effect would cause the hooks error during state updates
-    // Instead, render null and update location
-    setLocation("/auth");
-    return null;
+    return <Redirect to="/auth" />;
   }
 
-  // Check if user has the required role
+  // Handle role mismatch
   if (requiredRole && user.role !== requiredRole) {
-    // Redirect to appropriate dashboard based on role
     const redirectPath = user.role === "admin" ? "/admin-dashboard" : "/driver";
-    setLocation(redirectPath);
-    return null;
+    return <Redirect to={redirectPath} />;
   }
 
-  // If authenticated and authorized, render the component
+  // Render component for authenticated and authorized users
   return <Component />;
 }
