@@ -24,10 +24,11 @@ function useLoginMutation() {
 
   return useMutation({
     mutationFn: (credentials: LoginData) => 
-      apiRequest('POST', '/api/login', credentials),
+      apiRequest('POST', 'api/login', credentials),
     onSuccess: (user: SelectUser) => {
-      queryClient.setQueryData(['/api/user'], user);
-      window.location.href = user.role === 'admin' ? '/admin-dashboard' : '/driver';
+      queryClient.setQueryData(['api/user'], user);
+      const path = user.role === 'admin' ? 'admin-dashboard' : 'driver';
+      window.location.href = `/${path}`;
     },
     onError: (error: Error) => {
       toast({
@@ -43,9 +44,9 @@ function useLogoutMutation() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: () => apiRequest('POST', '/api/logout'),
+    mutationFn: () => apiRequest('POST', 'api/logout'),
     onSuccess: () => {
-      queryClient.setQueryData(['/api/user'], null);
+      queryClient.setQueryData(['api/user'], null);
       window.location.href = '/';
     },
     onError: (error: Error) => {
@@ -66,8 +67,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     error,
     isLoading,
   } = useQuery<SelectUser | null>({
-    queryKey: ['/api/user'],
-    queryFn: () => apiRequest('GET', '/api/user'),
+    queryKey: ['api/user'],
+    queryFn: () => apiRequest('GET', 'api/user'),
+    retry: false,
     onError: (error: Error) => {
       if (!error.message.includes('401')) {
         toast({

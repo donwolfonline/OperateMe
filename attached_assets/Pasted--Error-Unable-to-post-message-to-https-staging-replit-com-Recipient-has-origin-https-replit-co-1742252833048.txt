@@ -1,0 +1,324 @@
+[Error] Unable to post message to https://staging.replit.com. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to https://firewalledreplit.com. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to https://staging.firewalledreplit.com. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to http://localhost:3000. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to https://staging.replit.com. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to https://firewalledreplit.com. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to https://staging.firewalledreplit.com. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to http://localhost:3000. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to https://staging.replit.com. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to https://firewalledreplit.com. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to https://staging.firewalledreplit.com. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to http://localhost:3000. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to https://staging.replit.com. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to https://firewalledreplit.com. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to https://staging.firewalledreplit.com. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to http://localhost:3000. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to https://staging.replit.com. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to https://firewalledreplit.com. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to https://staging.firewalledreplit.com. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to http://localhost:3000. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to https://staging.replit.com. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to https://firewalledreplit.com. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to https://staging.firewalledreplit.com. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to http://localhost:3000. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to https://staging.replit.com. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to https://firewalledreplit.com. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to https://staging.firewalledreplit.com. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to http://localhost:3000. Recipient has origin https://replit.com.
+
+[Error] Failed to load resource: the server responded with a status of 401 (Unauthorized) (user, line 0)
+[Error] Failed to load resource: the server responded with a status of 401 (Unauthorized) (user, line 0)
+[Error] Unable to post message to https://staging.replit.com. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to https://firewalledreplit.com. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to https://staging.firewalledreplit.com. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to http://localhost:3000. Recipient has origin https://replit.com.
+
+[Error] Invalid href 'https://ff7a22a3-b500-4d42-b5a5-28ff0af8d6a5-00-1ojo9vzl3ukrf.riker.replit.dev//admin' passed to next/router in page: '/replEnvironmentDesktop'. Repeated forward-slashes (//) or backslashes \ are not valid in the href.
+	(anonymous function) (_app-081109b28a4dc48d.js:16:5283)
+	d (main-6f08d6c85df09731.js:1:75953)
+	(anonymous function) (_app-081109b28a4dc48d.js:4:486814)
+	lU (framework-6f2397f21c8383a3.js:1:132328)
+	(anonymous function) (framework-6f2397f21c8383a3.js:1:205452)
+	(anonymous function) (_app-081109b28a4dc48d.js:4:486730)
+	ld (framework-6f2397f21c8383a3.js:1:127955)
+	ou (framework-6f2397f21c8383a3.js:1:140705)
+	i (framework-6f2397f21c8383a3.js:1:191009)
+	uI (framework-6f2397f21c8383a3.js:1:168573)
+	(anonymous function) (framework-6f2397f21c8383a3.js:1:168441)
+	uM (framework-6f2397f21c8383a3.js:1:168446)
+	uS (framework-6f2397f21c8383a3.js:1:163487)
+	C (framework-6f2397f21c8383a3.js:1:207256)
+	z (framework-6f2397f21c8383a3.js:1:207786)
+[Error] Warning: A component is changing an uncontrolled input to be controlled. This is likely caused by the value changing from undefined to a defined value, which should not happen. Decide between using a controlled or uncontrolled input element for the lifetime of the component. More info: https://reactjs.org/link/controlled-components%s
+	(anonymous function) (eruda.js:2:135522)
+	printWarning (chunk-RPCDYKBN.js:521)
+	error (chunk-RPCDYKBN.js:505)
+	updateWrapper (chunk-RPCDYKBN.js:1968)
+	updateProperties (chunk-RPCDYKBN.js:7762)
+	commitUpdate (chunk-RPCDYKBN.js:8419)
+	commitMutationEffectsOnFiber (chunk-RPCDYKBN.js:17763)
+	recursivelyTraverseMutationEffects (chunk-RPCDYKBN.js:17685)
+	commitMutationEffectsOnFiber (chunk-RPCDYKBN.js:17699)
+	recursivelyTraverseMutationEffects (chunk-RPCDYKBN.js:17685)
+	commitMutationEffectsOnFiber (chunk-RPCDYKBN.js:17699)
+	recursivelyTraverseMutationEffects (chunk-RPCDYKBN.js:17685)
+	commitMutationEffectsOnFiber (chunk-RPCDYKBN.js:17699)
+	recursivelyTraverseMutationEffects (chunk-RPCDYKBN.js:17685)
+	commitMutationEffectsOnFiber (chunk-RPCDYKBN.js:17699)
+	recursivelyTraverseMutationEffects (chunk-RPCDYKBN.js:17685)
+	commitMutationEffectsOnFiber (chunk-RPCDYKBN.js:17737)
+	recursivelyTraverseMutationEffects (chunk-RPCDYKBN.js:17685)
+	commitMutationEffectsOnFiber (chunk-RPCDYKBN.js:17896)
+	recursivelyTraverseMutationEffects (chunk-RPCDYKBN.js:17685)
+	commitMutationEffectsOnFiber (chunk-RPCDYKBN.js:17699)
+	recursivelyTraverseMutationEffects (chunk-RPCDYKBN.js:17685)
+	commitMutationEffectsOnFiber (chunk-RPCDYKBN.js:17699)
+	recursivelyTraverseMutationEffects (chunk-RPCDYKBN.js:17685)
+	commitMutationEffectsOnFiber (chunk-RPCDYKBN.js:17896)
+	recursivelyTraverseMutationEffects (chunk-RPCDYKBN.js:17685)
+	commitMutationEffectsOnFiber (chunk-RPCDYKBN.js:17699)
+	recursivelyTraverseMutationEffects (chunk-RPCDYKBN.js:17685)
+	commitMutationEffectsOnFiber (chunk-RPCDYKBN.js:17737)
+	recursivelyTraverseMutationEffects (chunk-RPCDYKBN.js:17685)
+	commitMutationEffectsOnFiber (chunk-RPCDYKBN.js:17896)
+	recursivelyTraverseMutationEffects (chunk-RPCDYKBN.js:17685)
+	commitMutationEffectsOnFiber (chunk-RPCDYKBN.js:17699)
+	recursivelyTraverseMutationEffects (chunk-RPCDYKBN.js:17685)
+	commitMutationEffectsOnFiber (chunk-RPCDYKBN.js:17737)
+	recursivelyTraverseMutationEffects (chunk-RPCDYKBN.js:17685)
+	commitMutationEffectsOnFiber (chunk-RPCDYKBN.js:17699)
+	recursivelyTraverseMutationEffects (chunk-RPCDYKBN.js:17685)
+	commitMutationEffectsOnFiber (chunk-RPCDYKBN.js:17737)
+	recursivelyTraverseMutationEffects (chunk-RPCDYKBN.js:17685)
+	commitMutationEffectsOnFiber (chunk-RPCDYKBN.js:17699)
+	recursivelyTraverseMutationEffects (chunk-RPCDYKBN.js:17685)
+	commitMutationEffectsOnFiber (chunk-RPCDYKBN.js:17737)
+	recursivelyTraverseMutationEffects (chunk-RPCDYKBN.js:17685)
+	commitMutationEffectsOnFiber (chunk-RPCDYKBN.js:17737)
+	recursivelyTraverseMutationEffects (chunk-RPCDYKBN.js:17685)
+	commitMutationEffectsOnFiber (chunk-RPCDYKBN.js:17699)
+	recursivelyTraverseMutationEffects (chunk-RPCDYKBN.js:17685)
+	commitMutationEffectsOnFiber (chunk-RPCDYKBN.js:17896)
+	recursivelyTraverseMutationEffects (chunk-RPCDYKBN.js:17685)
+	commitMutationEffectsOnFiber (chunk-RPCDYKBN.js:17699)
+	recursivelyTraverseMutationEffects (chunk-RPCDYKBN.js:17685)
+	commitMutationEffectsOnFiber (chunk-RPCDYKBN.js:17699)
+	recursivelyTraverseMutationEffects (chunk-RPCDYKBN.js:17685)
+	commitMutationEffectsOnFiber (chunk-RPCDYKBN.js:17699)
+	recursivelyTraverseMutationEffects (chunk-RPCDYKBN.js:17685)
+	commitMutationEffectsOnFiber (chunk-RPCDYKBN.js:17896)
+	recursivelyTraverseMutationEffects (chunk-RPCDYKBN.js:17685)
+	commitMutationEffectsOnFiber (chunk-RPCDYKBN.js:17699)
+	recursivelyTraverseMutationEffects (chunk-RPCDYKBN.js:17685)
+	commitMutationEffectsOnFiber (chunk-RPCDYKBN.js:17896)
+	recursivelyTraverseMutationEffects (chunk-RPCDYKBN.js:17685)
+	commitMutationEffectsOnFiber (chunk-RPCDYKBN.js:17699)
+	recursivelyTraverseMutationEffects (chunk-RPCDYKBN.js:17685)
+	commitMutationEffectsOnFiber (chunk-RPCDYKBN.js:17699)
+	recursivelyTraverseMutationEffects (chunk-RPCDYKBN.js:17685)
+	commitMutationEffectsOnFiber (chunk-RPCDYKBN.js:17794)
+	commitMutationEffects (chunk-RPCDYKBN.js:17663)
+	commitRootImpl (chunk-RPCDYKBN.js:19347)
+	commitRoot (chunk-RPCDYKBN.js:19277)
+	performSyncWorkOnRoot (chunk-RPCDYKBN.js:18895)
+	flushSyncCallbacks (chunk-RPCDYKBN.js:9119)
+	flushSync (chunk-RPCDYKBN.js:18959)
+	finishEventHandler (chunk-RPCDYKBN.js:3569)
+	batchedUpdates (chunk-RPCDYKBN.js:3582)
+	dispatchEventForPluginEventSystem (chunk-RPCDYKBN.js:7173)
+	dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay (chunk-RPCDYKBN.js:5478)
+	dispatchEvent (chunk-RPCDYKBN.js:5472:93)
+	dispatchDiscreteEvent (chunk-RPCDYKBN.js:5449)
+[Error] Unable to post message to https://staging.replit.com. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to https://firewalledreplit.com. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to https://staging.firewalledreplit.com. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to http://localhost:3000. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to https://staging.replit.com. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to https://firewalledreplit.com. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to https://staging.firewalledreplit.com. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to http://localhost:3000. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to https://staging.replit.com. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to https://firewalledreplit.com. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to https://staging.firewalledreplit.com. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to http://localhost:3000. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to https://staging.replit.com. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to https://firewalledreplit.com. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to https://staging.firewalledreplit.com. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to http://localhost:3000. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to https://staging.replit.com. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to https://firewalledreplit.com. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to https://staging.firewalledreplit.com. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to http://localhost:3000. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to https://staging.replit.com. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to https://firewalledreplit.com. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to https://staging.firewalledreplit.com. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to http://localhost:3000. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to https://staging.replit.com. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to https://firewalledreplit.com. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to https://staging.firewalledreplit.com. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to http://localhost:3000. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to https://staging.replit.com. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to https://firewalledreplit.com. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to https://staging.firewalledreplit.com. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to http://localhost:3000. Recipient has origin https://replit.com.
+
+[Error] Invalid href 'https://ff7a22a3-b500-4d42-b5a5-28ff0af8d6a5-00-1ojo9vzl3ukrf.riker.replit.dev//admin-dashboard' passed to next/router in page: '/replEnvironmentDesktop'. Repeated forward-slashes (//) or backslashes \ are not valid in the href.
+	(anonymous function) (_app-081109b28a4dc48d.js:16:5283)
+	d (main-6f08d6c85df09731.js:1:75953)
+	(anonymous function) (_app-081109b28a4dc48d.js:4:486814)
+	lU (framework-6f2397f21c8383a3.js:1:132328)
+	(anonymous function) (framework-6f2397f21c8383a3.js:1:205452)
+	(anonymous function) (_app-081109b28a4dc48d.js:4:486730)
+	ld (framework-6f2397f21c8383a3.js:1:127955)
+	ou (framework-6f2397f21c8383a3.js:1:140705)
+	i (framework-6f2397f21c8383a3.js:1:191009)
+	uI (framework-6f2397f21c8383a3.js:1:168573)
+	(anonymous function) (framework-6f2397f21c8383a3.js:1:168441)
+	uM (framework-6f2397f21c8383a3.js:1:168446)
+	uS (framework-6f2397f21c8383a3.js:1:163487)
+	C (framework-6f2397f21c8383a3.js:1:207256)
+	z (framework-6f2397f21c8383a3.js:1:207786)
+[Error] Failed to load resource: the server responded with a status of 401 (Unauthorized) (user, line 0)
+[Error] Unable to post message to https://staging.replit.com. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to https://firewalledreplit.com. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to https://staging.firewalledreplit.com. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to http://localhost:3000. Recipient has origin https://replit.com.
+
+[Error] Invalid href 'https://ff7a22a3-b500-4d42-b5a5-28ff0af8d6a5-00-1ojo9vzl3ukrf.riker.replit.dev//auth' passed to next/router in page: '/replEnvironmentDesktop'. Repeated forward-slashes (//) or backslashes \ are not valid in the href.
+	(anonymous function) (_app-081109b28a4dc48d.js:16:5283)
+	d (main-6f08d6c85df09731.js:1:75953)
+	(anonymous function) (_app-081109b28a4dc48d.js:4:486814)
+	lU (framework-6f2397f21c8383a3.js:1:132328)
+	(anonymous function) (framework-6f2397f21c8383a3.js:1:205452)
+	(anonymous function) (_app-081109b28a4dc48d.js:4:486730)
+	ld (framework-6f2397f21c8383a3.js:1:127955)
+	ou (framework-6f2397f21c8383a3.js:1:140705)
+	i (framework-6f2397f21c8383a3.js:1:191009)
+	uI (framework-6f2397f21c8383a3.js:1:168573)
+	(anonymous function) (framework-6f2397f21c8383a3.js:1:168441)
+	uM (framework-6f2397f21c8383a3.js:1:168446)
+	uS (framework-6f2397f21c8383a3.js:1:163487)
+	C (framework-6f2397f21c8383a3.js:1:207256)
+	z (framework-6f2397f21c8383a3.js:1:207786)
+[Error] Source Map loading errors (x6)
+[Error] Failed to load resource: the server responded with a status of 404 () (1798006b5a320e4d.css.map, line 0)
+[Error] Failed to load resource: the server responded with a status of 404 () (c2ca4f8b20a9f168.css.map, line 0)
+[Error] Failed to load resource: the server responded with a status of 404 () (1414a9e650b25ced.css.map, line 0)
+[Error] Failed to load resource: the server responded with a status of 404 () (c2ca4f8b20a9f168.css.map, line 0)
+[Error] Failed to load resource: the server responded with a status of 404 () (1798006b5a320e4d.css.map, line 0)
+[Error] Failed to load resource: the server responded with a status of 404 () (1414a9e650b25ced.css.map, line 0)
+[Error] Unable to post message to https://staging.replit.com. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to https://firewalledreplit.com. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to https://staging.firewalledreplit.com. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to http://localhost:3000. Recipient has origin https://replit.com.
+
+[Error] Invalid href 'https://ff7a22a3-b500-4d42-b5a5-28ff0af8d6a5-00-1ojo9vzl3ukrf.riker.replit.dev//' passed to next/router in page: '/replEnvironmentDesktop'. Repeated forward-slashes (//) or backslashes \ are not valid in the href.
+	(anonymous function) (_app-081109b28a4dc48d.js:16:5283)
+	d (main-6f08d6c85df09731.js:1:75953)
+	(anonymous function) (_app-081109b28a4dc48d.js:4:486814)
+	lU (framework-6f2397f21c8383a3.js:1:132328)
+	(anonymous function) (framework-6f2397f21c8383a3.js:1:205452)
+	(anonymous function) (_app-081109b28a4dc48d.js:4:486730)
+	ld (framework-6f2397f21c8383a3.js:1:127955)
+	ou (framework-6f2397f21c8383a3.js:1:140705)
+	i (framework-6f2397f21c8383a3.js:1:191009)
+	uI (framework-6f2397f21c8383a3.js:1:168573)
+	(anonymous function) (framework-6f2397f21c8383a3.js:1:168441)
+	uM (framework-6f2397f21c8383a3.js:1:168446)
+	uS (framework-6f2397f21c8383a3.js:1:163487)
+	C (framework-6f2397f21c8383a3.js:1:207256)
+	z (framework-6f2397f21c8383a3.js:1:207786)
+[Error] Unable to post message to https://staging.replit.com. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to https://firewalledreplit.com. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to https://staging.firewalledreplit.com. Recipient has origin https://replit.com.
+
+[Error] Unable to post message to http://localhost:3000. Recipient has origin https://replit.com.
+
+[Error] Invalid href 'https://ff7a22a3-b500-4d42-b5a5-28ff0af8d6a5-00-1ojo9vzl3ukrf.riker.replit.dev//admin' passed to next/router in page: '/replEnvironmentDesktop'. Repeated forward-slashes (//) or backslashes \ are not valid in the href.
+	(anonymous function) (_app-081109b28a4dc48d.js:16:5283)
+	d (main-6f08d6c85df09731.js:1:75953)
+	(anonymous function) (_app-081109b28a4dc48d.js:4:486814)
+	lU (framework-6f2397f21c8383a3.js:1:132328)
+	(anonymous function) (framework-6f2397f21c8383a3.js:1:205452)
+	(anonymous function) (_app-081109b28a4dc48d.js:4:486730)
+	ld (framework-6f2397f21c8383a3.js:1:127955)
+	ou (framework-6f2397f21c8383a3.js:1:140705)
+	i (framework-6f2397f21c8383a3.js:1:191009)
+	uI (framework-6f2397f21c8383a3.js:1:168573)
+	(anonymous function) (framework-6f2397f21c8383a3.js:1:168441)
+	uM (framework-6f2397f21c8383a3.js:1:168446)
+	uS (framework-6f2397f21c8383a3.js:1:163487)
+	C (framework-6f2397f21c8383a3.js:1:207256)
+	z (framework-6f2397f21c8383a3.js:1:207786)
+> Selected Element
+< <div data-replit-metadata="client/src/pages/admin-login.tsx:51:10" data-component-name="CardContent" class="p-6">…</div>
