@@ -23,7 +23,8 @@ const resources = {
         changesSaved: "Changes saved successfully",
         viewDocument: "View uploaded document",
         accountSuspended: "Account Suspended",
-        suspensionMessage: "Your account has been suspended. Please contact administrator."
+        suspensionMessage: "Your account has been suspended. Please contact administrator.",
+        pendingApproval: "Your account is pending approval. You'll be able to create orders once approved."
       },
       landing: {
         title: "Road Lightning Transport",
@@ -137,7 +138,8 @@ const resources = {
         changesSaved: "تم حفظ التغييرات بنجاح",
         viewDocument: "عرض المستند المرفوع",
         accountSuspended: "الحساب معلق",
-        suspensionMessage: "تم تعليق حسابك. يرجى الاتصال بالمسؤول."
+        suspensionMessage: "تم تعليق حسابك. يرجى الاتصال بالمسؤول.",
+        pendingApproval: "حسابك قيد الموافقة. ستتمكن من إنشاء الطلبات بمجرد الموافقة عليه."
       },
       landing: {
         title: "صاعقة الطريق للنقل",
@@ -251,7 +253,8 @@ const resources = {
         changesSaved: "تبدیلیاں کامیابی سے محفوظ ہو گئیں",
         viewDocument: "اپ لوڈ کردہ دستاویز دیکھیں",
         accountSuspended: "اکاؤنٹ معطل",
-        suspensionMessage: "آپ کا اکاؤنٹ معطل کر دیا گیا ہے۔ براہ کرم منتظم سے رابطہ کریں۔"
+        suspensionMessage: "آپ کا اکاؤنٹ معطل کر دیا گیا ہے۔ براہ کرم منتظم سے رابطہ کریں۔",
+        pendingApproval: "آپ کا اکاؤنٹ منظوری کے انتظار میں ہے۔ منظوری کے بعد آپ آرڈر بنا سکیں گے۔"
       },
       landing: {
         title: "روڈ لائٹننگ ٹرانسپورٹ",

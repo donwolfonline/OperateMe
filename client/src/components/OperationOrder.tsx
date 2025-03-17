@@ -9,8 +9,9 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/use-auth";
 import { useState } from "react";
-import { FileText, Plus, Trash2 } from "lucide-react";
+import { FileText, Plus, Trash2, AlertCircle } from "lucide-react";
 
 // Saudi cities list with bilingual names
 const saudiCities = [
@@ -29,8 +30,12 @@ const saudiCities = [
 export default function OperationOrder() {
   const { t } = useTranslation();
   const { toast } = useToast();
+  const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+
+  // Check if user is pending or not approved
+  const isPending = user?.status === 'pending' || !user?.isApproved;
 
   const form = useForm({
     resolver: zodResolver(insertOperationOrderSchema),
@@ -91,6 +96,19 @@ export default function OperationOrder() {
 
   return (
     <div className="space-y-4">
+      {isPending && (
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center gap-2 text-amber-500">
+              <AlertCircle className="h-5 w-5" />
+              <p className="text-sm font-medium">
+                {t('notifications.pendingApproval')}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <Card>
         <CardContent className="p-6">
           <Form {...form}>
@@ -105,6 +123,7 @@ export default function OperationOrder() {
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
+                        disabled={isPending}
                       >
                         <FormControl>
                           <SelectTrigger>
@@ -133,6 +152,7 @@ export default function OperationOrder() {
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
+                        disabled={isPending}
                       >
                         <FormControl>
                           <SelectTrigger>
@@ -163,6 +183,7 @@ export default function OperationOrder() {
                           type="datetime-local"
                           className="w-full"
                           {...field}
+                          disabled={isPending}
                         />
                       </FormControl>
                       <FormMessage />
@@ -177,7 +198,7 @@ export default function OperationOrder() {
                     <FormItem>
                       <FormLabel>{t('order.visaType')}</FormLabel>
                       <FormControl>
-                        <Input {...field} className="w-full" />
+                        <Input {...field} className="w-full" disabled={isPending} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -191,7 +212,7 @@ export default function OperationOrder() {
                     <FormItem>
                       <FormLabel>{t('order.tripNumber')}</FormLabel>
                       <FormControl>
-                        <Input {...field} className="w-full" />
+                        <Input {...field} className="w-full" disabled={isPending} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -206,6 +227,7 @@ export default function OperationOrder() {
                     type="button"
                     variant="outline"
                     size="sm"
+                    disabled={isPending}
                     onClick={() => {
                       if (fields.length >= 12) {
                         toast({
@@ -238,7 +260,7 @@ export default function OperationOrder() {
                             <FormItem>
                               <FormLabel>{t('order.passengerName')}</FormLabel>
                               <FormControl>
-                                <Input {...field} className="w-full" />
+                                <Input {...field} className="w-full" disabled={isPending} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -252,7 +274,7 @@ export default function OperationOrder() {
                             <FormItem>
                               <FormLabel>{t('order.passengerIdNumber')}</FormLabel>
                               <FormControl>
-                                <Input {...field} className="w-full" />
+                                <Input {...field} className="w-full" disabled={isPending} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -266,7 +288,7 @@ export default function OperationOrder() {
                             <FormItem>
                               <FormLabel>{t('order.nationality')}</FormLabel>
                               <FormControl>
-                                <Input {...field} className="w-full" />
+                                <Input {...field} className="w-full" disabled={isPending} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -281,6 +303,7 @@ export default function OperationOrder() {
                           size="sm"
                           className="mt-4 w-full sm:w-auto"
                           onClick={() => remove(index)}
+                          disabled={isPending}
                         >
                           <Trash2 className="h-4 w-4 mr-2" />
                           {t('order.removePassenger')}
@@ -293,10 +316,10 @@ export default function OperationOrder() {
 
               <Button
                 type="submit"
-                disabled={isSubmitting}
+                disabled={isSubmitting || isPending}
                 className="w-full"
               >
-                {isSubmitting ? t('common.saving') : t('order.create')}
+                {isPending ? t('notifications.pendingApproval') : (isSubmitting ? t('common.saving') : t('order.create'))}
               </Button>
             </form>
           </Form>
