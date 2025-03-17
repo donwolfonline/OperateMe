@@ -1,7 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { storage } from '../server/storage';
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default function handler(req: VercelRequest, res: VercelResponse) {
   // Add CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
@@ -12,13 +11,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const user = req.session?.user;
-    if (!user) {
-      return res.status(401).json({ error: 'Not authenticated' });
-    }
-    res.json(user);
+    // For now, return a simple response
+    res.json({
+      message: 'API is working',
+      timestamp: new Date().toISOString()
+    });
   } catch (error) {
-    console.error('User API error:', error);
+    console.error('API error:', error);
     res.status(500).json({
       error: 'Internal Server Error',
       message: error instanceof Error ? error.message : 'Unknown error'

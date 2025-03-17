@@ -21,17 +21,7 @@
     },
     {
       "source": "/(.*)",
-      "destination": "$1",
-      "has": [
-        {
-          "type": "file",
-          "value": "dist/public/$1"
-        }
-      ]
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
+      "destination": "/$1"
     }
   ]
 }
