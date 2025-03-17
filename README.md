@@ -14,6 +14,42 @@ A comprehensive bilingual vehicle and driver management system designed to strea
 - 📋 Operation Order Management
 - 🔎 Advanced Search and Filtering System
 
+## Key Features
+
+### Driver Management
+- Driver registration and profile management
+- Document upload capability (ID, license, profile picture)
+- Status tracking (pending, active, suspended)
+- Advanced search and filtering by name, date, and status
+
+### Vehicle Management
+- Vehicle registration with detailed information
+- Multiple photo uploads
+- Active/inactive status tracking
+
+### Operation Orders
+- Create and manage transportation orders
+- Passenger information management
+- PDF document generation with QR codes
+- Trip tracking and history
+- Search by driver name and visa type
+
+### Admin Dashboard
+- Comprehensive driver management with advanced filtering
+- Order monitoring and tracking with search capabilities
+- Document verification system
+- Status management for drivers and vehicles
+- Searchable document history by driver name
+
+### Search and Filter System
+- Real-time search functionality across all sections
+- Advanced filtering options:
+  - Registration date (Today, This Week, This Month)
+  - Driver name dropdown filters
+  - Document type filters
+  - Status filters for orders
+  - Date-based filtering
+
 ## Tech Stack
 
 ### Frontend
