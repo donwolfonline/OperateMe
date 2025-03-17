@@ -12,28 +12,40 @@ import { Badge } from "@/components/ui/badge";
 import { FileText, User as UserIcon, Car, FileCheck, Download, Calendar, MapPin, Users } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { UserCircle2 } from "lucide-react";
+import { useLocation } from "wouter";
 import React from 'react';
 
 export default function AdminDashboard() {
   const { t } = useTranslation();
   const { user, logoutMutation } = useAuth();
+  const [, setLocation] = useLocation();
 
-  // Existing queries...
+  // Move all queries up here
   const { data: pendingDrivers } = useQuery<User[]>({
     queryKey: ["/api/admin/pending-drivers"],
+    enabled: !!user && user.role === "admin",
   });
 
   const { data: activeDrivers } = useQuery<User[]>({
     queryKey: ["/api/admin/active-drivers"],
+    enabled: !!user && user.role === "admin",
   });
 
   const { data: suspendedDrivers } = useQuery<User[]>({
     queryKey: ["/api/admin/suspended-drivers"],
+    enabled: !!user && user.role === "admin",
   });
 
   const { data: allOrders } = useQuery<(OperationOrder & { passengers: any[]; driver?: any })[]>({
     queryKey: ["/api/admin/all-orders"],
+    enabled: !!user && user.role === "admin",
   });
+
+  // If not authenticated or not admin, redirect
+  if (!user || user.role !== "admin") {
+    setLocation("/auth");
+    return null;
+  }
 
   // Driver management functions...
   const approveDriver = async (driverId: number) => {
@@ -192,7 +204,7 @@ export default function AdminDashboard() {
     </Card>
   );
 
-  if (!user || user.role !== "admin") return null;
+
 
   return (
     <div className="min-h-screen bg-background">

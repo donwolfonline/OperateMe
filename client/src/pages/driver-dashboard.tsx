@@ -12,20 +12,26 @@ import HomeButton from "@/components/HomeButton";
 import { FileText, Download, Calendar, MapPin, Users } from "lucide-react";
 import { OperationOrder as OperationOrderType } from "@shared/schema";
 import { Badge } from "@/components/ui/badge";
+import { useLocation } from "wouter";
 
 export default function DriverDashboard() {
   const { t } = useTranslation();
   const { user, logoutMutation } = useAuth();
+  const [, setLocation] = useLocation();
 
   // Query for driver's orders with proper typing
   const { data: driverOrders } = useQuery<(OperationOrderType & { passengers: any[]; pdfUrl?: string })[]>({
     queryKey: ["/api/driver/orders"],
-    enabled: !!user, // Only run query if user is logged in
+    enabled: !!user && user.role === "driver",
   });
 
-  console.log("Driver Orders:", driverOrders); // Debug log
+  // If not authenticated or not a driver, redirect
+  if (!user || user.role !== "driver") {
+    setLocation("/auth");
+    return null;
+  }
 
-  if (!user) return null;
+  console.log("Driver Orders:", driverOrders); // Debug log
 
   return (
     <div className="min-h-screen bg-background">
