@@ -10,9 +10,9 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   // Simple health check response
-  res.status(200).json({
+  res.json({
     status: 'ok',
-    time: new Date().toISOString()
+    timestamp: new Date().toISOString()
   });
 }
 

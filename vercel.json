@@ -3,7 +3,11 @@
   "builds": [
     {
       "src": "package.json",
-      "use": "@vercel/static-build"
+      "use": "@vercel/static-build",
+      "config": {
+        "buildCommand": "npm run build",
+        "outputDirectory": "dist/public"
+      }
     },
     {
       "src": "api/*.ts",
@@ -12,17 +16,23 @@
   ],
   "rewrites": [
     {
-      "source": "/api/:path*",
-      "destination": "/api/:path*"
+      "source": "/api/(.*)",
+      "destination": "/api/$1"
     },
     {
       "source": "/(.*)",
-      "destination": "/index.html"
+      "destination": "$1",
+      "missing": [
+        {
+          "type": "file",
+          "value": "dist/public/$1"
+        }
+      ]
     }
   ],
   "headers": [
     {
-      "source": "/(.*).(js|css|json|ico|png|jpg|jpeg|svg|gif)",
+      "source": "/assets/(.*)",
       "headers": [
         {
           "key": "Cache-Control",
