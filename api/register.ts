@@ -4,7 +4,7 @@ import { randomBytes } from 'crypto';
 function generateUID(role: string, id: number) {
   const prefix = role === 'admin' ? 'ADM' : 'DRV';
   const timestamp = Date.now().toString(36);
-  const randomSuffix = randomBytes(4).toString('hex');
+  const randomSuffix = Math.random().toString(36).substring(2, 5);
   return `${prefix}-${id}${timestamp}${randomSuffix}`.toUpperCase();
 }
 
