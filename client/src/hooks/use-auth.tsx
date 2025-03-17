@@ -38,7 +38,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const res = await apiRequest("POST", "/api/login", credentials);
       const userData = await res.json();
 
-      // Check if user is suspended
+      // Check if user is suspended - only during login
       if (userData.status === 'suspended') {
         toast({
           title: t('notifications.accountSuspended'),
@@ -70,7 +70,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const registerMutation = useMutation({
     mutationFn: async (credentials: InsertUser) => {
       const res = await apiRequest("POST", "/api/register", credentials);
-      return await res.json();
+      const userData = await res.json();
+      return userData;
     },
     onSuccess: (user: SelectUser) => {
       queryClient.setQueryData(["/api/user"], user);
