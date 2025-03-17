@@ -1,6 +1,6 @@
 # OperateMe - Vehicle and Driver Management System
 
-A comprehensive bilingual vehicle and driver management system with intelligent operational workflows, designed to streamline administrative processes through advanced search and filtering capabilities.
+A comprehensive bilingual vehicle and driver management system designed to streamline administrative and driver-related processes with intelligent operational workflows.
 
 ## Features
 
@@ -13,36 +13,6 @@ A comprehensive bilingual vehicle and driver management system with intelligent 
 - 🚗 Vehicle Registration and Tracking
 - 📋 Operation Order Management
 - 🔎 Advanced Search and Filtering System
-
-## Project Overview
-
-This system provides a complete solution for managing vehicles and drivers with features including:
-
-### User Management
-- Role-based authentication (Admin/Driver)
-- Multi-language support
-- Profile management with document uploads
-
-### Driver Features
-- Vehicle registration and management
-- Operation order creation
-- Document generation with QR codes
-- Trip history tracking
-
-### Admin Features
-- Driver approval and management
-- Advanced search and filtering capabilities
-- Document verification system
-- Order tracking and monitoring
-
-### Search and Filtering System
-- Real-time search functionality
-- Advanced filtering options:
-  - Registration date (Today, This Week, This Month)
-  - Driver name dropdown filters
-  - Document type filters
-  - Status filters for orders
-  - Date-based filtering
 
 ## Tech Stack
 
@@ -61,6 +31,52 @@ This system provides a complete solution for managing vehicles and drivers with 
 - Passport.js for authentication
 - Multer for file uploads
 - PDF generation capabilities
+
+## Key Features
+
+### Authentication System
+- Separate login flows for drivers and administrators
+- Secure session management
+- Role-based access control
+
+### Driver Management
+- Driver registration and profile management
+- Document upload capability (ID, license, profile picture)
+- Status tracking (pending, active, suspended)
+- Advanced search and filtering by name, date, and status
+
+### Vehicle Management
+- Vehicle registration with detailed information
+- Multiple photo uploads
+- Active/inactive status tracking
+
+### Operation Orders
+- Create and manage transportation orders
+- Passenger information management
+- PDF document generation with QR codes
+- Trip tracking and history
+- Search by driver name and visa type
+
+### Admin Dashboard
+- Comprehensive driver management with advanced filtering
+- Order monitoring and tracking with search capabilities
+- Document verification system
+- Status management for drivers and vehicles
+- Searchable document history by driver name
+
+### Multilingual Support
+- Complete trilingual interface (Arabic, English, Urdu)
+- RTL support for Arabic
+- Easy language switching
+
+### Search and Filter System
+- Real-time search functionality across all sections
+- Advanced filtering options:
+  - Registration date (Today, This Week, This Month)
+  - Driver name dropdown filters
+  - Document type filters
+  - Status filters for orders
+  - Date-based filtering
 
 ## Getting Started
 
@@ -92,59 +108,110 @@ SESSION_SECRET=your_session_secret
 npm run dev
 ```
 
-## Deployment
+## Deployment on Hostinger
 
-### Vercel Deployment Steps
+### Prerequisites
+- Hostinger VPS or Business Hosting plan with Node.js support
+- Node.js (v20.x or later)
+- PostgreSQL database
+- Domain name (optional but recommended)
 
-#### Prerequisites
-1. Node.js (v20.x or later)
-2. Vercel CLI
-3. PostgreSQL database (recommended: Neon for serverless compatibility)
+### Deployment Steps
 
-#### Deployment Steps
-
-1. Install Vercel CLI:
+1. Upload Project Files
 ```bash
-npm i -g vercel
+# Build the frontend
+npm run build
+
+# Upload files to Hostinger via FTP or Git
 ```
 
-2. Login to Vercel:
+2. Install Dependencies
 ```bash
-vercel login
+npm install
+npm install -g pm2
 ```
 
-3. Deploy to Vercel:
-```bash
-vercel
-```
-
-#### Environment Variables
-Set these in your Vercel project dashboard:
+3. Set Up Environment Variables
+Create a `.env` file in your project root:
 ```env
-DATABASE_URL=your_neon_postgresql_connection_string
+DATABASE_URL=your_postgresql_connection_string
 SESSION_SECRET=your_session_secret
 NODE_ENV=production
+PORT=3000
 ```
 
-#### Important Notes
-- The application uses serverless functions for the API
-- Static assets are served through Vercel's CDN
-- Database connections are optimized for serverless environment
-- File uploads are handled through Vercel Blob Storage
+4. Configure PM2
+Create a `ecosystem.config.js` file:
+```javascript
+module.exports = {
+  apps: [{
+    name: "operateme",
+    script: "server/index.js",
+    env: {
+      NODE_ENV: "production",
+    }
+  }]
+}
+```
 
-#### Troubleshooting
-If you encounter any issues:
-1. Check the Vercel deployment logs
-2. Verify environment variables are correctly set
-3. Ensure database connection string is properly formatted
-4. Check if all dependencies are properly installed
+5. Start the Application
+```bash
+# Start the application with PM2
+pm2 start ecosystem.config.js
 
+# Ensure app starts on server reboot
+pm2 startup
+pm2 save
+```
 
-### Alternative Deployment Options
-For other deployment options, see:
-- `DEPLOY_HOSTINGER.md` for Hostinger deployment
-- `deploy.sh` for general deployment script
-- `ecosystem.config.js` for PM2 configuration
+6. Configure Nginx (if using VPS)
+```nginx
+server {
+    listen 80;
+    server_name your-domain.com;
+
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+```
+
+7. Set Up SSL Certificate
+- Use Hostinger's auto SSL feature or install Let's Encrypt
+- Enable HTTPS in nginx configuration
+
+### Database Setup
+1. Create a PostgreSQL database in Hostinger's control panel
+2. Update the DATABASE_URL in your .env file
+3. Run database migrations:
+```bash
+npm run db:migrate
+```
+
+### File Upload Configuration
+1. Create uploads directory:
+```bash
+mkdir uploads
+chmod 755 uploads
+```
+
+2. Configure nginx to serve uploaded files:
+```nginx
+location /uploads {
+    alias /path/to/your/uploads;
+}
+```
+
+### Troubleshooting
+- Check application logs: `pm2 logs`
+- Monitor application: `pm2 monit`
+- Nginx logs: `/var/log/nginx/error.log`
 
 ## Project Structure
 
@@ -156,7 +223,6 @@ For other deployment options, see:
 │   │   ├── lib/          # Utility functions and configurations
 │   │   └── pages/        # Page components
 ├── server/                # Backend Express application
-│   ├── api/              # Serverless API routes
 │   ├── routes.ts         # API routes
 │   ├── auth.ts           # Authentication logic
 │   └── storage.ts        # Database operations

@@ -1,35 +1,62 @@
 import { createContext, ReactNode, useContext } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import {
+  useQuery,
+  useMutation,
+  UseMutationResult,
+} from "@tanstack/react-query";
+import { insertUserSchema, User as SelectUser, InsertUser } from "@shared/schema";
+import { getQueryFn, apiRequest, queryClient } from "../lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import type { User as SelectUser } from "@shared/schema";
+import { useTranslation } from "react-i18next";
 
-interface LoginData {
-  username: string;
-  password: string;
-}
-
-interface AuthContextType {
+type AuthContextType = {
   user: SelectUser | null;
   isLoading: boolean;
   error: Error | null;
-  loginMutation: ReturnType<typeof useLoginMutation>;
-  logoutMutation: ReturnType<typeof useLogoutMutation>;
-}
+  loginMutation: UseMutationResult<SelectUser, Error, LoginData>;
+  logoutMutation: UseMutationResult<void, Error, void>;
+  registerMutation: UseMutationResult<SelectUser, Error, InsertUser>;
+};
 
-const AuthContext = createContext<AuthContextType | null>(null);
+type LoginData = Pick<InsertUser, "username" | "password"> & { role?: string };
 
-function useLoginMutation() {
+export const AuthContext = createContext<AuthContextType | null>(null);
+export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
+  const { t } = useTranslation();
+  const {
+    data: user,
+    error,
+    isLoading,
+  } = useQuery<SelectUser | undefined, Error>({
+    queryKey: ["/api/user"],
+    queryFn: getQueryFn({ on401: "returnNull" }),
+  });
 
-  return useMutation({
+  const loginMutation = useMutation({
     mutationFn: async (credentials: LoginData) => {
-      return await apiRequest('POST', 'api/login', credentials);
+      const res = await apiRequest("POST", "/api/login", credentials);
+      const userData = await res.json();
+
+      // Check if user is suspended - only during login
+      if (userData.status === 'suspended') {
+        toast({
+          title: t('notifications.accountSuspended'),
+          description: t('notifications.suspensionMessage'),
+          variant: "destructive",
+        });
+        return null;
+      }
+
+      return userData;
     },
-    onSuccess: (user: SelectUser) => {
-      queryClient.setQueryData(['api/user'], user);
-      const path = user.role === 'admin' ? '/admin-dashboard' : '/driver';
-      window.location.href = path;
+    onSuccess: (user: SelectUser | null) => {
+      if (user) {
+        queryClient.setQueryData(["/api/user"], user);
+        // Redirect based on user role
+        const redirectPath = user.role === "admin" ? "/admin-dashboard" : "/driver";
+        window.location.href = redirectPath;
+      }
     },
     onError: (error: Error) => {
       toast({
@@ -39,18 +66,44 @@ function useLoginMutation() {
       });
     },
   });
-}
 
-function useLogoutMutation() {
-  const { toast } = useToast();
-
-  return useMutation({
-    mutationFn: async () => {
-      await apiRequest('POST', 'api/logout');
+  const registerMutation = useMutation({
+    mutationFn: async (credentials: InsertUser) => {
+      // Clear any existing session first
+      await apiRequest("POST", "/api/logout");
       queryClient.clear();
+      queryClient.removeQueries();
+
+      const res = await apiRequest("POST", "/api/register", credentials);
+      const userData = await res.json();
+      return userData;
+    },
+    onSuccess: (user: SelectUser) => {
+      // Set the new user data
+      queryClient.setQueryData(["/api/user"], user);
+      // After registration, redirect to driver dashboard
+      window.location.href = "/driver";
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Registration failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const logoutMutation = useMutation({
+    mutationFn: async () => {
+      await apiRequest("POST", "/api/logout");
     },
     onSuccess: () => {
-      window.location.href = '/';
+      // Clear all queries and cached data
+      queryClient.clear();
+      queryClient.removeQueries();
+      queryClient.setQueryData(["/api/user"], null);
+      // After logout, redirect to home
+      window.location.href = "/";
     },
     onError: (error: Error) => {
       toast({
@@ -60,51 +113,16 @@ function useLogoutMutation() {
       });
     },
   });
-}
-
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const { toast } = useToast();
-
-  const {
-    data: user,
-    error,
-    isLoading,
-  } = useQuery<SelectUser | null>({
-    queryKey: ['api/user'],
-    queryFn: async () => {
-      try {
-        return await apiRequest('GET', 'api/user');
-      } catch (error) {
-        if (error instanceof Error && error.message.includes('401')) {
-          return null;
-        }
-        throw error;
-      }
-    },
-    retry: false,
-    onError: (error: Error) => {
-      if (!error.message.includes('401')) {
-        toast({
-          title: "Authentication Error",
-          description: error.message,
-          variant: "destructive",
-        });
-      }
-      return null;
-    },
-  });
-
-  const loginMutation = useLoginMutation();
-  const logoutMutation = useLogoutMutation();
 
   return (
     <AuthContext.Provider
       value={{
         user: user ?? null,
         isLoading,
-        error: error ?? null,
+        error,
         loginMutation,
         logoutMutation,
+        registerMutation,
       }}
     >
       {children}

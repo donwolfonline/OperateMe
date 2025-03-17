@@ -1,4 +1,4 @@
-import express from "express";
+import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import path from "path";
@@ -6,10 +6,8 @@ import { mkdir } from 'fs/promises';
 import { existsSync } from 'fs';
 
 const app = express();
-
-// Body parsing middleware should come before any routes
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: false }));
 
 // Serve uploaded files
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
@@ -18,12 +16,12 @@ app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
-  let capturedJsonResponse: any = undefined;
+  let capturedJsonResponse: Record<string, any> | undefined = undefined;
 
-  const originalJson = res.json;
-  res.json = function(body) {
-    capturedJsonResponse = body;
-    return originalJson.call(this, body);
+  const originalResJson = res.json;
+  res.json = function (bodyJson, ...args) {
+    capturedJsonResponse = bodyJson;
+    return originalResJson.apply(res, [bodyJson, ...args]);
   };
 
   res.on("finish", () => {
@@ -52,13 +50,15 @@ app.use((req, res, next) => {
 
     const server = await registerRoutes(app);
 
-    if (process.env.NODE_ENV !== "production") {
+    // Setup vite in development
+    if (app.get("env") === "development") {
       await setupVite(app, server);
     } else {
       serveStatic(app);
     }
 
-    const port = process.env.PORT || 5000;
+    // ALWAYS serve on port 5000 and bind to all network interfaces
+    const port = 5000;
     server.listen({
       port,
       host: "0.0.0.0",
@@ -67,6 +67,7 @@ app.use((req, res, next) => {
       log(`Server running on port ${port}`);
     });
 
+    // Handle server errors
     server.on('error', (error: any) => {
       log(`Server error: ${error.message}`);
       if (error.syscall !== 'listen') {

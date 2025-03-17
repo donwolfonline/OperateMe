@@ -1,57 +1,72 @@
-import { QueryClient } from "@tanstack/react-query";
+import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
-function getBaseUrl() {
-  return ''; // Empty string for relative URLs
+async function throwIfResNotOk(res: Response) {
+  if (!res.ok) {
+    try {
+      const errorData = await res.json();
+      throw new Error(errorData.message || res.statusText);
+    } catch (e) {
+      const text = await res.text();
+      throw new Error(`${res.status}: ${text || res.statusText}`);
+    }
+  }
 }
 
 export async function apiRequest(
   method: string,
-  endpoint: string,
-  data?: unknown,
-): Promise<any> {
-  const url = `${getBaseUrl()}/${endpoint}`;
+  url: string,
+  data?: unknown | FormData,
+): Promise<Response> {
+  const headers: Record<string, string> = {};
+  let body: string | FormData | undefined;
 
-  const config: RequestInit = {
-    method,
-    headers: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json'
-    },
-    credentials: 'include'
-  };
-
-  if (data) {
-    config.body = JSON.stringify(data);
+  if (data instanceof FormData) {
+    body = data;
+  } else if (data) {
+    headers["Content-Type"] = "application/json";
+    body = JSON.stringify(data);
   }
 
-  try {
-    const response = await fetch(url, config);
-    const contentType = response.headers.get('content-type');
+  const res = await fetch(url, {
+    method,
+    headers,
+    body,
+    credentials: "include",
+  });
 
-    if (!response.ok) {
-      if (contentType?.includes('application/json')) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || response.statusText);
-      }
-      throw new Error(response.statusText);
+  await throwIfResNotOk(res);
+  return res;
+}
+
+type UnauthorizedBehavior = "returnNull" | "throw";
+export const getQueryFn: <T>(options: {
+  on401: UnauthorizedBehavior;
+}) => QueryFunction<T> =
+  ({ on401: unauthorizedBehavior }) =>
+  async ({ queryKey }) => {
+    const res = await fetch(queryKey[0] as string, {
+      credentials: "include",
+    });
+
+    if (unauthorizedBehavior === "returnNull" && res.status === 401) {
+      return null;
     }
 
-    return contentType?.includes('application/json') ? response.json() : null;
-  } catch (error) {
-    console.error('API Request Error:', error);
-    throw error;
-  }
-}
+    await throwIfResNotOk(res);
+    return await res.json();
+  };
 
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: false,
+      queryFn: getQueryFn({ on401: "throw" }),
+      refetchInterval: false,
       refetchOnWindowFocus: false,
-      staleTime: Infinity
+      staleTime: Infinity,
+      retry: false,
     },
     mutations: {
-      retry: false
-    }
-  }
+      retry: false,
+    },
+  },
 });
