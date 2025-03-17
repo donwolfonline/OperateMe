@@ -24,13 +24,7 @@ function useLoginMutation() {
 
   return useMutation({
     mutationFn: async (credentials: LoginData) => {
-      try {
-        const response = await apiRequest('POST', 'api/login', credentials);
-        return response;
-      } catch (error) {
-        console.error('Login mutation error:', error);
-        throw error;
-      }
+      return await apiRequest('POST', 'api/login', credentials);
     },
     onSuccess: (user: SelectUser) => {
       queryClient.setQueryData(['api/user'], user);
