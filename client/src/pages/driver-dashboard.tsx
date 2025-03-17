@@ -8,53 +8,15 @@ import VehicleForm from "@/components/VehicleForm";
 import OperationOrder from "@/components/OperationOrder";
 import LanguageToggle from "@/components/LanguageToggle";
 import HomeButton from "@/components/HomeButton";
-import DashboardWidget from "@/components/DashboardWidget";
-import DashboardSettings from "@/components/DashboardSettings";
-import { Settings } from "lucide-react";
-import { useState } from "react";
 import { Redirect } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { FileText, Download, Calendar, MapPin, Users } from "lucide-react";
 import { OperationOrder as OperationOrderType } from "@shared/schema";
 import { Badge } from "@/components/ui/badge";
 
-
 function DriverDashboardContent() {
   const { t } = useTranslation();
   const { user, logoutMutation } = useAuth();
-  const [showSettings, setShowSettings] = useState(false);
-  const [widgets, setWidgets] = useState(user?.dashboardPreferences?.widgets || []);
-
-  const handleDragStart = (e: React.DragEvent, id: string) => {
-    e.dataTransfer.setData("widgetId", id);
-  };
-
-  const handleDragEnd = () => {
-    // Optional: Add any cleanup after drag
-  };
-
-  const handleDrop = (e: React.DragEvent, targetId: string) => {
-    e.preventDefault();
-    const sourceId = e.dataTransfer.getData("widgetId");
-
-    const newWidgets = [...widgets];
-    const sourceWidget = newWidgets.find(w => w.id === sourceId);
-    const targetWidget = newWidgets.find(w => w.id === targetId);
-
-    if (sourceWidget && targetWidget) {
-      const sourcePos = sourceWidget.position;
-      sourceWidget.position = targetWidget.position;
-      targetWidget.position = sourcePos;
-
-      setWidgets(newWidgets.sort((a, b) => a.position - b.position));
-    }
-  };
-
-  const handleRemoveWidget = (id: string) => {
-    setWidgets(widgets.map(widget => 
-      widget.id === id ? { ...widget, visible: false } : widget
-    ));
-  };
 
   const { data: driverOrders } = useQuery<(OperationOrderType & { passengers: any[]; pdfUrl?: string })[]>({
     queryKey: ["/api/driver/orders"],
@@ -66,14 +28,7 @@ function DriverDashboardContent() {
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
           <HomeButton />
-          <div className="flex gap-4 items-center">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setShowSettings(true)}
-            >
-              <Settings className="h-4 w-4" />
-            </Button>
+          <div className="flex gap-4">
             <LanguageToggle />
             <button
               onClick={() => logoutMutation.mutate()}
@@ -84,28 +39,6 @@ function DriverDashboardContent() {
           </div>
         </div>
 
-        {/* Dashboard Widgets */}
-        <div className={`grid gap-4 mb-8 ${
-          user?.dashboardPreferences?.layout === 'list' 
-            ? 'grid-cols-1' 
-            : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
-        }`}>
-          {widgets
-            .filter(widget => widget.visible)
-            .sort((a, b) => a.position - b.position)
-            .map(widget => (
-              <DashboardWidget
-                key={widget.id}
-                widget={widget}
-                onRemove={handleRemoveWidget}
-                onDragStart={handleDragStart}
-                onDragEnd={handleDragEnd}
-                onDrop={handleDrop}
-              />
-            ))}
-        </div>
-
-        {/* Tabs for other sections */}
         <Tabs defaultValue="profile" className="space-y-4">
           <TabsList>
             <TabsTrigger value="profile">{t('driver.profile')}</TabsTrigger>
@@ -224,11 +157,6 @@ function DriverDashboardContent() {
             </Card>
           </TabsContent>
         </Tabs>
-
-        {/* Dashboard Settings Modal */}
-        {showSettings && (
-          <DashboardSettings onClose={() => setShowSettings(false)} />
-        )}
       </div>
     </div>
   );

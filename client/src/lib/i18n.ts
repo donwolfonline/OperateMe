@@ -4,33 +4,6 @@ import { initReactI18next } from 'react-i18next';
 const resources = {
   en: {
     translation: {
-      dashboard: {
-        widgets: {
-          orders: 'Recent Orders',
-          stats: 'Statistics',
-          chart: 'Activity Chart',
-          notifications: 'Notifications',
-        },
-        customize: {
-          title: 'Customize Dashboard',
-          layout: 'Layout',
-          theme: 'Theme',
-          grid: 'Grid View',
-          list: 'List View',
-          light: 'Light Theme',
-          dark: 'Dark Theme',
-          saveChanges: 'Save Changes',
-          dragToReorder: 'Drag widgets to reorder',
-          hideWidget: 'Hide Widget',
-          showWidget: 'Show Widget',
-          settings: 'Widget Settings',
-        },
-        recentOrders: 'Recent Orders',
-        totalOrders: 'Total Orders',
-        activeOrders: 'Active Orders',
-        orderActivity: 'Order Activity',
-        noNewNotifications: 'No new notifications',
-      },
       notifications: {
         success: "Success",
         error: "Error",
@@ -69,7 +42,8 @@ const resources = {
         password: "Password",
         fullName: "Full Name",
         idNumber: "ID Number",
-        licenseNumber: "License Number"
+        licenseNumber: "License Number",
+        uniqueId: "Unique Identifier"
       },
       driver: {
         profile: "Driver Profile",
@@ -141,39 +115,13 @@ const resources = {
       common: {
         logout: "Logout",
         saving: "Saving...",
-        error: "Error"
+        error: "Error",
+        cancel: "Cancel"
       }
     }
   },
   ar: {
     translation: {
-      dashboard: {
-        widgets: {
-          orders: 'الطلبات الأخيرة',
-          stats: 'الإحصائيات',
-          chart: 'مخطط النشاط',
-          notifications: 'الإشعارات',
-        },
-        customize: {
-          title: 'تخصيص لوحة القيادة',
-          layout: 'التخطيط',
-          theme: 'المظهر',
-          grid: 'عرض الشبكة',
-          list: 'عرض القائمة',
-          light: 'مظهر فاتح',
-          dark: 'مظهر داكن',
-          saveChanges: 'حفظ التغييرات',
-          dragToReorder: 'اسحب العناصر لإعادة الترتيب',
-          hideWidget: 'إخفاء العنصر',
-          showWidget: 'إظهار العنصر',
-          settings: 'إعدادات العنصر',
-        },
-        recentOrders: 'الطلبات الأخيرة',
-        totalOrders: 'إجمالي الطلبات',
-        activeOrders: 'الطلبات النشطة',
-        orderActivity: 'نشاط الطلبات',
-        noNewNotifications: 'لا توجد إشعارات جديدة',
-      },
       notifications: {
         success: "نجاح",
         error: "خطأ",
@@ -212,7 +160,8 @@ const resources = {
         password: "كلمة المرور",
         fullName: "الاسم الكامل",
         idNumber: "رقم الهوية",
-        licenseNumber: "رقم الرخصة"
+        licenseNumber: "رقم الرخصة",
+        uniqueId: "المعرف الفريد"
       },
       driver: {
         profile: "ملف السائق",
@@ -284,39 +233,13 @@ const resources = {
       common: {
         logout: "تسجيل الخروج",
         saving: "جاري الحفظ...",
-        error: "خطأ"
+        error: "خطأ",
+        cancel: "إلغاء"
       }
     }
   },
   ur: {
     translation: {
-      dashboard: {
-        widgets: {
-          orders: 'حالیہ آرڈرز',
-          stats: 'شماریات',
-          chart: 'سرگرمی چارٹ',
-          notifications: 'اطلاعات',
-        },
-        customize: {
-          title: 'ڈیش بورڈ کی تخصیص',
-          layout: 'لے آؤٹ',
-          theme: 'تھیم',
-          grid: 'گرڈ ویو',
-          list: 'لسٹ ویو',
-          light: 'لائٹ تھیم',
-          dark: 'ڈارک تھیم',
-          saveChanges: 'تبدیلیاں محفوظ کریں',
-          dragToReorder: 'ترتیب کے لیے گھسیٹیں',
-          hideWidget: 'ویجیٹ چھپائیں',
-          showWidget: 'ویجیٹ دکھائیں',
-          settings: 'ویجیٹ کی ترتیبات',
-        },
-        recentOrders: 'حالیہ آرڈرز',
-        totalOrders: 'کل آرڈرز',
-        activeOrders: 'فعال آرڈرز',
-        orderActivity: 'آرڈر سرگرمی',
-        noNewNotifications: 'کوئی نئی اطلاع نہیں',
-      },
       notifications: {
         success: "کامیابی",
         error: "خطا",
@@ -355,7 +278,8 @@ const resources = {
         password: "پاس ورڈ",
         fullName: "پورا نام",
         idNumber: "شناختی نمبر",
-        licenseNumber: "لائسنس نمبر"
+        licenseNumber: "لائسنس نمبر",
+        uniqueId: "منفرد شناخت"
       },
       driver: {
         profile: "ڈرائیور پروفائل",
@@ -427,7 +351,8 @@ const resources = {
       common: {
         logout: "لاگ آؤٹ",
         saving: "محفوظ کیا جا رہا ہے...",
-        error: "خطا"
+        error: "خطا",
+        cancel: "منسوخ کریں"
       }
     }
   }

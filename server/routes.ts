@@ -238,7 +238,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(400).json({ message: "Invalid status" });
     }
 
-    // Update both status and isApproved
     const user = await storage.updateDriver(parseInt(req.params.id), {
       status,
       isApproved: status === "active"
@@ -253,7 +252,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const details = await storage.getDriverDetails(parseInt(req.params.id));
     if (!details) return res.sendStatus(404);
 
-    // Get passengers for each order
     const ordersWithPassengers = await Promise.all(details.orders.map(async (order) => {
       const passengers = await storage.getPassengersByOrder(order.id);
       return { ...order, passengers };
@@ -265,12 +263,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
-  // Modify the getAllOperationOrders route to include visa type
   app.get("/api/admin/all-orders", async (req, res) => {
     if (!req.user || req.user.role !== "admin") return res.sendStatus(403);
     const orders = await storage.getAllOperationOrders();
 
-    // Get passengers and driver info for each order
     const ordersWithDetails = await Promise.all(orders.map(async (order) => {
       const passengers = await storage.getPassengersByOrder(order.id);
       const driver = await storage.getUser(order.driverId);
@@ -279,7 +275,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         passengers,
         driver: {
           fullName: driver?.fullName,
-          idNumber: driver?.idNumber
+          uid: driver?.uid
         }
       };
     }));
@@ -287,14 +283,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(ordersWithDetails);
   });
 
-
   app.get("/api/driver/orders", async (req, res) => {
     if (!req.user) return res.sendStatus(401);
     try {
-      // Get all orders for the driver
       const orders = await storage.getOperationOrdersByDriver(req.user.id);
-
-      // Get passengers for each order and combine the data
       const ordersWithDetails = await Promise.all(orders.map(async (order) => {
         const passengers = await storage.getPassengersByOrder(order.id);
         return {
@@ -308,24 +300,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error fetching driver orders:', error);
       res.status(500).json({ message: "Error fetching orders" });
-    }
-  });
-
-  // Add user preferences update endpoint
-  app.patch("/api/user/preferences", async (req, res) => {
-    try {
-      if (!req.user) return res.sendStatus(401);
-
-      const user = await storage.getUser(req.user.id);
-      if (!user) return res.sendStatus(404);
-
-      // Update dashboard preferences
-      user.dashboardPreferences = req.body.dashboardPreferences;
-      const updatedUser = await storage.updateUser(user);
-
-      res.json(updatedUser);
-    } catch (error: any) {
-      res.status(400).json({ message: error.message });
     }
   });
 

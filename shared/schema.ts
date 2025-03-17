@@ -16,26 +16,6 @@ export const users = pgTable("users", {
   idDocumentUrl: text("id_document_url"),
   licenseDocumentUrl: text("license_document_url"),
   profileImageUrl: text("profile_image_url"),
-  dashboardPreferences: json("dashboard_preferences").$type<{
-    layout: 'grid' | 'list';
-    theme: 'light' | 'dark';
-    widgets: {
-      id: string;
-      type: 'orders' | 'stats' | 'chart' | 'notifications';
-      position: number;
-      visible: boolean;
-      settings?: Record<string, any>;
-    }[];
-  }>().default({
-    layout: 'grid',
-    theme: 'light',
-    widgets: [
-      { id: 'recent-orders', type: 'orders', position: 0, visible: true },
-      { id: 'stats', type: 'stats', position: 1, visible: true },
-      { id: 'activity-chart', type: 'chart', position: 2, visible: true },
-      { id: 'notifications', type: 'notifications', position: 3, visible: true }
-    ]
-  }),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -81,18 +61,6 @@ export const insertUserSchema = createInsertSchema(users).pick({
   fullName: true,
   idNumber: true,
   licenseNumber: true,
-}).extend({
-  dashboardPreferences: z.object({
-    layout: z.enum(['grid', 'list']).optional(),
-    theme: z.enum(['light', 'dark']).optional(),
-    widgets: z.array(z.object({
-      id: z.string(),
-      type: z.enum(['orders', 'stats', 'chart', 'notifications']),
-      position: z.number(),
-      visible: z.boolean(),
-      settings: z.record(z.any()).optional()
-    })).optional()
-  }).optional()
 });
 
 export const insertVehicleSchema = createInsertSchema(vehicles).pick({
