@@ -4,8 +4,8 @@ import { randomBytes } from 'crypto';
 function generateUID(role: string, id: number) {
   const prefix = role === 'admin' ? 'ADM' : 'DRV';
   const timestamp = Date.now().toString(36);
-  const randomSuffix = Math.random().toString(36).substring(2, 5);
-  return `${prefix}-${id}${timestamp}${randomSuffix}`.toUpperCase();
+  const randomSuffix = randomBytes(4).toString('hex');
+  return `${prefix}-${timestamp}${randomSuffix}`.toUpperCase();
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -27,9 +27,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(400).json({ message: 'Missing required fields' });
       }
 
+      console.log('Registration attempt for username:', username); // Debug log
+
       // Generate a unique ID for the new driver
       const id = Date.now();
       const uid = generateUID('driver', id);
+
+      console.log('Generated UID:', uid); // Debug log
 
       // Create new driver object
       const newDriver = {
@@ -45,6 +49,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         createdAt: new Date().toISOString()
       };
 
+      console.log('Created new driver:', newDriver); // Debug log
       return res.status(201).json(newDriver);
     } catch (error) {
       console.error('Registration error:', error);

@@ -23,8 +23,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(400).json({ message: 'Username and password are required' });
       }
 
+      console.log('Login attempt for username:', username); // Debug log
+
       // Check admin credentials
       if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+        console.log('Admin login successful'); // Debug log
         return res.status(200).json({
           id: 1,
           uid: 'ADM-1',
@@ -37,6 +40,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         });
       }
 
+      console.log('Login failed: Invalid credentials'); // Debug log
       return res.status(401).json({ message: 'Invalid credentials' });
     } catch (error) {
       console.error('Login error:', error);
