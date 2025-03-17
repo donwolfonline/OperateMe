@@ -50,15 +50,23 @@ app.use((req, res, next) => {
 
     const server = await registerRoutes(app);
 
-    // Setup vite in development
-    if (app.get("env") === "development") {
+    // Setup vite in development, serve static files in production
+    if (process.env.NODE_ENV !== "production") {
       await setupVite(app, server);
     } else {
-      serveStatic(app);
+      const staticPath = path.join(process.cwd(), 'dist', 'public');
+      app.use(express.static(staticPath));
+
+      // Serve index.html for all non-API routes in production
+      app.get('*', (req, res) => {
+        if (!req.path.startsWith('/api')) {
+          res.sendFile(path.join(staticPath, 'index.html'));
+        }
+      });
     }
 
     // ALWAYS serve on port 5000 and bind to all network interfaces
-    const port = 5000;
+    const port = process.env.PORT || 5000;
     server.listen({
       port,
       host: "0.0.0.0",

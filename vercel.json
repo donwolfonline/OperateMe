@@ -21,13 +21,7 @@
     },
     {
       "source": "/(.*)",
-      "destination": "$1",
-      "missing": [
-        {
-          "type": "file",
-          "value": "dist/public/$1"
-        }
-      ]
+      "destination": "/index.html"
     }
   ],
   "headers": [
