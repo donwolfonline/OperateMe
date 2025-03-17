@@ -9,12 +9,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { insertUserSchema } from "@shared/schema";
 import LanguageToggle from "@/components/LanguageToggle";
 import HomeButton from "@/components/HomeButton";
+import { Redirect } from "wouter";
 
 export default function AdminLoginPage() {
   const { t } = useTranslation();
   const { user, loginMutation } = useAuth();
-
-  if (user) return null;
 
   const loginForm = useForm({
     resolver: zodResolver(
@@ -31,6 +30,14 @@ export default function AdminLoginPage() {
       role: "admin"
     });
   };
+
+  if (user) {
+    if (user.role === "admin") {
+      return <Redirect to="/admin" />;
+    } else {
+      return <Redirect to="/driver" />;
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-secondary p-4">
