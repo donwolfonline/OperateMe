@@ -71,6 +71,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     queryFn: () => apiRequest('GET', 'api/user'),
     retry: false,
     onError: (error: Error) => {
+      // Don't show toast for 401 errors as they're expected when not logged in
       if (!error.message.includes('401')) {
         toast({
           title: "Authentication Error",

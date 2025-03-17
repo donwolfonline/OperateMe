@@ -1,12 +1,18 @@
 import { QueryClient } from "@tanstack/react-query";
 
+function normalizeUrl(endpoint: string): string {
+  const baseUrl = window.location.origin;
+  // Remove any leading slashes from endpoint and combine with baseUrl
+  const normalizedEndpoint = endpoint.replace(/^\/+/, '');
+  return `${baseUrl}/${normalizedEndpoint}`;
+}
+
 export async function apiRequest(
   method: string,
   endpoint: string,
   data?: unknown,
 ): Promise<any> {
-  const baseUrl = window.location.origin;
-  const url = `${baseUrl}/${endpoint}`;
+  const url = normalizeUrl(endpoint);
 
   const config: RequestInit = {
     method,
@@ -26,13 +32,18 @@ export async function apiRequest(
     const contentType = response.headers.get('content-type');
 
     if (!response.ok) {
-      const errorData = contentType?.includes('application/json') 
-        ? await response.json() 
-        : { error: response.statusText };
-      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      if (contentType?.includes('application/json')) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || errorData.message || response.statusText);
+      }
+      throw new Error(response.statusText);
     }
 
-    return contentType?.includes('application/json') ? response.json() : null;
+    if (!contentType?.includes('application/json')) {
+      return null;
+    }
+
+    return response.json();
   } catch (error) {
     console.error('API Request Error:', error);
     throw error;
