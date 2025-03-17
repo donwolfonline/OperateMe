@@ -53,7 +53,8 @@ const resources = {
         newOrder: "New Operation Order",
         uploadId: "Upload ID Document",
         uploadLicense: "Upload License Document",
-        uploadProfileImage: "Upload Profile Image"
+        uploadProfileImage: "Upload Profile Image",
+        uniqueId: "Unique Identifier"
       },
       vehicle: {
         type: "Vehicle Type",
@@ -166,7 +167,8 @@ const resources = {
         newOrder: "أمر تشغيل جديد",
         uploadId: "رفع صورة الهوية",
         uploadLicense: "رفع صورة الرخصة",
-        uploadProfileImage: "رفع صورة الملف الشخصي"
+        uploadProfileImage: "رفع صورة الملف الشخصي",
+        uniqueId: "المعرف الفريد"
       },
       vehicle: {
         type: "نوع المركبة",
@@ -279,7 +281,8 @@ const resources = {
         newOrder: "نیا آپریشن آرڈر",
         uploadId: "شناختی دستاویز اپلوڈ کریں",
         uploadLicense: "لائسنس دستاویز اپلوڈ کریں",
-        uploadProfileImage: "پروفائل تصویر اپلوڈ کریں"
+        uploadProfileImage: "پروفائل تصویر اپلوڈ کریں",
+        uniqueId: "منفرد شناخت"
       },
       vehicle: {
         type: "گاڑی کی قسم",
@@ -347,7 +350,7 @@ i18n
   .use(initReactI18next)
   .init({
     resources,
-    lng: "ar", // default language
+    lng: "ar",
     fallbackLng: "ar",
     interpolation: {
       escapeValue: false

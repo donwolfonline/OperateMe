@@ -102,6 +102,17 @@ export default function DriverProfile() {
               </AvatarFallback>
             )}
           </Avatar>
+
+          {/* Add UID display here */}
+          <div className="text-center">
+            <div className="text-sm font-medium text-muted-foreground">
+              {t('driver.uniqueId')}
+            </div>
+            <div className="text-lg font-bold">
+              {user.uid}
+            </div>
+          </div>
+
           {!profilePreview && (
             <div>
               <input

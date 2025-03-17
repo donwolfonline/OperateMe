@@ -81,6 +81,9 @@ export default function AdminDashboard() {
               <p className="font-medium">{driver.fullName}</p>
             </div>
             <p className="text-sm text-muted-foreground">
+              UID: {driver.uid}
+            </p>
+            <p className="text-sm text-muted-foreground">
               {t('auth.idNumber')}: {driver.idNumber}
             </p>
             <p className="text-sm text-muted-foreground">
