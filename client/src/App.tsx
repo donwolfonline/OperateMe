@@ -19,12 +19,12 @@ function Router() {
       <Route path="/auth" component={DriverLoginPage} />
       <Route path="/admin" component={AdminLoginPage} />
       <Route path="/register" component={RegisterPage} />
-      <Route path="/driver">
+      <Route path="/driver" component={() => (
         <ProtectedRoute component={DriverDashboard} requiredRole="driver" />
-      </Route>
-      <Route path="/admin-dashboard">
+      )} />
+      <Route path="/admin-dashboard" component={() => (
         <ProtectedRoute component={AdminDashboard} requiredRole="admin" />
-      </Route>
+      )} />
       <Route component={NotFound} />
     </Switch>
   );
