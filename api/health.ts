@@ -10,13 +10,23 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(200).end();
   }
 
-  res.status(200).json({
-    status: 'ok',
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development',
-    vercel: process.env.VERCEL === '1',
-    path: req.url
-  });
+  try {
+    res.status(200).json({
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development',
+      vercel: process.env.VERCEL === '1',
+      url: req.url,
+      headers: req.headers,
+      runtime: 'vercel'
+    });
+  } catch (error) {
+    console.error('Health check error:', error);
+    res.status(500).json({
+      error: 'Internal Server Error',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
 }
 
 export const config = {
