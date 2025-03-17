@@ -2,7 +2,6 @@
   "version": 2,
   "buildCommand": "npm run build",
   "outputDirectory": "dist/public",
-  "installCommand": "npm install",
   "builds": [
     {
       "src": "server/api/**/*.ts",
@@ -12,14 +11,10 @@
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "/server/api/$1"
+      "dest": "/api/$1"
     },
     {
       "handle": "filesystem"
-    },
-    {
-      "src": "^/assets/(.*)",
-      "dest": "/assets/$1"
     },
     {
       "src": "/(.*)",
