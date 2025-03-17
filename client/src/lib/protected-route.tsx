@@ -1,6 +1,7 @@
 import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
 import { Redirect } from "wouter";
+import { useTranslation } from "react-i18next";
 
 type ProtectedRouteProps = {
   component: () => React.JSX.Element;
@@ -16,6 +17,7 @@ export function ProtectedRoute({
   requiredRole,
 }: ProtectedRouteProps) {
   const { user, isLoading } = useAuth();
+  const { t } = useTranslation();
 
   if (isLoading) {
     return (
@@ -51,8 +53,12 @@ export function ProtectedRoute({
       <AuthWrapper>
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
-            <h2 className="text-xl font-semibold text-destructive">Account Suspended</h2>
-            <p className="mt-2 text-muted-foreground">Your account has been suspended. Please contact administrator.</p>
+            <h2 className="text-xl font-semibold text-destructive">
+              {t('notifications.accountSuspended')}
+            </h2>
+            <p className="mt-2 text-muted-foreground">
+              {t('notifications.suspensionMessage')}
+            </p>
           </div>
         </div>
       </AuthWrapper>

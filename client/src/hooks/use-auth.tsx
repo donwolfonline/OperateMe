@@ -7,6 +7,7 @@ import {
 import { insertUserSchema, User as SelectUser, InsertUser } from "@shared/schema";
 import { getQueryFn, apiRequest, queryClient } from "../lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 
 type AuthContextType = {
   user: SelectUser | null;
@@ -22,6 +23,7 @@ type LoginData = Pick<InsertUser, "username" | "password"> & { role?: string };
 export const AuthContext = createContext<AuthContextType | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
+  const { t } = useTranslation();
   const {
     data: user,
     error,
@@ -39,8 +41,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Check if user is suspended
       if (userData.status === 'suspended') {
         toast({
-          title: "Account Suspended",
-          description: "Your account has been suspended. Please contact administrator.",
+          title: t('notifications.accountSuspended'),
+          description: t('notifications.suspensionMessage'),
           variant: "destructive",
         });
         return null;

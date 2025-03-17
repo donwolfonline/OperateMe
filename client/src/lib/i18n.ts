@@ -21,7 +21,9 @@ const resources = {
         maxFileSize: "File size exceeds limit",
         savingChanges: "Saving changes...",
         changesSaved: "Changes saved successfully",
-        viewDocument: "View uploaded document"
+        viewDocument: "View uploaded document",
+        accountSuspended: "Account Suspended",
+        suspensionMessage: "Your account has been suspended. Please contact administrator."
       },
       landing: {
         title: "Road Lightning Transport",
@@ -132,7 +134,9 @@ const resources = {
         maxFileSize: "حجم الملف يتجاوز الحد المسموح",
         savingChanges: "جاري حفظ التغييرات...",
         changesSaved: "تم حفظ التغييرات بنجاح",
-        viewDocument: "عرض المستند المرفوع"
+        viewDocument: "عرض المستند المرفوع",
+        accountSuspended: "الحساب معلق",
+        suspensionMessage: "تم تعليق حسابك. يرجى الاتصال بالمسؤول."
       },
       landing: {
         title: "صاعقة الطريق للنقل",
@@ -243,7 +247,9 @@ const resources = {
         maxFileSize: "فائل کا سائز حد سے زیادہ ہے",
         savingChanges: "تبدیلیاں محفوظ کی جا رہی ہیں...",
         changesSaved: "تبدیلیاں کامیابی سے محفوظ ہو گئیں",
-        viewDocument: "اپ لوڈ کردہ دستاویز دیکھیں"
+        viewDocument: "اپ لوڈ کردہ دستاویز دیکھیں",
+        accountSuspended: "اکاؤنٹ معطل",
+        suspensionMessage: "آپ کا اکاؤنٹ معطل کر دیا گیا ہے۔ براہ کرم منتظم سے رابطہ کریں۔"
       },
       landing: {
         title: "روڈ لائٹننگ ٹرانسپورٹ",
