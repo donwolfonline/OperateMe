@@ -7,15 +7,17 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar as CalendarIcon, X } from "lucide-react";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
+import { User } from "@shared/schema";
 
 interface SearchAndFilterProps {
   onSearch: (searchTerm: string) => void;
   onFilter: (filters: any) => void;
   type: 'drivers' | 'orders' | 'documents';
   className?: string;
+  driversList?: User[];
 }
 
-export default function SearchAndFilter({ onSearch, onFilter, type, className }: SearchAndFilterProps) {
+export default function SearchAndFilter({ onSearch, onFilter, type, className, driversList }: SearchAndFilterProps) {
   const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
   const [date, setDate] = useState<Date>();
@@ -62,6 +64,21 @@ export default function SearchAndFilter({ onSearch, onFilter, type, className }:
               <SelectItem value="month">{t('filter.thisMonth')}</SelectItem>
             </SelectContent>
           </Select>
+
+          {driversList && driversList.length > 0 && (
+            <Select onValueChange={(value) => handleFilterChange('driverName', value)}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder={t('filter.selectDriver')} />
+              </SelectTrigger>
+              <SelectContent>
+                {driversList.map((driver) => (
+                  <SelectItem key={driver.id} value={driver.fullName || ''}>
+                    {driver.fullName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
         </>
       )}
 

@@ -136,6 +136,7 @@ const resources = {
         licenseDocument: "License Document",
         registrationDocument: "Registration Document",
         clearAll: "Clear all filters",
+        selectDriver: "Select Driver"
       }
     }
   },
@@ -273,6 +274,7 @@ const resources = {
         licenseDocument: "وثيقة الرخصة",
         registrationDocument: "وثيقة التسجيل",
         clearAll: "مسح جميع عوامل التصفية",
+        selectDriver: "اختر السائق"
       }
     }
   },
@@ -410,6 +412,7 @@ const resources = {
         licenseDocument: "لائسنس دستاویز",
         registrationDocument: "رجسٹریشن دستاویز",
         clearAll: "تمام فلٹرز صاف کریں",
+        selectDriver: "ڈرائیور منتخب کریں"
       }
     }
   }

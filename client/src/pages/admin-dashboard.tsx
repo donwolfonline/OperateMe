@@ -210,17 +210,17 @@ export default function AdminDashboard() {
     if (!drivers) return [];
 
     return drivers.filter(driver => {
-      const matchesSearch = searchTerm === "" || 
+      const matchesSearch = searchTerm === "" ||
         driver.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         driver.uid?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         driver.idNumber?.toLowerCase().includes(searchTerm.toLowerCase());
 
-      const matchesFilters = Object.keys(activeFilters).length === 0 || 
+      const matchesFilters = Object.keys(activeFilters).length === 0 ||
         Object.entries(activeFilters).every(([key, value]) => {
           if (key === 'registrationDate') {
             const driverDate = new Date(driver.createdAt);
             const today = new Date();
-            switch(value) {
+            switch (value) {
               case 'today':
                 return driverDate.toDateString() === today.toDateString();
               case 'week':
@@ -233,6 +233,9 @@ export default function AdminDashboard() {
                 return true;
             }
           }
+          if (key === 'driverName') {
+            return driver.fullName === value;
+          }
           return true;
         });
 
@@ -244,12 +247,12 @@ export default function AdminDashboard() {
     if (!orders) return [];
 
     return orders.filter(order => {
-      const matchesSearch = searchTerm === "" || 
+      const matchesSearch = searchTerm === "" ||
         order.tripNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         order.fromCity?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         order.toCity?.toLowerCase().includes(searchTerm.toLowerCase());
 
-      const matchesFilters = Object.keys(activeFilters).length === 0 || 
+      const matchesFilters = Object.keys(activeFilters).length === 0 ||
         Object.entries(activeFilters).every(([key, value]) => {
           if (key === 'status') return order.status === value;
           if (key === 'date') {
@@ -264,16 +267,16 @@ export default function AdminDashboard() {
     });
   };
 
-  const filteredPendingDrivers = useMemo(() => 
+  const filteredPendingDrivers = useMemo(() =>
     filterDrivers(pendingDrivers), [pendingDrivers, searchTerm, activeFilters]);
 
-  const filteredActiveDrivers = useMemo(() => 
+  const filteredActiveDrivers = useMemo(() =>
     filterDrivers(activeDrivers), [activeDrivers, searchTerm, activeFilters]);
 
-  const filteredSuspendedDrivers = useMemo(() => 
+  const filteredSuspendedDrivers = useMemo(() =>
     filterDrivers(suspendedDrivers), [suspendedDrivers, searchTerm, activeFilters]);
 
-  const filteredOrders = useMemo(() => 
+  const filteredOrders = useMemo(() =>
     filterOrders(allOrders), [allOrders, searchTerm, activeFilters]);
 
 
@@ -317,6 +320,7 @@ export default function AdminDashboard() {
                     onSearch={setSearchTerm}
                     onFilter={setActiveFilters}
                     className="mb-4"
+                    driversList={pendingDrivers}
                   />
                   {filteredPendingDrivers?.length === 0 ? (
                     <p className="text-muted-foreground text-center py-4">{t('admin.noDrivers')}</p>
@@ -340,6 +344,7 @@ export default function AdminDashboard() {
                     onSearch={setSearchTerm}
                     onFilter={setActiveFilters}
                     className="mb-4"
+                    driversList={activeDrivers}
                   />
                   {filteredActiveDrivers?.length === 0 ? (
                     <p className="text-muted-foreground text-center py-4">{t('admin.noActiveDrivers')}</p>
@@ -368,6 +373,7 @@ export default function AdminDashboard() {
                     onSearch={setSearchTerm}
                     onFilter={setActiveFilters}
                     className="mb-4"
+                    driversList={suspendedDrivers}
                   />
                   {filteredSuspendedDrivers?.length === 0 ? (
                     <p className="text-muted-foreground text-center py-4">{t('admin.noSuspendedDrivers')}</p>
