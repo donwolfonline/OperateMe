@@ -13,11 +13,14 @@ import { FileText, User as UserIcon, Car, FileCheck, Download, Calendar, MapPin,
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { UserCircle2 } from "lucide-react";
 import { Redirect } from "wouter";
-import React from 'react';
+import React, { useState, useMemo } from 'react';
+import SearchAndFilter from "@/components/SearchAndFilter";
 
 export default function AdminDashboard() {
   const { t } = useTranslation();
   const { user, logoutMutation } = useAuth();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [activeFilters, setActiveFilters] = useState({});
 
   const { data: pendingDrivers } = useQuery<User[]>({
     queryKey: ["/api/admin/pending-drivers"],
@@ -203,6 +206,77 @@ export default function AdminDashboard() {
     </Card>
   );
 
+  const filterDrivers = (drivers: User[] | undefined) => {
+    if (!drivers) return [];
+
+    return drivers.filter(driver => {
+      const matchesSearch = searchTerm === "" || 
+        driver.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        driver.uid?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        driver.idNumber?.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const matchesFilters = Object.keys(activeFilters).length === 0 || 
+        Object.entries(activeFilters).every(([key, value]) => {
+          if (key === 'registrationDate') {
+            const driverDate = new Date(driver.createdAt);
+            const today = new Date();
+            switch(value) {
+              case 'today':
+                return driverDate.toDateString() === today.toDateString();
+              case 'week':
+                const weekAgo = new Date(today.setDate(today.getDate() - 7));
+                return driverDate >= weekAgo;
+              case 'month':
+                const monthAgo = new Date(today.setMonth(today.getMonth() - 1));
+                return driverDate >= monthAgo;
+              default:
+                return true;
+            }
+          }
+          return true;
+        });
+
+      return matchesSearch && matchesFilters;
+    });
+  };
+
+  const filterOrders = (orders: (OperationOrder & { passengers: any[]; driver?: any })[] | undefined) => {
+    if (!orders) return [];
+
+    return orders.filter(order => {
+      const matchesSearch = searchTerm === "" || 
+        order.tripNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        order.fromCity?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        order.toCity?.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const matchesFilters = Object.keys(activeFilters).length === 0 || 
+        Object.entries(activeFilters).every(([key, value]) => {
+          if (key === 'status') return order.status === value;
+          if (key === 'date') {
+            const orderDate = new Date(order.departureTime);
+            const filterDate = new Date(value);
+            return orderDate.toDateString() === filterDate.toDateString();
+          }
+          return true;
+        });
+
+      return matchesSearch && matchesFilters;
+    });
+  };
+
+  const filteredPendingDrivers = useMemo(() => 
+    filterDrivers(pendingDrivers), [pendingDrivers, searchTerm, activeFilters]);
+
+  const filteredActiveDrivers = useMemo(() => 
+    filterDrivers(activeDrivers), [activeDrivers, searchTerm, activeFilters]);
+
+  const filteredSuspendedDrivers = useMemo(() => 
+    filterDrivers(suspendedDrivers), [suspendedDrivers, searchTerm, activeFilters]);
+
+  const filteredOrders = useMemo(() => 
+    filterOrders(allOrders), [allOrders, searchTerm, activeFilters]);
+
+
   return (
     <>
       <div className="min-h-screen bg-background">
@@ -238,11 +312,17 @@ export default function AdminDashboard() {
               <Card>
                 <CardContent className="p-6">
                   <h2 className="text-xl font-semibold mb-4">{t('admin.pendingDrivers')}</h2>
-                  {pendingDrivers?.length === 0 ? (
+                  <SearchAndFilter
+                    type="drivers"
+                    onSearch={setSearchTerm}
+                    onFilter={setActiveFilters}
+                    className="mb-4"
+                  />
+                  {filteredPendingDrivers?.length === 0 ? (
                     <p className="text-muted-foreground text-center py-4">{t('admin.noDrivers')}</p>
                   ) : (
                     <div className="space-y-4">
-                      {pendingDrivers?.map((driver) => renderDriverCard(driver, (
+                      {filteredPendingDrivers?.map((driver) => renderDriverCard(driver, (
                         <Button onClick={() => approveDriver(driver.id)}>{t('admin.approve')}</Button>
                       )))}
                     </div>
@@ -255,11 +335,17 @@ export default function AdminDashboard() {
               <Card>
                 <CardContent className="p-6">
                   <h2 className="text-xl font-semibold mb-4">{t('admin.activeDrivers')}</h2>
-                  {activeDrivers?.length === 0 ? (
+                  <SearchAndFilter
+                    type="drivers"
+                    onSearch={setSearchTerm}
+                    onFilter={setActiveFilters}
+                    className="mb-4"
+                  />
+                  {filteredActiveDrivers?.length === 0 ? (
                     <p className="text-muted-foreground text-center py-4">{t('admin.noActiveDrivers')}</p>
                   ) : (
                     <div className="space-y-4">
-                      {activeDrivers?.map((driver) => renderDriverCard(driver, (
+                      {filteredActiveDrivers?.map((driver) => renderDriverCard(driver, (
                         <Button
                           variant="destructive"
                           onClick={() => suspendDriver(driver.id)}
@@ -277,11 +363,17 @@ export default function AdminDashboard() {
               <Card>
                 <CardContent className="p-6">
                   <h2 className="text-xl font-semibold mb-4">{t('admin.suspendedDrivers')}</h2>
-                  {suspendedDrivers?.length === 0 ? (
+                  <SearchAndFilter
+                    type="drivers"
+                    onSearch={setSearchTerm}
+                    onFilter={setActiveFilters}
+                    className="mb-4"
+                  />
+                  {filteredSuspendedDrivers?.length === 0 ? (
                     <p className="text-muted-foreground text-center py-4">{t('admin.noSuspendedDrivers')}</p>
                   ) : (
                     <div className="space-y-4">
-                      {suspendedDrivers?.map((driver) => renderDriverCard(driver, (
+                      {filteredSuspendedDrivers?.map((driver) => renderDriverCard(driver, (
                         <Button
                           variant="outline"
                           onClick={() => activateDriver(driver.id)}
@@ -299,11 +391,17 @@ export default function AdminDashboard() {
               <Card>
                 <CardContent className="p-6">
                   <h2 className="text-xl font-semibold mb-4">{t('admin.allOrders')}</h2>
-                  {allOrders?.length === 0 ? (
+                  <SearchAndFilter
+                    type="orders"
+                    onSearch={setSearchTerm}
+                    onFilter={setActiveFilters}
+                    className="mb-4"
+                  />
+                  {filteredOrders?.length === 0 ? (
                     <p className="text-muted-foreground text-center py-4">{t('admin.noOrders')}</p>
                   ) : (
                     <div className="space-y-4">
-                      {allOrders?.map(renderOrderCard)}
+                      {filteredOrders?.map(renderOrderCard)}
                     </div>
                   )}
                 </CardContent>
@@ -314,6 +412,12 @@ export default function AdminDashboard() {
               <Card>
                 <CardContent className="p-6">
                   <h2 className="text-xl font-semibold mb-6">{t('admin.documents')}</h2>
+                  <SearchAndFilter
+                    type="documents"
+                    onSearch={setSearchTerm}
+                    onFilter={setActiveFilters}
+                    className="mb-4"
+                  />
                   {allOrders?.filter(order => order.pdfUrl).length === 0 ? (
                     <p className="text-muted-foreground text-center py-4">{t('admin.noDocuments')}</p>
                   ) : (

@@ -117,6 +117,25 @@ const resources = {
         saving: "Saving...",
         error: "Error",
         cancel: "Cancel"
+      },
+      search: {
+        placeholder: "Search...",
+      },
+      filter: {
+        registrationDate: "Registration Date",
+        today: "Today",
+        thisWeek: "This Week",
+        thisMonth: "This Month",
+        status: "Status",
+        active: "Active",
+        completed: "Completed",
+        cancelled: "Cancelled",
+        selectDate: "Select date",
+        documentType: "Document Type",
+        idDocument: "ID Document",
+        licenseDocument: "License Document",
+        registrationDocument: "Registration Document",
+        clearAll: "Clear all filters",
       }
     }
   },
@@ -235,6 +254,25 @@ const resources = {
         saving: "جاري الحفظ...",
         error: "خطأ",
         cancel: "إلغاء"
+      },
+      search: {
+        placeholder: "بحث...",
+      },
+      filter: {
+        registrationDate: "تاريخ التسجيل",
+        today: "اليوم",
+        thisWeek: "هذا الأسبوع",
+        thisMonth: "هذا الشهر",
+        status: "الحالة",
+        active: "نشط",
+        completed: "مكتمل",
+        cancelled: "ملغي",
+        selectDate: "اختر التاريخ",
+        documentType: "نوع المستند",
+        idDocument: "وثيقة الهوية",
+        licenseDocument: "وثيقة الرخصة",
+        registrationDocument: "وثيقة التسجيل",
+        clearAll: "مسح جميع عوامل التصفية",
       }
     }
   },
@@ -353,6 +391,25 @@ const resources = {
         saving: "محفوظ کیا جا رہا ہے...",
         error: "خطا",
         cancel: "منسوخ کریں"
+      },
+      search: {
+        placeholder: "تلاش...",
+      },
+      filter: {
+        registrationDate: "رجسٹریشن کی تاریخ",
+        today: "آج",
+        thisWeek: "اس ہفتے",
+        thisMonth: "اس مہینے",
+        status: "حالت",
+        active: "فعال",
+        completed: "مکمل",
+        cancelled: "منسوخ",
+        selectDate: "تاریخ منتخب کریں",
+        documentType: "دستاویز کی قسم",
+        idDocument: "شناختی دستاویز",
+        licenseDocument: "لائسنس دستاویز",
+        registrationDocument: "رجسٹریشن دستاویز",
+        clearAll: "تمام فلٹرز صاف کریں",
       }
     }
   }
