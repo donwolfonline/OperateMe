@@ -94,30 +94,57 @@ npm run dev
 
 ## Deployment
 
-### Files Included for Deployment
-- `deploy.sh` - Deployment script
-- `ecosystem.config.js` - PM2 configuration
-- `DEPLOY_HOSTINGER.md` - Detailed deployment guide
+### Vercel Deployment Steps
 
-### Required Environment Variables
+#### Prerequisites
+1. Node.js (v20.x or later)
+2. Vercel CLI
+3. PostgreSQL database (recommended: Neon for serverless compatibility)
+
+#### Deployment Steps
+
+1. Install Vercel CLI:
+```bash
+npm i -g vercel
+```
+
+2. Login to Vercel:
+```bash
+vercel login
+```
+
+3. Deploy to Vercel:
+```bash
+vercel
+```
+
+#### Environment Variables
+Set these in your Vercel project dashboard:
 ```env
-DATABASE_URL=your_postgresql_connection_string
+DATABASE_URL=your_neon_postgresql_connection_string
 SESSION_SECRET=your_session_secret
 NODE_ENV=production
-PORT=3000
 ```
 
-### Build Instructions
-```bash
-# Install dependencies
-npm install
+#### Important Notes
+- The application uses serverless functions for the API
+- Static assets are served through Vercel's CDN
+- Database connections are optimized for serverless environment
+- File uploads are handled through Vercel Blob Storage
 
-# Build frontend
-npm run build
+#### Troubleshooting
+If you encounter any issues:
+1. Check the Vercel deployment logs
+2. Verify environment variables are correctly set
+3. Ensure database connection string is properly formatted
+4. Check if all dependencies are properly installed
 
-# Start production server
-npm start
-```
+
+### Alternative Deployment Options
+For other deployment options, see:
+- `DEPLOY_HOSTINGER.md` for Hostinger deployment
+- `deploy.sh` for general deployment script
+- `ecosystem.config.js` for PM2 configuration
 
 ## Project Structure
 
@@ -129,6 +156,7 @@ npm start
 │   │   ├── lib/          # Utility functions and configurations
 │   │   └── pages/        # Page components
 ├── server/                # Backend Express application
+│   ├── api/              # Serverless API routes
 │   ├── routes.ts         # API routes
 │   ├── auth.ts           # Authentication logic
 │   └── storage.ts        # Database operations
