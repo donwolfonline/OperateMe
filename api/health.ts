@@ -12,7 +12,10 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
 
   res.status(200).json({
     status: 'ok',
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development',
+    vercel: process.env.VERCEL === '1',
+    path: req.url
   });
 }
 
