@@ -1,11 +1,11 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { randomBytes } from 'crypto';
 
-function generateUID(role: string, id: number) {
+function generateUID(role: string, id: number): string {
   const prefix = role === 'admin' ? 'ADM' : 'DRV';
   const timestamp = Date.now().toString(36);
-  const randomSuffix = randomBytes(4).toString('hex');
-  return `${prefix}-${timestamp}${randomSuffix}`.toUpperCase();
+  const randomSuffix = randomBytes(2).toString('hex');
+  return `${prefix}-${timestamp}-${randomSuffix}`.toUpperCase();
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -24,16 +24,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       // Basic validation
       if (!username || !password || !fullName) {
+        console.log('Registration failed: Missing required fields');
         return res.status(400).json({ message: 'Missing required fields' });
       }
 
-      console.log('Registration attempt for username:', username); // Debug log
+      console.log('Registration attempt for username:', username);
 
       // Generate a unique ID for the new driver
-      const id = Date.now();
+      const id = Math.floor(Date.now() / 1000);
       const uid = generateUID('driver', id);
 
-      console.log('Generated UID:', uid); // Debug log
+      console.log('Generated UID:', uid);
 
       // Create new driver object
       const newDriver = {
@@ -49,7 +50,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         createdAt: new Date().toISOString()
       };
 
-      console.log('Created new driver:', newDriver); // Debug log
+      console.log('Created new driver:', newDriver);
       return res.status(201).json(newDriver);
     } catch (error) {
       console.error('Registration error:', error);
