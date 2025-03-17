@@ -4,8 +4,8 @@ import {
   useMutation,
   UseMutationResult,
 } from "@tanstack/react-query";
-import { insertUserSchema, User as SelectUser, InsertUser } from "@shared/schema";
-import { getQueryFn, apiRequest, queryClient } from "../lib/queryClient";
+import { InsertUser, User as SelectUser } from "@shared/schema";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
 type AuthContextType = {
@@ -17,36 +17,41 @@ type AuthContextType = {
   registerMutation: UseMutationResult<SelectUser, Error, InsertUser>;
 };
 
-type LoginData = Pick<InsertUser, "username" | "password">;
+type LoginData = {
+  username: string;
+  password: string;
+};
 
 export const AuthContext = createContext<AuthContextType | null>(null);
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
+
   const {
     data: user,
     error,
     isLoading,
-  } = useQuery<SelectUser | undefined, Error>({
+  } = useQuery<SelectUser | null, Error>({
     queryKey: ["/api/user"],
-    queryFn: getQueryFn({ on401: "returnNull" }),
+    queryFn: async () => {
+      try {
+        return await apiRequest("GET", "/api/user");
+      } catch (error) {
+        if (error instanceof Error && error.message.includes("401")) {
+          return null;
+        }
+        throw error;
+      }
+    },
   });
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginData) => {
-      try {
-        const res = await apiRequest("POST", "/api/login", credentials);
-        const userData = await res.json();
-        return userData;
-      } catch (error) {
-        console.error('Login error:', error);
-        throw error;
-      }
+      return await apiRequest("POST", "/api/login", credentials);
     },
     onSuccess: (user: SelectUser) => {
       queryClient.setQueryData(["/api/user"], user);
-      // Redirect based on user role
-      const redirectPath = user.role === "admin" ? "/admin-dashboard" : "/driver";
-      window.location.href = redirectPath;
+      window.location.href = user.role === "admin" ? "/admin-dashboard" : "/driver";
     },
     onError: (error: Error) => {
       toast({
@@ -58,19 +63,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   });
 
   const registerMutation = useMutation({
-    mutationFn: async (credentials: InsertUser) => {
-      try {
-        const res = await apiRequest("POST", "/api/register", credentials);
-        const userData = await res.json();
-        return userData;
-      } catch (error) {
-        console.error('Registration error:', error);
-        throw error;
-      }
+    mutationFn: async (data: InsertUser) => {
+      return await apiRequest("POST", "/api/register", data);
     },
     onSuccess: (user: SelectUser) => {
       queryClient.setQueryData(["/api/user"], user);
-      // After registration, redirect to driver dashboard
       window.location.href = "/driver";
     },
     onError: (error: Error) => {
@@ -85,12 +82,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logoutMutation = useMutation({
     mutationFn: async () => {
       await apiRequest("POST", "/api/logout");
+      queryClient.clear();
     },
     onSuccess: () => {
-      queryClient.clear();
-      queryClient.removeQueries();
-      queryClient.setQueryData(["/api/user"], null);
-      // After logout, redirect to home
       window.location.href = "/";
     },
     onError: (error: Error) => {
