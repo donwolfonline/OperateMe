@@ -38,16 +38,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       // Check if user is suspended
       if (userData.status === 'suspended') {
-        throw new Error("Your account has been suspended. Please contact administrator.");
+        toast({
+          title: "Account Suspended",
+          description: "Your account has been suspended. Please contact administrator.",
+          variant: "destructive",
+        });
+        return null;
       }
 
       return userData;
     },
-    onSuccess: (user: SelectUser) => {
-      queryClient.setQueryData(["/api/user"], user);
-      // Redirect based on user role
-      const redirectPath = user.role === "admin" ? "/admin-dashboard" : "/driver";
-      window.location.href = redirectPath;
+    onSuccess: (user: SelectUser | null) => {
+      if (user) {
+        queryClient.setQueryData(["/api/user"], user);
+        // Redirect based on user role
+        const redirectPath = user.role === "admin" ? "/admin-dashboard" : "/driver";
+        window.location.href = redirectPath;
+      }
     },
     onError: (error: Error) => {
       toast({
