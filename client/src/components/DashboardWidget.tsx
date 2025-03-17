@@ -1,10 +1,9 @@
 import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { GripVertical, X, Settings } from "lucide-react";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { AreaChart, Area, XAxis, YAxis } from "recharts";
+import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer } from "recharts";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 
@@ -36,7 +35,7 @@ export default function DashboardWidget({ widget, onRemove, onDragStart, onDragE
   const { t } = useTranslation();
   const [isDragging, setIsDragging] = useState(false);
 
-  const { data: orders = [] } = useQuery({
+  const { data: orders } = useQuery({
     queryKey: ["/api/driver/orders"],
     enabled: widget.type === 'orders',
   });
@@ -62,10 +61,10 @@ export default function DashboardWidget({ widget, onRemove, onDragStart, onDragE
         return (
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              {t('dashboard.recentOrders')} ({orders.length})
+              {t('dashboard.recentOrders')} ({orders?.length || 0})
             </p>
             <div className="space-y-2">
-              {orders.slice(0, 3).map((order: any) => (
+              {orders?.slice(0, 3).map((order: any) => (
                 <div key={order.id} className="flex justify-between items-center p-2 bg-muted rounded-lg">
                   <div>
                     <p className="font-medium">{order.fromCity} → {order.toCity}</p>
@@ -84,12 +83,12 @@ export default function DashboardWidget({ widget, onRemove, onDragStart, onDragE
         return (
           <div className="grid grid-cols-2 gap-4">
             <div className="text-center">
-              <p className="text-2xl font-bold">{orders.length}</p>
+              <p className="text-2xl font-bold">{orders?.length || 0}</p>
               <p className="text-sm text-muted-foreground">{t('dashboard.totalOrders')}</p>
             </div>
             <div className="text-center">
               <p className="text-2xl font-bold">
-                {orders.filter((o: any) => o.status === 'active').length}
+                {orders?.filter((o: any) => o.status === 'active').length || 0}
               </p>
               <p className="text-sm text-muted-foreground">{t('dashboard.activeOrders')}</p>
             </div>
@@ -99,7 +98,17 @@ export default function DashboardWidget({ widget, onRemove, onDragStart, onDragE
       case 'chart':
         return (
           <div className="h-[200px]">
-            <ChartContainer>
+            <ChartContainer
+              config={{
+                orders: {
+                  label: t('dashboard.orderActivity'),
+                  theme: {
+                    light: "hsl(222.2 47.4% 11.2%)",
+                    dark: "hsl(210 40% 98%)",
+                  },
+                },
+              }}
+            >
               <AreaChart data={chartData}>
                 <XAxis
                   dataKey="date"
@@ -111,9 +120,9 @@ export default function DashboardWidget({ widget, onRemove, onDragStart, onDragE
                   type="monotone"
                   dataKey="orders"
                   strokeWidth={2}
-                  fill="var(--primary)"
+                  fill="var(--color-orders)"
                   fillOpacity={0.1}
-                  stroke="var(--primary)"
+                  stroke="var(--color-orders)"
                 />
               </AreaChart>
             </ChartContainer>
