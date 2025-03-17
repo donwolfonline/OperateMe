@@ -250,15 +250,46 @@ export default function AdminDashboard() {
       const matchesSearch = searchTerm === "" ||
         order.tripNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         order.fromCity?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        order.toCity?.toLowerCase().includes(searchTerm.toLowerCase());
+        order.toCity?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        order.driver?.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        order.visaType?.toLowerCase().includes(searchTerm.toLowerCase());
 
       const matchesFilters = Object.keys(activeFilters).length === 0 ||
         Object.entries(activeFilters).every(([key, value]) => {
           if (key === 'status') return order.status === value;
           if (key === 'date') {
             const orderDate = new Date(order.departureTime);
-            const filterDate = new Date(value);
+            const filterDate = new Date(value as string);
             return orderDate.toDateString() === filterDate.toDateString();
+          }
+          if (key === 'driverName') {
+            return order.driver?.fullName === value;
+          }
+          return true;
+        });
+
+      return matchesSearch && matchesFilters;
+    });
+  };
+
+  // Add a filter function for documents
+  const filterDocuments = (orders: (OperationOrder & { passengers: any[]; driver?: any })[] | undefined) => {
+    if (!orders) return [];
+
+    const documentsWithPdf = orders.filter(order => order.pdfUrl);
+
+    return documentsWithPdf.filter(doc => {
+      const matchesSearch = searchTerm === "" ||
+        doc.driver?.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        doc.tripNumber?.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const matchesFilters = Object.keys(activeFilters).length === 0 ||
+        Object.entries(activeFilters).every(([key, value]) => {
+          if (key === 'driverName') {
+            return doc.driver?.fullName === value;
+          }
+          if (key === 'documentType') {
+            return true; // Implement if you have specific document types
           }
           return true;
         });
@@ -278,6 +309,9 @@ export default function AdminDashboard() {
 
   const filteredOrders = useMemo(() =>
     filterOrders(allOrders), [allOrders, searchTerm, activeFilters]);
+
+  const filteredDocuments = useMemo(() =>
+    filterDocuments(allOrders), [allOrders, searchTerm, activeFilters]);
 
 
   return (
@@ -423,12 +457,13 @@ export default function AdminDashboard() {
                     onSearch={setSearchTerm}
                     onFilter={setActiveFilters}
                     className="mb-4"
+                    driversList={[...(activeDrivers || []), ...(suspendedDrivers || [])]}
                   />
-                  {allOrders?.filter(order => order.pdfUrl).length === 0 ? (
+                  {filteredDocuments.length === 0 ? (
                     <p className="text-muted-foreground text-center py-4">{t('admin.noDocuments')}</p>
                   ) : (
                     <div className="grid gap-6">
-                      {allOrders?.filter(order => order.pdfUrl).map((order) => (
+                      {filteredDocuments.map((order) => (
                         <Card key={order.id} className="hover:shadow-md transition-shadow">
                           <CardContent className="p-6">
                             <div className="flex flex-col lg:flex-row justify-between gap-4">
