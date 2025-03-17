@@ -35,8 +35,18 @@ export function ProtectedRoute({
     );
   }
 
-  // Check if user is suspended (for drivers)
-  if (user.status === 'suspended' && user.role === 'driver') {
+  // Check if user has the required role
+  if (requiredRole && user.role !== requiredRole) {
+    const redirectPath = user.role === "admin" ? "/admin-dashboard" : "/driver";
+    return (
+      <AuthWrapper>
+        <Redirect to={redirectPath} />
+      </AuthWrapper>
+    );
+  }
+
+  // Check if driver is suspended (only for driver role)
+  if (requiredRole === "driver" && user.status === "suspended") {
     return (
       <AuthWrapper>
         <div className="flex items-center justify-center min-h-screen">
@@ -45,15 +55,6 @@ export function ProtectedRoute({
             <p className="mt-2 text-muted-foreground">Your account has been suspended. Please contact administrator.</p>
           </div>
         </div>
-      </AuthWrapper>
-    );
-  }
-
-  if (requiredRole && user.role !== requiredRole) {
-    const redirectPath = user.role === "admin" ? "/admin-dashboard" : "/driver";
-    return (
-      <AuthWrapper>
-        <Redirect to={redirectPath} />
       </AuthWrapper>
     );
   }
