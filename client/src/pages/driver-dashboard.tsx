@@ -12,10 +12,8 @@ import HomeButton from "@/components/HomeButton";
 import { FileText, Download, Calendar, MapPin, Users } from "lucide-react";
 import { OperationOrder as OperationOrderType } from "@shared/schema";
 import { Badge } from "@/components/ui/badge";
-import { Redirect } from "wouter";
 
 export default function DriverDashboard() {
-  // All hooks at the top level
   const { t } = useTranslation();
   const { user, logoutMutation } = useAuth();
 
@@ -24,12 +22,7 @@ export default function DriverDashboard() {
     enabled: !!user && user.role === "driver",
   });
 
-  // If not authenticated or not a driver, show the login page
-  if (!user || user.role !== "driver") {
-    return <Redirect to="/auth" />;
-  }
-
-  const renderContent = () => (
+  return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
@@ -166,6 +159,4 @@ export default function DriverDashboard() {
       </div>
     </div>
   );
-
-  return renderContent();
 }
