@@ -7,7 +7,6 @@ import {
 import { insertUserSchema, User as SelectUser, InsertUser } from "@shared/schema";
 import { getQueryFn, apiRequest, queryClient } from "../lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { useTranslation } from "react-i18next";
 
 type AuthContextType = {
   user: SelectUser | null;
@@ -18,12 +17,11 @@ type AuthContextType = {
   registerMutation: UseMutationResult<SelectUser, Error, InsertUser>;
 };
 
-type LoginData = Pick<InsertUser, "username" | "password"> & { role?: string };
+type LoginData = Pick<InsertUser, "username" | "password">;
 
 export const AuthContext = createContext<AuthContextType | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
-  const { t } = useTranslation();
   const {
     data: user,
     error,
@@ -35,28 +33,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginData) => {
-      const res = await apiRequest("POST", "/api/login", credentials);
-      const userData = await res.json();
-
-      // Check if user is suspended - only during login
-      if (userData.status === 'suspended') {
-        toast({
-          title: t('notifications.accountSuspended'),
-          description: t('notifications.suspensionMessage'),
-          variant: "destructive",
-        });
-        return null;
+      try {
+        const res = await apiRequest("POST", "/api/login", credentials);
+        const userData = await res.json();
+        return userData;
+      } catch (error) {
+        console.error('Login error:', error);
+        throw error;
       }
-
-      return userData;
     },
-    onSuccess: (user: SelectUser | null) => {
-      if (user) {
-        queryClient.setQueryData(["/api/user"], user);
-        // Redirect based on user role
-        const redirectPath = user.role === "admin" ? "/admin-dashboard" : "/driver";
-        window.location.href = redirectPath;
-      }
+    onSuccess: (user: SelectUser) => {
+      queryClient.setQueryData(["/api/user"], user);
+      // Redirect based on user role
+      const redirectPath = user.role === "admin" ? "/admin-dashboard" : "/driver";
+      window.location.href = redirectPath;
     },
     onError: (error: Error) => {
       toast({
@@ -69,17 +59,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const registerMutation = useMutation({
     mutationFn: async (credentials: InsertUser) => {
-      // Clear any existing session first
-      await apiRequest("POST", "/api/logout");
-      queryClient.clear();
-      queryClient.removeQueries();
-
-      const res = await apiRequest("POST", "/api/register", credentials);
-      const userData = await res.json();
-      return userData;
+      try {
+        const res = await apiRequest("POST", "/api/register", credentials);
+        const userData = await res.json();
+        return userData;
+      } catch (error) {
+        console.error('Registration error:', error);
+        throw error;
+      }
     },
     onSuccess: (user: SelectUser) => {
-      // Set the new user data
       queryClient.setQueryData(["/api/user"], user);
       // After registration, redirect to driver dashboard
       window.location.href = "/driver";
@@ -98,7 +87,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await apiRequest("POST", "/api/logout");
     },
     onSuccess: () => {
-      // Clear all queries and cached data
       queryClient.clear();
       queryClient.removeQueries();
       queryClient.setQueryData(["/api/user"], null);
