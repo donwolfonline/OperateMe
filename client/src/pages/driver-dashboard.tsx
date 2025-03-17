@@ -12,21 +12,24 @@ import HomeButton from "@/components/HomeButton";
 import { FileText, Download, Calendar, MapPin, Users } from "lucide-react";
 import { OperationOrder as OperationOrderType } from "@shared/schema";
 import { Badge } from "@/components/ui/badge";
-import { useLocation } from "wouter";
+import { Redirect } from "wouter";
 
 export default function DriverDashboard() {
   // All hooks at the top level
   const { t } = useTranslation();
   const { user, logoutMutation } = useAuth();
-  const [, setLocation] = useLocation();
 
   const { data: driverOrders } = useQuery<(OperationOrderType & { passengers: any[]; pdfUrl?: string })[]>({
     queryKey: ["/api/driver/orders"],
     enabled: !!user && user.role === "driver",
   });
 
-  // Use a single return with conditional rendering
-  return user && user.role === "driver" ? (
+  // Redirect non-drivers to auth page
+  if (!user || user.role !== "driver") {
+    return <Redirect to="/auth" />;
+  }
+
+  return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
@@ -162,10 +165,5 @@ export default function DriverDashboard() {
         </Tabs>
       </div>
     </div>
-  ) : (
-    (() => {
-      setLocation("/auth");
-      return null;
-    })()
   );
 }
