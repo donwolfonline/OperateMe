@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 export default function handler(req: VercelRequest, res: VercelResponse) {
-  // Handle CORS preflight
+  // Add CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -10,21 +10,10 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(200).end();
   }
 
-  try {
-    // Basic health check response
-    res.status(200).json({
-      status: 'ok',
-      timestamp: new Date().toISOString(),
-      message: 'Health check endpoint is working',
-      path: req.url
-    });
-  } catch (error) {
-    console.error('Health check error:', error);
-    res.status(500).json({
-      error: 'Internal Server Error',
-      message: error instanceof Error ? error.message : 'Unknown error'
-    });
-  }
+  res.status(200).json({
+    status: 'ok',
+    timestamp: new Date().toISOString()
+  });
 }
 
 export const config = {
