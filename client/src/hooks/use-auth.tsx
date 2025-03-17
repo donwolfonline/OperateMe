@@ -69,13 +69,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const registerMutation = useMutation({
     mutationFn: async (credentials: InsertUser) => {
+      // Clear any existing session first
+      await apiRequest("POST", "/api/logout");
+      queryClient.clear();
+      queryClient.removeQueries();
+
       const res = await apiRequest("POST", "/api/register", credentials);
       const userData = await res.json();
       return userData;
     },
     onSuccess: (user: SelectUser) => {
-      // Clear any existing user data first
-      queryClient.clear();
       // Set the new user data
       queryClient.setQueryData(["/api/user"], user);
       // After registration, redirect to driver dashboard
@@ -95,8 +98,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await apiRequest("POST", "/api/logout");
     },
     onSuccess: () => {
-      // Clear all queries on logout
+      // Clear all queries and cached data
       queryClient.clear();
+      queryClient.removeQueries();
       queryClient.setQueryData(["/api/user"], null);
       // After logout, redirect to home
       window.location.href = "/";
