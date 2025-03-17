@@ -6,8 +6,7 @@ async function throwIfResNotOk(res: Response) {
       const errorData = await res.json();
       throw new Error(errorData.message || res.statusText);
     } catch (e) {
-      const text = await res.text();
-      throw new Error(`${res.status}: ${text || res.statusText}`);
+      throw new Error(`${res.status}: ${res.statusText}`);
     }
   }
 }
@@ -17,25 +16,36 @@ export async function apiRequest(
   url: string,
   data?: unknown | FormData,
 ): Promise<Response> {
-  const headers: Record<string, string> = {};
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
+  };
+
   let body: string | FormData | undefined;
 
   if (data instanceof FormData) {
+    delete headers['Content-Type']; // Let browser set the correct boundary for FormData
     body = data;
   } else if (data) {
-    headers["Content-Type"] = "application/json";
     body = JSON.stringify(data);
   }
 
-  const res = await fetch(url, {
-    method,
-    headers,
-    body,
-    credentials: "include",
-  });
+  try {
+    const res = await fetch(url, {
+      method,
+      headers,
+      body,
+      credentials: "include",
+    });
 
-  await throwIfResNotOk(res);
-  return res;
+    // Clone the response before checking status to avoid the "Body used already" error
+    const responseClone = res.clone();
+    await throwIfResNotOk(responseClone);
+    return res;
+  } catch (error) {
+    console.error('API Request Error:', error);
+    throw error;
+  }
 }
 
 type UnauthorizedBehavior = "returnNull" | "throw";
@@ -44,16 +54,27 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    const res = await fetch(queryKey[0] as string, {
-      credentials: "include",
-    });
+    try {
+      const res = await fetch(queryKey[0] as string, {
+        credentials: "include",
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
 
-    if (unauthorizedBehavior === "returnNull" && res.status === 401) {
-      return null;
+      if (unauthorizedBehavior === "returnNull" && res.status === 401) {
+        return null;
+      }
+
+      // Clone the response before checking status
+      const responseClone = res.clone();
+      await throwIfResNotOk(responseClone);
+
+      return res.json();
+    } catch (error) {
+      console.error('Query Function Error:', error);
+      throw error;
     }
-
-    await throwIfResNotOk(res);
-    return await res.json();
   };
 
 export const queryClient = new QueryClient({
