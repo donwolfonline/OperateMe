@@ -34,7 +34,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginData) => {
       const res = await apiRequest("POST", "/api/login", credentials);
-      return await res.json();
+      const userData = await res.json();
+
+      // Check if user is suspended
+      if (userData.status === 'suspended') {
+        throw new Error("Your account has been suspended. Please contact administrator.");
+      }
+
+      return userData;
     },
     onSuccess: (user: SelectUser) => {
       queryClient.setQueryData(["/api/user"], user);

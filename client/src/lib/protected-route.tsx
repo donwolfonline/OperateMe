@@ -35,6 +35,20 @@ export function ProtectedRoute({
     );
   }
 
+  // Check if user is suspended (for drivers)
+  if (user.status === 'suspended' && user.role === 'driver') {
+    return (
+      <AuthWrapper>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <h2 className="text-xl font-semibold text-destructive">Account Suspended</h2>
+            <p className="mt-2 text-muted-foreground">Your account has been suspended. Please contact administrator.</p>
+          </div>
+        </div>
+      </AuthWrapper>
+    );
+  }
+
   if (requiredRole && user.role !== requiredRole) {
     const redirectPath = user.role === "admin" ? "/admin-dashboard" : "/driver";
     return (
