@@ -13,26 +13,21 @@ export function ProtectedRoute({
 }: ProtectedRouteProps) {
   const { user, isLoading } = useAuth();
 
-  // Show loading state while checking auth
+  // Always render something to maintain consistent hook order
+  let content = <Component />;
+
   if (isLoading) {
-    return (
+    content = (
       <div className="flex items-center justify-center min-h-screen">
         <Loader2 className="h-8 w-8 animate-spin text-border" />
       </div>
     );
-  }
-
-  // Handle unauthenticated users
-  if (!user) {
-    return <Redirect to="/auth" />;
-  }
-
-  // Handle role mismatch
-  if (requiredRole && user.role !== requiredRole) {
+  } else if (!user) {
+    content = <Redirect to="/auth" />;
+  } else if (requiredRole && user.role !== requiredRole) {
     const redirectPath = user.role === "admin" ? "/admin-dashboard" : "/driver";
-    return <Redirect to={redirectPath} />;
+    content = <Redirect to={redirectPath} />;
   }
 
-  // Render component for authenticated and authorized users
-  return <Component />;
+  return content;
 }
