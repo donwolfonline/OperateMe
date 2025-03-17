@@ -5,9 +5,6 @@ const ADMIN_USERNAME = 'admin';
 const ADMIN_PASSWORD = 'admin123';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  console.log('Request method:', req.method);
-  console.log('Request headers:', req.headers);
-
   // Add CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
@@ -23,9 +20,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    // Log raw body for debugging
-    const rawBody = JSON.stringify(req.body);
-    console.log('Raw request body:', rawBody);
+    console.log('Login attempt:', { method: req.method, headers: req.headers });
 
     const { username, password } = req.body;
 
@@ -34,8 +29,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       console.log('Login failed: Missing credentials');
       return res.status(400).json({ message: 'Username and password are required' });
     }
-
-    console.log('Login attempt for username:', username);
 
     // Check admin credentials
     if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
