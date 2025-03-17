@@ -1,6 +1,6 @@
 # OperateMe - Vehicle and Driver Management System
 
-A comprehensive bilingual vehicle and driver management system designed to streamline administrative and driver-related processes with intelligent operational workflows.
+A comprehensive bilingual vehicle and driver management system with intelligent operational workflows, designed to streamline administrative processes through advanced search and filtering capabilities.
 
 ## Features
 
@@ -37,12 +37,12 @@ This system provides a complete solution for managing vehicles and drivers with 
 
 ### Search and Filtering System
 - Real-time search functionality
-- Filtering by:
-  - Registration date
-  - Driver name
-  - Document type
-  - Order status
-  - Date ranges
+- Advanced filtering options:
+  - Registration date (Today, This Week, This Month)
+  - Driver name dropdown filters
+  - Document type filters
+  - Status filters for orders
+  - Date-based filtering
 
 ## Tech Stack
 
@@ -92,32 +92,14 @@ SESSION_SECRET=your_session_secret
 npm run dev
 ```
 
-## Deployment on Hostinger
+## Deployment
 
-### Prerequisites
-- Hostinger VPS or Business Hosting plan with Node.js support
-- Node.js (v20.x or later)
-- PostgreSQL database
-- Domain name (optional but recommended)
+### Files Included for Deployment
+- `deploy.sh` - Deployment script
+- `ecosystem.config.js` - PM2 configuration
+- `DEPLOY_HOSTINGER.md` - Detailed deployment guide
 
-### Deployment Steps
-
-1. Upload Project Files
-```bash
-# Build the frontend
-npm run build
-
-# Upload files to Hostinger via FTP or Git
-```
-
-2. Install Dependencies
-```bash
-npm install
-npm install -g pm2
-```
-
-3. Set Up Environment Variables
-Create a `.env` file in your project root:
+### Required Environment Variables
 ```env
 DATABASE_URL=your_postgresql_connection_string
 SESSION_SECRET=your_session_secret
@@ -125,77 +107,17 @@ NODE_ENV=production
 PORT=3000
 ```
 
-4. Configure PM2
-Create a `ecosystem.config.js` file:
-```javascript
-module.exports = {
-  apps: [{
-    name: "operateme",
-    script: "server/index.js",
-    env: {
-      NODE_ENV: "production",
-    }
-  }]
-}
-```
-
-5. Start the Application
+### Build Instructions
 ```bash
-# Start the application with PM2
-pm2 start ecosystem.config.js
+# Install dependencies
+npm install
 
-# Ensure app starts on server reboot
-pm2 startup
-pm2 save
+# Build frontend
+npm run build
+
+# Start production server
+npm start
 ```
-
-6. Configure Nginx (if using VPS)
-```nginx
-server {
-    listen 80;
-    server_name your-domain.com;
-
-    location / {
-        proxy_pass http://localhost:3000;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_cache_bypass $http_upgrade;
-    }
-}
-```
-
-7. Set Up SSL Certificate
-- Use Hostinger's auto SSL feature or install Let's Encrypt
-- Enable HTTPS in nginx configuration
-
-### Database Setup
-1. Create a PostgreSQL database in Hostinger's control panel
-2. Update the DATABASE_URL in your .env file
-3. Run database migrations:
-```bash
-npm run db:migrate
-```
-
-### File Upload Configuration
-1. Create uploads directory:
-```bash
-mkdir uploads
-chmod 755 uploads
-```
-
-2. Configure nginx to serve uploaded files:
-```nginx
-location /uploads {
-    alias /path/to/your/uploads;
-}
-```
-
-### Troubleshooting
-- Check application logs: `pm2 logs`
-- Monitor application: `pm2 monit`
-- Nginx logs: `/var/log/nginx/error.log`
 
 ## Project Structure
 
