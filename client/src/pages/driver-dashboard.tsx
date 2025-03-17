@@ -24,12 +24,12 @@ export default function DriverDashboard() {
     enabled: !!user && user.role === "driver",
   });
 
-  // Redirect non-drivers to auth page
+  // If not authenticated or not a driver, show the login page
   if (!user || user.role !== "driver") {
     return <Redirect to="/auth" />;
   }
 
-  return (
+  const renderContent = () => (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
@@ -166,4 +166,6 @@ export default function DriverDashboard() {
       </div>
     </div>
   );
+
+  return renderContent();
 }

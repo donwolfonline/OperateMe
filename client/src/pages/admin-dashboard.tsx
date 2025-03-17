@@ -12,15 +12,13 @@ import { Badge } from "@/components/ui/badge";
 import { FileText, User as UserIcon, Car, FileCheck, Download, Calendar, MapPin, Users } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { UserCircle2 } from "lucide-react";
-import { useLocation } from "wouter";
+import { Redirect } from "wouter";
 import React from 'react';
 
 export default function AdminDashboard() {
   const { t } = useTranslation();
   const { user, logoutMutation } = useAuth();
-  const [, setLocation] = useLocation();
 
-  // Move all queries up here
   const { data: pendingDrivers } = useQuery<User[]>({
     queryKey: ["/api/admin/pending-drivers"],
     enabled: !!user && user.role === "admin",
@@ -41,7 +39,11 @@ export default function AdminDashboard() {
     enabled: !!user && user.role === "admin",
   });
 
-  // Driver management functions...
+  // If not authenticated or not admin, show the login page
+  if (!user || user.role !== "admin") {
+    return <Redirect to="/auth" />;
+  }
+
   const approveDriver = async (driverId: number) => {
     await apiRequest("POST", `/api/admin/drivers/${driverId}/status`, { status: 'active' });
     queryClient.invalidateQueries({ queryKey: ["/api/admin/pending-drivers"] });
@@ -60,7 +62,6 @@ export default function AdminDashboard() {
     queryClient.invalidateQueries({ queryKey: ["/api/admin/active-drivers"] });
   };
 
-  // Render functions...
   const renderDriverCard = (driver: User, actions: React.ReactNode) => (
     <div key={driver.id} className="flex flex-col space-y-4 p-4 border rounded-lg bg-card">
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
@@ -200,9 +201,6 @@ export default function AdminDashboard() {
 
   return (
     <>
-      {(!user || user.role !== "admin") ? (
-        <>{setLocation("/auth") && null}</>
-      ) : (
         <div className="min-h-screen bg-background">
           <div className="container mx-auto px-4 py-8">
             <div className="flex justify-between items-center mb-8">
@@ -379,7 +377,6 @@ export default function AdminDashboard() {
             </Tabs>
           </div>
         </div>
-      )}
     </>
   );
 }
