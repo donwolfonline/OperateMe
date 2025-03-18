@@ -10,10 +10,11 @@ import { insertUserSchema } from "@shared/schema";
 import LanguageToggle from "@/components/LanguageToggle";
 import HomeButton from "@/components/HomeButton";
 import { Redirect } from "wouter";
+import { Loader2 } from "lucide-react";
 
 function AdminLoginPage() {
   const { t } = useTranslation();
-  const { user, loginMutation } = useAuth();
+  const { user, loginMutation, isLoading } = useAuth();
 
   const loginForm = useForm({
     resolver: zodResolver(
@@ -35,6 +36,16 @@ function AdminLoginPage() {
     });
   };
 
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // Handle authentication redirect
   if (user) {
     if (user.role === "admin") {
       return <Redirect to="/admin" />;
@@ -90,6 +101,9 @@ function AdminLoginPage() {
                   className="w-full"
                   disabled={loginMutation.isPending}
                 >
+                  {loginMutation.isPending ? (
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  ) : null}
                   {t('auth.login')}
                 </Button>
               </form>
