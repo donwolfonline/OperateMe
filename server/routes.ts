@@ -8,7 +8,6 @@ import { insertVehicleSchema, insertOperationOrderSchema } from "@shared/schema"
 import { generateOrderPDF } from './utils/pdfGenerator';
 import express from "express";
 import fs from 'fs';
-import { WebSocketServer, WebSocket } from 'ws';
 
 // Ensure uploads directory exists
 const uploadsDir = path.join(process.cwd(), 'uploads');
@@ -52,7 +51,7 @@ const upload = multer({
 });
 
 // Notification types
-type NotificationType = 'NEW_DRIVER' | 'NEW_ORDER' | 'NEW_PDF' | 'VEHICLE_REGISTERED' | 'CONNECTION_STATUS';
+type NotificationType = 'NEW_DRIVER' | 'NEW_ORDER' | 'NEW_PDF' | 'VEHICLE_REGISTERED';
 
 interface Notification {
   type: NotificationType;
@@ -64,7 +63,7 @@ interface Notification {
 // Add notification storage
 let notifications: Notification[] = [];
 
-// Modify the function to store notifications instead of broadcasting
+// Modify the function to store notifications
 function addNotification(notification: Notification) {
   notifications.unshift(notification);
   // Keep only last 100 notifications
@@ -91,6 +90,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     maxAge: '1h'
   }));
 
+  // Add CORS headers for development
+  app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,UPDATE,OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept');
+    next();
+  });
+
   // Document upload route
   app.post("/api/documents/upload", upload.single('document'), async (req, res) => {
     try {
@@ -102,7 +110,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const documentType = req.body.type;
-      // Store only the filename, not the full path
       const filePath = req.file.filename;
 
       const user = await storage.getUser(req.user.id);
@@ -350,14 +357,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Add new endpoint to fetch notifications
-  app.get("/api/notifications", (req, res) => {
+  // Add notifications endpoint
+  app.get("/api/notifications", async (req, res) => {
     if (!req.user || req.user.role !== "admin") {
       return res.sendStatus(403);
     }
     res.json(notifications);
   });
-
 
   app.post("/api/register", async (req, res) => {
     // ... existing registration logic ...

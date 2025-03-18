@@ -35,6 +35,7 @@ export function NotificationCenter() {
         setUnreadCount(prev => prev + 1);
         setLastNotificationTime(new Date(latestNotification.timestamp));
 
+        // Show toast notification
         toast({
           title: t(`notifications.${latestNotification.type.toLowerCase()}`),
           description: latestNotification.message,
@@ -95,7 +96,7 @@ export function NotificationCenter() {
           </div>
 
           <ScrollArea className="h-[400px]">
-            {!notifications?.length ? (
+            {notifications.length === 0 ? (
               <div className="p-4 text-center text-muted-foreground">
                 {t('notifications.noNotifications')}
               </div>
