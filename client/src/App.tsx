@@ -29,7 +29,9 @@ function App() {
             <Route path="/admin/dashboard">
               <ProtectedRoute component={AdminDashboard} requiredRole="admin" />
             </Route>
-            <Route path="/:rest*" component={NotFound} />
+            <Route>
+              <NotFound />
+            </Route>
           </Switch>
           <Toaster />
         </AuthProvider>

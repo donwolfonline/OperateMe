@@ -1,14 +1,5 @@
 import { QueryClient } from "@tanstack/react-query";
 
-async function throwIfResNotOk(res: Response) {
-  if (!res.ok) {
-    const errorData = await res.json().catch(() => ({
-      message: res.statusText
-    }));
-    throw new Error(errorData.message || res.statusText);
-  }
-}
-
 export async function apiRequest(
   method: string,
   url: string,
@@ -31,7 +22,13 @@ export async function apiRequest(
     credentials: "include",
   });
 
-  await throwIfResNotOk(res);
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({
+      message: res.statusText
+    }));
+    throw new Error(errorData.message || res.statusText);
+  }
+
   return res;
 }
 
@@ -44,7 +41,14 @@ export const queryClient = new QueryClient({
         const res = await fetch(queryKey[0] as string, {
           credentials: "include",
         });
-        await throwIfResNotOk(res);
+
+        if (!res.ok) {
+          if (res.status === 401) {
+            return null;
+          }
+          throw new Error(res.statusText);
+        }
+
         return res.json();
       }
     },

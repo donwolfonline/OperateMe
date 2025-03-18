@@ -32,23 +32,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isLoading,
   } = useQuery<SelectUser | null>({
     queryKey: ["/api/user"],
-    queryFn: async () => {
-      try {
-        const res = await fetch("/api/user", {
-          credentials: "include",
-        });
-        if (res.status === 401) {
-          return null;
-        }
-        if (!res.ok) {
-          throw new Error(res.statusText);
-        }
-        return res.json();
-      } catch (error) {
-        console.error('Auth query error:', error);
-        return null;
-      }
-    },
   });
 
   const loginMutation = useMutation({
@@ -58,7 +41,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     onSuccess: (user: SelectUser) => {
       queryClient.setQueryData(["/api/user"], user);
-      // Redirect based on user role
       window.location.href = user.role === "admin" ? "/admin/dashboard" : "/driver";
     },
     onError: (error: Error) => {
@@ -70,13 +52,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
   });
 
-  const registerMutation = useMutation({
-    mutationFn: async (credentials: InsertUser) => {
-      // Clear any existing session first
+  const logoutMutation = useMutation({
+    mutationFn: async () => {
       await apiRequest("POST", "/api/logout");
       queryClient.clear();
       queryClient.removeQueries();
+    },
+    onSuccess: () => {
+      queryClient.setQueryData(["/api/user"], null);
+      window.location.href = "/";
+    },
+    onError: (error: Error) => {
+      toast({
+        title: t('auth.logoutError'),
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
 
+  const registerMutation = useMutation({
+    mutationFn: async (credentials: InsertUser) => {
       const res = await apiRequest("POST", "/api/register", credentials);
       return res.json();
     },
@@ -87,25 +83,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     onError: (error: Error) => {
       toast({
         title: t('auth.registerError'),
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
-
-  const logoutMutation = useMutation({
-    mutationFn: async () => {
-      await apiRequest("POST", "/api/logout");
-    },
-    onSuccess: () => {
-      queryClient.clear();
-      queryClient.removeQueries();
-      queryClient.setQueryData(["/api/user"], null);
-      window.location.href = "/";
-    },
-    onError: (error: Error) => {
-      toast({
-        title: t('auth.logoutError'),
         description: error.message,
         variant: "destructive",
       });
