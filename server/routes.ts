@@ -50,47 +50,20 @@ const upload = multer({
   }
 });
 
-// Notification types
-type NotificationType = 'NEW_DRIVER' | 'NEW_ORDER' | 'NEW_PDF' | 'VEHICLE_REGISTERED';
-
-interface Notification {
-  type: NotificationType;
-  message: string;
-  timestamp: Date;
-  data?: any;
-}
-
-// Add notification storage
-let notifications: Notification[] = [];
-
-// Modify the function to store notifications
-function addNotification(notification: Notification) {
-  notifications.unshift(notification);
-  // Keep only last 100 notifications
-  if (notifications.length > 100) {
-    notifications = notifications.slice(0, 100);
-  }
-}
-
 export async function registerRoutes(app: Express): Promise<Server> {
   setupAuth(app);
 
-  // Configure static file serving for uploads with proper headers
+  // Configure static file serving for uploads
   app.use('/uploads', express.static(uploadsDir, {
     setHeaders: (res, path) => {
       if (path.endsWith('.pdf')) {
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', 'inline; filename="' + path.split('/').pop() + '"');
-        res.setHeader('Cache-Control', 'public, max-age=3600');
-        res.setHeader('Access-Control-Allow-Origin', '*');
-        res.setHeader('X-Content-Type-Options', 'nosniff');
       }
-    },
-    fallthrough: true,
-    maxAge: '1h'
+    }
   }));
 
-  // Add CORS headers for development
+  // Add CORS headers
   app.use((req, res, next) => {
     res.header('Access-Control-Allow-Credentials', 'true');
     res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
@@ -160,13 +133,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         createdAt: new Date()
       });
 
-      addNotification({
-        type: 'VEHICLE_REGISTERED',
-        message: `New vehicle registered by ${req.user.fullName}`,
-        timestamp: new Date(),
-        data: { vehicle, driver: req.user }
-      });
-
       res.status(201).json(vehicle);
     } catch (error: any) {
       console.error('Vehicle creation error:', error);
@@ -226,23 +192,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const pdfFileName = await generateOrderPDF(order, req.user);
         order.pdfUrl = pdfFileName;
         await storage.updateOperationOrder(order);
-
-        addNotification({
-          type: 'NEW_ORDER',
-          message: `New operation order created by ${req.user.fullName}`,
-          timestamp: new Date(),
-          data: { order, driver: req.user }
-        });
-
-        if (pdfFileName) {
-          addNotification({
-            type: 'NEW_PDF',
-            message: `New PDF generated for order #${order.id}`,
-            timestamp: new Date(),
-            data: { orderId: order.id, pdfUrl: pdfFileName }
-          });
-        }
-
         res.status(201).json(order);
       } catch (pdfError) {
         console.error('PDF generation error:', pdfError);
@@ -357,23 +306,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Add notifications endpoint
-  app.get("/api/notifications", async (req, res) => {
-    if (!req.user || req.user.role !== "admin") {
-      return res.sendStatus(403);
-    }
-    res.json(notifications);
-  });
-
   app.post("/api/register", async (req, res) => {
     // ... existing registration logic ...
-
-    addNotification({
-      type: 'NEW_DRIVER',
-      message: `New driver registered: ${req.body.fullName}`,
-      timestamp: new Date(),
-      data: { username: req.body.username, fullName: req.body.fullName }
-    });
   });
 
   const httpServer = createServer(app);

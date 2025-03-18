@@ -7,7 +7,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { User, OperationOrder } from "@shared/schema";
 import LanguageToggle from "@/components/LanguageToggle";
-import { NotificationCenter } from "@/components/NotificationCenter";
 import HomeButton from "@/components/HomeButton";
 import { Badge } from "@/components/ui/badge";
 import { FileText, User as UserIcon, Car, FileCheck, Download, Calendar, MapPin, Users } from "lucide-react";
@@ -316,225 +315,222 @@ export default function AdminDashboard() {
 
 
   return (
-    <>
-      <div className="min-h-screen bg-background">
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex justify-between items-center mb-8">
-            <HomeButton />
-            <div className="flex items-center gap-4">
-              <NotificationCenter />
-              <LanguageToggle />
-              <button
-                onClick={() => logoutMutation.mutate()}
-                className="text-sm text-muted-foreground hover:text-foreground"
-              >
-                {t('common.logout')}
-              </button>
-            </div>
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex justify-between items-center mb-8">
+          <HomeButton />
+          <div className="flex items-center gap-4">
+            <LanguageToggle />
+            <button
+              onClick={() => logoutMutation.mutate()}
+              className="text-sm text-muted-foreground hover:text-foreground"
+            >
+              {t('common.logout')}
+            </button>
           </div>
+        </div>
 
-          <Tabs defaultValue="pending" className="space-y-4">
-            <TabsList className="grid w-full grid-cols-2 lg:grid-cols-5 gap-2">
-              <TabsTrigger value="pending">
-                {t('admin.pendingDrivers')}
-                {pendingDrivers?.length ? (
-                  <Badge variant="destructive" className="ml-2">{pendingDrivers.length}</Badge>
-                ) : null}
-              </TabsTrigger>
-              <TabsTrigger value="active">{t('admin.activeDrivers')}</TabsTrigger>
-              <TabsTrigger value="suspended">{t('admin.suspendedDrivers')}</TabsTrigger>
-              <TabsTrigger value="orders">{t('admin.orders')}</TabsTrigger>
-              <TabsTrigger value="documents">{t('admin.documents')}</TabsTrigger>
-            </TabsList>
+        <Tabs defaultValue="pending" className="space-y-4">
+          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-5 gap-2">
+            <TabsTrigger value="pending">
+              {t('admin.pendingDrivers')}
+              {pendingDrivers?.length ? (
+                <Badge variant="destructive" className="ml-2">{pendingDrivers.length}</Badge>
+              ) : null}
+            </TabsTrigger>
+            <TabsTrigger value="active">{t('admin.activeDrivers')}</TabsTrigger>
+            <TabsTrigger value="suspended">{t('admin.suspendedDrivers')}</TabsTrigger>
+            <TabsTrigger value="orders">{t('admin.orders')}</TabsTrigger>
+            <TabsTrigger value="documents">{t('admin.documents')}</TabsTrigger>
+          </TabsList>
 
-            <TabsContent value="pending">
-              <Card>
-                <CardContent className="p-6">
-                  <h2 className="text-xl font-semibold mb-4">{t('admin.pendingDrivers')}</h2>
-                  <SearchAndFilter
-                    type="drivers"
-                    onSearch={setSearchTerm}
-                    onFilter={setActiveFilters}
-                    className="mb-4"
-                    driversList={pendingDrivers}
-                  />
-                  {filteredPendingDrivers?.length === 0 ? (
-                    <p className="text-muted-foreground text-center py-4">{t('admin.noDrivers')}</p>
-                  ) : (
-                    <div className="space-y-4">
-                      {filteredPendingDrivers?.map((driver) => renderDriverCard(driver, (
-                        <Button onClick={() => approveDriver(driver.id)}>{t('admin.approve')}</Button>
-                      )))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
+          <TabsContent value="pending">
+            <Card>
+              <CardContent className="p-6">
+                <h2 className="text-xl font-semibold mb-4">{t('admin.pendingDrivers')}</h2>
+                <SearchAndFilter
+                  type="drivers"
+                  onSearch={setSearchTerm}
+                  onFilter={setActiveFilters}
+                  className="mb-4"
+                  driversList={pendingDrivers}
+                />
+                {filteredPendingDrivers?.length === 0 ? (
+                  <p className="text-muted-foreground text-center py-4">{t('admin.noDrivers')}</p>
+                ) : (
+                  <div className="space-y-4">
+                    {filteredPendingDrivers?.map((driver) => renderDriverCard(driver, (
+                      <Button onClick={() => approveDriver(driver.id)}>{t('admin.approve')}</Button>
+                    )))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-            <TabsContent value="active">
-              <Card>
-                <CardContent className="p-6">
-                  <h2 className="text-xl font-semibold mb-4">{t('admin.activeDrivers')}</h2>
-                  <SearchAndFilter
-                    type="drivers"
-                    onSearch={setSearchTerm}
-                    onFilter={setActiveFilters}
-                    className="mb-4"
-                    driversList={activeDrivers}
-                  />
-                  {filteredActiveDrivers?.length === 0 ? (
-                    <p className="text-muted-foreground text-center py-4">{t('admin.noActiveDrivers')}</p>
-                  ) : (
-                    <div className="space-y-4">
-                      {filteredActiveDrivers?.map((driver) => renderDriverCard(driver, (
-                        <Button
-                          variant="destructive"
-                          onClick={() => suspendDriver(driver.id)}
-                        >
-                          {t('admin.suspend')}
-                        </Button>
-                      )))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
+          <TabsContent value="active">
+            <Card>
+              <CardContent className="p-6">
+                <h2 className="text-xl font-semibold mb-4">{t('admin.activeDrivers')}</h2>
+                <SearchAndFilter
+                  type="drivers"
+                  onSearch={setSearchTerm}
+                  onFilter={setActiveFilters}
+                  className="mb-4"
+                  driversList={activeDrivers}
+                />
+                {filteredActiveDrivers?.length === 0 ? (
+                  <p className="text-muted-foreground text-center py-4">{t('admin.noActiveDrivers')}</p>
+                ) : (
+                  <div className="space-y-4">
+                    {filteredActiveDrivers?.map((driver) => renderDriverCard(driver, (
+                      <Button
+                        variant="destructive"
+                        onClick={() => suspendDriver(driver.id)}
+                      >
+                        {t('admin.suspend')}
+                      </Button>
+                    )))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-            <TabsContent value="suspended">
-              <Card>
-                <CardContent className="p-6">
-                  <h2 className="text-xl font-semibold mb-4">{t('admin.suspendedDrivers')}</h2>
-                  <SearchAndFilter
-                    type="drivers"
-                    onSearch={setSearchTerm}
-                    onFilter={setActiveFilters}
-                    className="mb-4"
-                    driversList={suspendedDrivers}
-                  />
-                  {filteredSuspendedDrivers?.length === 0 ? (
-                    <p className="text-muted-foreground text-center py-4">{t('admin.noSuspendedDrivers')}</p>
-                  ) : (
-                    <div className="space-y-4">
-                      {filteredSuspendedDrivers?.map((driver) => renderDriverCard(driver, (
-                        <Button
-                          variant="outline"
-                          onClick={() => activateDriver(driver.id)}
-                        >
-                          {t('admin.activate')}
-                        </Button>
-                      )))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
+          <TabsContent value="suspended">
+            <Card>
+              <CardContent className="p-6">
+                <h2 className="text-xl font-semibold mb-4">{t('admin.suspendedDrivers')}</h2>
+                <SearchAndFilter
+                  type="drivers"
+                  onSearch={setSearchTerm}
+                  onFilter={setActiveFilters}
+                  className="mb-4"
+                  driversList={suspendedDrivers}
+                />
+                {filteredSuspendedDrivers?.length === 0 ? (
+                  <p className="text-muted-foreground text-center py-4">{t('admin.noSuspendedDrivers')}</p>
+                ) : (
+                  <div className="space-y-4">
+                    {filteredSuspendedDrivers?.map((driver) => renderDriverCard(driver, (
+                      <Button
+                        variant="outline"
+                        onClick={() => activateDriver(driver.id)}
+                      >
+                        {t('admin.activate')}
+                      </Button>
+                    )))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-            <TabsContent value="orders">
-              <Card>
-                <CardContent className="p-6">
-                  <h2 className="text-xl font-semibold mb-4">{t('admin.allOrders')}</h2>
-                  <SearchAndFilter
-                    type="orders"
-                    onSearch={setSearchTerm}
-                    onFilter={setActiveFilters}
-                    className="mb-4"
-                  />
-                  {filteredOrders?.length === 0 ? (
-                    <p className="text-muted-foreground text-center py-4">{t('admin.noOrders')}</p>
-                  ) : (
-                    <div className="space-y-4">
-                      {filteredOrders?.map(renderOrderCard)}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
+          <TabsContent value="orders">
+            <Card>
+              <CardContent className="p-6">
+                <h2 className="text-xl font-semibold mb-4">{t('admin.allOrders')}</h2>
+                <SearchAndFilter
+                  type="orders"
+                  onSearch={setSearchTerm}
+                  onFilter={setActiveFilters}
+                  className="mb-4"
+                />
+                {filteredOrders?.length === 0 ? (
+                  <p className="text-muted-foreground text-center py-4">{t('admin.noOrders')}</p>
+                ) : (
+                  <div className="space-y-4">
+                    {filteredOrders?.map(renderOrderCard)}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-            <TabsContent value="documents">
-              <Card>
-                <CardContent className="p-6">
-                  <h2 className="text-xl font-semibold mb-6">{t('admin.documents')}</h2>
-                  <SearchAndFilter
-                    type="documents"
-                    onSearch={setSearchTerm}
-                    onFilter={setActiveFilters}
-                    className="mb-4"
-                    driversList={[...(activeDrivers || []), ...(suspendedDrivers || [])]}
-                  />
-                  {filteredDocuments.length === 0 ? (
-                    <p className="text-muted-foreground text-center py-4">{t('admin.noDocuments')}</p>
-                  ) : (
-                    <div className="grid gap-6">
-                      {filteredDocuments.map((order) => (
-                        <Card key={order.id} className="hover:shadow-md transition-shadow">
-                          <CardContent className="p-6">
-                            <div className="flex flex-col lg:flex-row justify-between gap-4">
-                              <div className="space-y-2">
-                                <div className="flex items-center gap-2">
-                                  <FileText className="h-5 w-5 text-primary" />
-                                  <h3 className="text-lg font-semibold">
-                                    {t('order.tripNumber')}: {order.tripNumber}
-                                  </h3>
-                                </div>
-                                <div className="text-sm text-muted-foreground space-y-1">
-                                  <p className="flex items-center gap-2">
-                                    <Calendar className="h-4 w-4" />
-                                    {new Date(order.createdAt).toLocaleString()}
-                                  </p>
-                                  <p className="flex items-center gap-2">
-                                    <MapPin className="h-4 w-4" />
-                                    {order.fromCity} → {order.toCity}
-                                  </p>
-                                  <p className="flex items-center gap-2">
-                                    <Users className="h-4 w-4" />
-                                    {t('order.passengerCount')}: {order.passengers?.length || 0}
-                                  </p>
-                                  {order.driver && order.driver.fullName && (
-                                    <p className="flex items-center gap-2">
-                                      <UserIcon className="h-4 w-4" />
-                                      {t('order.issuedBy')}: {order.driver.fullName}
-                                      {order.driver.uid && ` (${order.driver.uid})`}
-                                    </p>
-                                  )}
-                                </div>
+          <TabsContent value="documents">
+            <Card>
+              <CardContent className="p-6">
+                <h2 className="text-xl font-semibold mb-6">{t('admin.documents')}</h2>
+                <SearchAndFilter
+                  type="documents"
+                  onSearch={setSearchTerm}
+                  onFilter={setActiveFilters}
+                  className="mb-4"
+                  driversList={[...(activeDrivers || []), ...(suspendedDrivers || [])]}
+                />
+                {filteredDocuments.length === 0 ? (
+                  <p className="text-muted-foreground text-center py-4">{t('admin.noDocuments')}</p>
+                ) : (
+                  <div className="grid gap-6">
+                    {filteredDocuments.map((order) => (
+                      <Card key={order.id} className="hover:shadow-md transition-shadow">
+                        <CardContent className="p-6">
+                          <div className="flex flex-col lg:flex-row justify-between gap-4">
+                            <div className="space-y-2">
+                              <div className="flex items-center gap-2">
+                                <FileText className="h-5 w-5 text-primary" />
+                                <h3 className="text-lg font-semibold">
+                                  {t('order.tripNumber')}: {order.tripNumber}
+                                </h3>
                               </div>
-                              <div className="flex flex-col sm:flex-row gap-2">
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  asChild
-                                >
-                                  <a
-                                    href={`/uploads/${order.pdfUrl}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="flex items-center gap-2"
-                                  >
-                                    <FileText className="h-4 w-4" />
-                                    {t('order.viewDocument')}
-                                  </a>
-                                </Button>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => window.open(`/uploads/${order.pdfUrl}`, '_blank')}
-                                >
-                                  <Download className="h-4 w-4 mr-2" />
-                                  {t('order.download')}
-                                </Button>
+                              <div className="text-sm text-muted-foreground space-y-1">
+                                <p className="flex items-center gap-2">
+                                  <Calendar className="h-4 w-4" />
+                                  {new Date(order.createdAt).toLocaleString()}
+                                </p>
+                                <p className="flex items-center gap-2">
+                                  <MapPin className="h-4 w-4" />
+                                  {order.fromCity} → {order.toCity}
+                                </p>
+                                <p className="flex items-center gap-2">
+                                  <Users className="h-4 w-4" />
+                                  {t('order.passengerCount')}: {order.passengers?.length || 0}
+                                </p>
+                                {order.driver && order.driver.fullName && (
+                                  <p className="flex items-center gap-2">
+                                    <UserIcon className="h-4 w-4" />
+                                    {t('order.issuedBy')}: {order.driver.fullName}
+                                    {order.driver.uid && ` (${order.driver.uid})`}
+                                  </p>
+                                )}
                               </div>
                             </div>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
-        </div>
+                            <div className="flex flex-col sm:flex-row gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                asChild
+                              >
+                                <a
+                                  href={`/uploads/${order.pdfUrl}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="flex items-center gap-2"
+                                >
+                                  <FileText className="h-4 w-4" />
+                                  {t('order.viewDocument')}
+                                </a>
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => window.open(`/uploads/${order.pdfUrl}`, '_blank')}
+                              >
+                                <Download className="h-4 w-4 mr-2" />
+                                {t('order.download')}
+                              </Button>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
-    </>
+    </div>
   );
 }
