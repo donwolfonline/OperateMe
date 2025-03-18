@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
+import { useAuth } from '@/hooks/use-auth';
 
 interface Notification {
   type: 'NEW_DRIVER' | 'NEW_ORDER' | 'NEW_PDF' | 'VEHICLE_REGISTERED';
@@ -17,11 +18,19 @@ export function NotificationCenter() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   useEffect(() => {
+    // Only connect if user is admin
+    if (!user || user.role !== 'admin') return;
+
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const wsUrl = `${protocol}//${window.location.host}/ws`;
     const socket = new WebSocket(wsUrl);
+
+    socket.onopen = () => {
+      console.log('WebSocket Connected');
+    };
 
     socket.onmessage = (event) => {
       try {
@@ -41,12 +50,19 @@ export function NotificationCenter() {
 
     socket.onerror = (error) => {
       console.error('WebSocket error:', error);
+      toast({
+        title: 'Connection Error',
+        description: 'Failed to connect to notification service',
+        variant: 'destructive',
+      });
     };
 
     return () => {
-      socket.close();
+      if (socket.readyState === WebSocket.OPEN) {
+        socket.close();
+      }
     };
-  }, []);
+  }, [user, toast]); // Dependencies properly listed
 
   const clearNotifications = () => {
     setNotifications([]);
@@ -59,6 +75,9 @@ export function NotificationCenter() {
       setUnreadCount(0);
     }
   };
+
+  // Only render for admin users
+  if (!user || user.role !== 'admin') return null;
 
   return (
     <div className="relative">
