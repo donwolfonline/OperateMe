@@ -18,6 +18,8 @@ function AdminLoginPage() {
   const { user, loginMutation, isLoading } = useAuth();
   const { toast } = useToast();
 
+  console.log('Auth state:', { user, isLoading }); // Debug log
+
   const loginForm = useForm({
     resolver: zodResolver(
       insertUserSchema.pick({ 
@@ -33,11 +35,13 @@ function AdminLoginPage() {
 
   const onLogin = async (data: any) => {
     try {
+      console.log('Attempting login...'); // Debug log
       await loginMutation.mutateAsync({
         ...data,
         role: "admin"
       });
     } catch (error: any) {
+      console.error('Login error:', error); // Debug log
       toast({
         title: t('auth.loginError'),
         description: error.message,
@@ -57,6 +61,7 @@ function AdminLoginPage() {
 
   // Handle authentication redirect
   if (user) {
+    console.log('User authenticated, redirecting...', user); // Debug log
     if (user.role === "admin") {
       return <Redirect to="/admin" />;
     } else {
