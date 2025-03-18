@@ -39,7 +39,7 @@ export function ProtectedRoute({
 
   // Check if user has the required role
   if (requiredRole && user.role !== requiredRole) {
-    const redirectPath = user.role === "admin" ? "/admin-dashboard" : "/driver";
+    const redirectPath = user.role === "admin" ? "/admin/dashboard" : "/auth";
     return (
       <AuthWrapper>
         <Redirect to={redirectPath} />
