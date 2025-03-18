@@ -46,7 +46,7 @@ export default function LandingPage() {
                   {t('landing.loginButton')}
                 </Button>
               </Link>
-              <Link href="/admin">
+              <Link href="/admin/login">
                 <Button 
                   size="lg" 
                   variant="outline" 

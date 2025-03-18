@@ -63,7 +63,7 @@ function AdminLoginPage() {
   if (user) {
     console.log('User authenticated, redirecting...', user); // Debug log
     if (user.role === "admin") {
-      return <Redirect to="/admin" />;
+      return <Redirect to="/admin/dashboard" />;
     } else {
       return <Redirect to="/driver" />;
     }

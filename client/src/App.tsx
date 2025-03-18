@@ -18,12 +18,12 @@ function Router() {
     <Switch>
       <Route path="/" component={LandingPage} />
       <Route path="/auth" component={DriverLoginPage} />
-      <Route path="/admin" component={AdminLoginPage} />
+      <Route path="/admin/login" component={AdminLoginPage} />
       <Route path="/register" component={RegisterPage} />
       <Route path="/driver" component={() => (
         <ProtectedRoute component={DriverDashboard} requiredRole="driver" />
       )} />
-      <Route path="/admin" component={() => ( //Corrected route here
+      <Route path="/admin/dashboard" component={() => (
         <ProtectedRoute component={AdminDashboard} requiredRole="admin" />
       )} />
       <Route component={NotFound} />
