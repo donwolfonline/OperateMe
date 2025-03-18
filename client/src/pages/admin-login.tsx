@@ -11,7 +11,7 @@ import LanguageToggle from "@/components/LanguageToggle";
 import HomeButton from "@/components/HomeButton";
 import { Redirect } from "wouter";
 
-export default function AdminLoginPage() {
+function AdminLoginPage() {
   const { t } = useTranslation();
   const { user, loginMutation } = useAuth();
 
@@ -21,7 +21,11 @@ export default function AdminLoginPage() {
         username: true, 
         password: true 
       })
-    )
+    ),
+    defaultValues: {
+      username: "",
+      password: ""
+    }
   });
 
   const onLogin = async (data: any) => {
@@ -96,3 +100,5 @@ export default function AdminLoginPage() {
     </div>
   );
 }
+
+export default AdminLoginPage;

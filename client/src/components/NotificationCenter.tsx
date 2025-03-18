@@ -44,6 +44,7 @@ export function NotificationCenter() {
           setIsConnected(false);
 
           // Attempt to reconnect after 5 seconds
+          if (reconnectTimer) clearTimeout(reconnectTimer);
           reconnectTimer = setTimeout(connectWebSocket, 5000);
         };
 
