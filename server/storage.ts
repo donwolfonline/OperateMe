@@ -5,8 +5,12 @@ import session from "express-session";
 import { scrypt, randomBytes } from "crypto";
 import { promisify } from "util";
 import { User, Vehicle, OperationOrder, Passenger, InsertUser } from "@shared/schema";
+import { db } from "./db";
+import { users, vehicles, operationOrders, passengers } from "@shared/schema";
+import { eq, and } from "drizzle-orm";
+import connectPg from "connect-pg-simple";
 
-const MemoryStore = createMemoryStore(session);
+const PostgresSessionStore = connectPg(session);
 const scryptAsync = promisify(scrypt);
 
 // Function to generate unique identifier
@@ -45,188 +49,158 @@ export interface IStorage {
   updateDriver(id: number, updates: { status: string; isApproved: boolean }): Promise<User | undefined>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  private vehicles: Map<number, Vehicle>;
-  private operationOrders: Map<number, OperationOrder>;
-  private passengers: Map<number, Passenger>;
+export class DatabaseStorage implements IStorage {
   sessionStore: session.Store;
-  currentId: number;
-
-  private async createDefaultUsers() {
-    // Create admin user
-    const adminSalt = randomBytes(16).toString("hex");
-    const adminBuf = (await scryptAsync("admin123", adminSalt, 64)) as Buffer;
-    const adminHashedPassword = `${adminBuf.toString("hex")}.${adminSalt}`;
-
-    const adminUser: User = {
-      id: this.currentId++,
-      uid: generateUID('admin', 1),
-      username: "admin",
-      password: adminHashedPassword,
-      role: "admin",
-      status: "active",
-      isApproved: true,
-      fullName: "Admin User",
-      idNumber: null,
-      licenseNumber: null,
-      idDocumentUrl: null,
-      licenseDocumentUrl: null,
-      profileImageUrl: null,
-      createdAt: new Date()
-    };
-
-    // Create test driver user
-    const driverSalt = randomBytes(16).toString("hex");
-    const driverBuf = (await scryptAsync("driver123", driverSalt, 64)) as Buffer;
-    const driverHashedPassword = `${driverBuf.toString("hex")}.${driverSalt}`;
-
-    const driverUser: User = {
-      id: this.currentId++,
-      uid: generateUID('driver', 2),
-      username: "driver",
-      password: driverHashedPassword,
-      role: "driver",
-      status: "active",
-      isApproved: true,
-      fullName: "Test Driver",
-      idNumber: "DRV123",
-      licenseNumber: "LIC456",
-      idDocumentUrl: null,
-      licenseDocumentUrl: null,
-      profileImageUrl: null,
-      createdAt: new Date()
-    };
-
-    this.users.set(adminUser.id, adminUser);
-    this.users.set(driverUser.id, driverUser);
-  }
 
   constructor() {
-    this.users = new Map();
-    this.vehicles = new Map();
-    this.operationOrders = new Map();
-    this.passengers = new Map();
-    this.currentId = 1;
-    this.sessionStore = new MemoryStore({
-      checkPeriod: 86400000, // Prune expired entries every 24h
+    this.sessionStore = new PostgresSessionStore({
+      conObject: {
+        connectionString: process.env.DATABASE_URL,
+      },
+      createTableIfMissing: true,
     });
 
-    // Create default users
+    // Create default users if they don't exist
     this.createDefaultUsers();
   }
 
-  async updateUser(user: User): Promise<User> {
-    this.users.set(user.id, user);
-    return user;
+  private async createDefaultUsers() {
+    const adminUser = await this.getUserByUsername("admin");
+    const driverUser = await this.getUserByUsername("driver");
+
+    if (!adminUser) {
+      const adminSalt = randomBytes(16).toString("hex");
+      const adminBuf = (await scryptAsync("admin123", adminSalt, 64)) as Buffer;
+      const adminHashedPassword = `${adminBuf.toString("hex")}.${adminSalt}`;
+
+      await db.insert(users).values({
+        username: "admin",
+        password: adminHashedPassword,
+        role: "admin",
+        status: "active",
+        isApproved: true,
+        fullName: "Admin User",
+        uid: generateUID('admin', 1),
+        createdAt: new Date()
+      });
+    }
+
+    if (!driverUser) {
+      const driverSalt = randomBytes(16).toString("hex");
+      const driverBuf = (await scryptAsync("driver123", driverSalt, 64)) as Buffer;
+      const driverHashedPassword = `${driverBuf.toString("hex")}.${driverSalt}`;
+
+      await db.insert(users).values({
+        username: "driver",
+        password: driverHashedPassword,
+        role: "driver",
+        status: "active",
+        isApproved: true,
+        fullName: "Test Driver",
+        idNumber: "DRV123",
+        licenseNumber: "LIC456",
+        uid: generateUID('driver', 2),
+        createdAt: new Date()
+      });
+    }
   }
 
   async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
-  }
-
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
-  }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.currentId++;
-    const user: User = {
-      ...insertUser,
-      id,
-      uid: generateUID(insertUser.role || 'driver', id),
-      role: "driver",
-      status: "pending",
-      isApproved: false,
-      fullName: insertUser.fullName || null,
-      idNumber: insertUser.idNumber || null,
-      licenseNumber: insertUser.licenseNumber || null,
-      idDocumentUrl: null,
-      licenseDocumentUrl: null,
-      profileImageUrl: null,
-      createdAt: new Date()
-    };
-    this.users.set(id, user);
+    const [user] = await db.select().from(users).where(eq(users.id, id));
     return user;
   }
 
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db.insert(users).values({
+      ...insertUser,
+      uid: generateUID(insertUser.role || 'driver', Date.now()),
+      createdAt: new Date()
+    }).returning();
+    return user;
+  }
+
+  async updateUser(user: User): Promise<User> {
+    const [updatedUser] = await db
+      .update(users)
+      .set(user)
+      .where(eq(users.id, user.id))
+      .returning();
+    return updatedUser;
+  }
+
   async getVehicle(id: number): Promise<Vehicle | undefined> {
-    return this.vehicles.get(id);
+    const [vehicle] = await db.select().from(vehicles).where(eq(vehicles.id, id));
+    return vehicle;
   }
 
   async getVehiclesByDriver(driverId: number): Promise<Vehicle[]> {
-    return Array.from(this.vehicles.values()).filter(
-      (vehicle) => vehicle.driverId === driverId
-    );
+    return db.select().from(vehicles).where(eq(vehicles.driverId, driverId));
   }
 
   async createVehicle(vehicle: Omit<Vehicle, "id">): Promise<Vehicle> {
-    const id = this.currentId++;
-    const newVehicle = { ...vehicle, id };
-    this.vehicles.set(id, newVehicle);
+    const [newVehicle] = await db.insert(vehicles).values(vehicle).returning();
     return newVehicle;
   }
 
   async updateVehicleStatus(id: number, driverId: number, isActive: boolean): Promise<Vehicle | undefined> {
-    const vehicle = await this.getVehicle(id);
-    if (vehicle && vehicle.driverId === driverId) {
-      const updatedVehicle = { ...vehicle, isActive };
-      this.vehicles.set(id, updatedVehicle);
-      return updatedVehicle;
-    }
-    return undefined;
+    const [vehicle] = await db
+      .update(vehicles)
+      .set({ isActive })
+      .where(and(eq(vehicles.id, id), eq(vehicles.driverId, driverId)))
+      .returning();
+    return vehicle;
   }
 
   async getOperationOrder(id: number): Promise<OperationOrder | undefined> {
-    return this.operationOrders.get(id);
+    const [order] = await db.select().from(operationOrders).where(eq(operationOrders.id, id));
+    return order;
   }
 
   async getOperationOrdersByDriver(driverId: number): Promise<OperationOrder[]> {
-    return Array.from(this.operationOrders.values()).filter(
-      (order) => order.driverId === driverId
-    );
+    return db.select().from(operationOrders).where(eq(operationOrders.driverId, driverId));
   }
 
   async createOperationOrder(
     order: Omit<OperationOrder, "id">,
-    passengers: Omit<Passenger, "id" | "orderId">[]
+    passengersList: Omit<Passenger, "id" | "orderId">[]
   ): Promise<OperationOrder> {
-    const orderId = this.currentId++;
-    const newOrder = { ...order, id: orderId };
-    this.operationOrders.set(orderId, newOrder);
+    const [newOrder] = await db.insert(operationOrders).values(order).returning();
 
     // Create passengers for this order
-    passengers.forEach(passenger => {
-      const passengerId = this.currentId++;
-      const newPassenger: Passenger = {
+    for (const passenger of passengersList) {
+      await db.insert(passengers).values({
         ...passenger,
-        id: passengerId,
-        orderId
-      };
-      this.passengers.set(passengerId, newPassenger);
-    });
+        orderId: newOrder.id
+      });
+    }
 
     return newOrder;
   }
 
   async getPendingDrivers(): Promise<User[]> {
-    return Array.from(this.users.values()).filter(
-      (user) => user.role === "driver" && user.status === "pending"
-    );
+    return db.select().from(users).where(and(
+      eq(users.role, "driver"),
+      eq(users.status, "pending")
+    ));
   }
 
   async getActiveDrivers(): Promise<User[]> {
-    return Array.from(this.users.values()).filter(
-      (user) => user.role === "driver" && user.status === "active"
-    );
+    return db.select().from(users).where(and(
+      eq(users.role, "driver"),
+      eq(users.status, "active")
+    ));
   }
 
   async getSuspendedDrivers(): Promise<User[]> {
-    return Array.from(this.users.values()).filter(
-      (user) => user.role === "driver" && user.status === "suspended"
-    );
+    return db.select().from(users).where(and(
+      eq(users.role, "driver"),
+      eq(users.status, "suspended")
+    ));
   }
 
   async updateDriverStatus(id: number, status: string): Promise<User | undefined> {
@@ -252,32 +226,30 @@ export class MemStorage implements IStorage {
   }
 
   async updateOperationOrder(order: OperationOrder): Promise<OperationOrder> {
-    this.operationOrders.set(order.id, order);
-    return order;
+    const [updatedOrder] = await db
+      .update(operationOrders)
+      .set(order)
+      .where(eq(operationOrders.id, order.id))
+      .returning();
+    return updatedOrder;
   }
 
   async getPassengersByOrder(orderId: number): Promise<Passenger[]> {
-    return Array.from(this.passengers.values()).filter(
-      (passenger) => passenger.orderId === orderId
-    );
+    return db.select().from(passengers).where(eq(passengers.orderId, orderId));
   }
 
   async getAllOperationOrders(): Promise<OperationOrder[]> {
-    return Array.from(this.operationOrders.values());
+    return db.select().from(operationOrders);
   }
+
   async updateDriver(id: number, updates: { status: string; isApproved: boolean }): Promise<User | undefined> {
-    const user = await this.getUser(id);
-    if (user && user.role === "driver") {
-      const updatedUser = {
-        ...user,
-        status: updates.status,
-        isApproved: updates.isApproved
-      };
-      this.users.set(id, updatedUser);
-      return updatedUser;
-    }
-    return undefined;
+    const [updatedUser] = await db
+      .update(users)
+      .set(updates)
+      .where(and(eq(users.id, id), eq(users.role, "driver")))
+      .returning();
+    return updatedUser;
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
