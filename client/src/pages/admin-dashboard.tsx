@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { User, OperationOrder } from "@shared/schema";
 import LanguageToggle from "@/components/LanguageToggle";
+import { NotificationCenter } from "@/components/NotificationCenter";
 import HomeButton from "@/components/HomeButton";
 import { Badge } from "@/components/ui/badge";
 import { FileText, User as UserIcon, Car, FileCheck, Download, Calendar, MapPin, Users } from "lucide-react";
@@ -320,7 +321,8 @@ export default function AdminDashboard() {
         <div className="container mx-auto px-4 py-8">
           <div className="flex justify-between items-center mb-8">
             <HomeButton />
-            <div className="flex gap-4">
+            <div className="flex items-center gap-4">
+              <NotificationCenter />
               <LanguageToggle />
               <button
                 onClick={() => logoutMutation.mutate()}

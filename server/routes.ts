@@ -8,6 +8,7 @@ import { insertVehicleSchema, insertOperationOrderSchema } from "@shared/schema"
 import { generateOrderPDF } from './utils/pdfGenerator';
 import express from "express";
 import fs from 'fs';
+import { WebSocketServer, WebSocket } from 'ws';
 
 // Ensure uploads directory exists
 const uploadsDir = path.join(process.cwd(), 'uploads');
@@ -49,6 +50,26 @@ const upload = multer({
     }
   }
 });
+
+// Notification types
+type NotificationType = 'NEW_DRIVER' | 'NEW_ORDER' | 'NEW_PDF' | 'VEHICLE_REGISTERED';
+
+interface Notification {
+  type: NotificationType;
+  message: string;
+  timestamp: Date;
+  data?: any;
+}
+
+let adminConnections: WebSocket[] = [];
+
+function broadcastToAdmins(notification: Notification) {
+  adminConnections.forEach(client => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(JSON.stringify(notification));
+    }
+  });
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   setupAuth(app);
@@ -130,6 +151,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         createdAt: new Date()
       });
 
+      broadcastToAdmins({
+        type: 'VEHICLE_REGISTERED',
+        message: `New vehicle registered by ${req.user.fullName}`,
+        timestamp: new Date(),
+        data: { vehicle, driver: req.user }
+      });
+
       res.status(201).json(vehicle);
     } catch (error: any) {
       console.error('Vehicle creation error:', error);
@@ -189,6 +217,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const pdfFileName = await generateOrderPDF(order, req.user);
         order.pdfUrl = pdfFileName;
         await storage.updateOperationOrder(order);
+
+        broadcastToAdmins({
+          type: 'NEW_ORDER',
+          message: `New operation order created by ${req.user.fullName}`,
+          timestamp: new Date(),
+          data: { order, driver: req.user }
+        });
+
+        if (pdfFileName) {
+          broadcastToAdmins({
+            type: 'NEW_PDF',
+            message: `New PDF generated for order #${order.id}`,
+            timestamp: new Date(),
+            data: { orderId: order.id, pdfUrl: pdfFileName }
+          });
+        }
+
         res.status(201).json(order);
       } catch (pdfError) {
         console.error('PDF generation error:', pdfError);
@@ -304,5 +349,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   const httpServer = createServer(app);
+
+  // Setup WebSocket server
+  const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
+
+  wss.on('connection', (ws, req) => {
+    // Check if the connected user is an admin
+    const user = (req as any).user;
+    if (user?.role === 'admin') {
+      adminConnections.push(ws);
+
+      ws.on('close', () => {
+        adminConnections = adminConnections.filter(conn => conn !== ws);
+      });
+    }
+  });
+
+  // Driver registration notification
+  app.post("/api/register", async (req, res) => {
+    // ... existing registration logic ...
+
+    broadcastToAdmins({
+      type: 'NEW_DRIVER',
+      message: `New driver registered: ${req.body.fullName}`,
+      timestamp: new Date(),
+      data: { username: req.body.username, fullName: req.body.fullName }
+    });
+  });
+
+
+  // Operation orders notification - already handled above.
+
+
   return httpServer;
 }
