@@ -61,14 +61,16 @@ interface Notification {
   data?: any;
 }
 
-let adminConnections: WebSocket[] = [];
+// Add notification storage
+let notifications: Notification[] = [];
 
-function broadcastToAdmins(notification: Notification) {
-  adminConnections.forEach(client => {
-    if (client.readyState === WebSocket.OPEN) {
-      client.send(JSON.stringify(notification));
-    }
-  });
+// Modify the function to store notifications instead of broadcasting
+function addNotification(notification: Notification) {
+  notifications.unshift(notification);
+  // Keep only last 100 notifications
+  if (notifications.length > 100) {
+    notifications = notifications.slice(0, 100);
+  }
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -151,7 +153,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         createdAt: new Date()
       });
 
-      broadcastToAdmins({
+      addNotification({
         type: 'VEHICLE_REGISTERED',
         message: `New vehicle registered by ${req.user.fullName}`,
         timestamp: new Date(),
@@ -218,7 +220,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         order.pdfUrl = pdfFileName;
         await storage.updateOperationOrder(order);
 
-        broadcastToAdmins({
+        addNotification({
           type: 'NEW_ORDER',
           message: `New operation order created by ${req.user.fullName}`,
           timestamp: new Date(),
@@ -226,7 +228,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
 
         if (pdfFileName) {
-          broadcastToAdmins({
+          addNotification({
             type: 'NEW_PDF',
             message: `New PDF generated for order #${order.id}`,
             timestamp: new Date(),
@@ -348,40 +350,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  const httpServer = createServer(app);
-
-  // Setup WebSocket server
-  const wss = new WebSocketServer({ server: httpServer, path: '/api/notifications/ws' });
-
-  wss.on('connection', (ws, req) => {
-    // Get session and user information
-    const session = (req as any).session;
-    const user = (req as any).user;
-
-    if (!user || user.role !== 'admin') {
-      ws.close();
-      return;
+  // Add new endpoint to fetch notifications
+  app.get("/api/notifications", (req, res) => {
+    if (!req.user || req.user.role !== "admin") {
+      return res.sendStatus(403);
     }
-
-    adminConnections.push(ws);
-
-    ws.on('close', () => {
-      adminConnections = adminConnections.filter(conn => conn !== ws);
-    });
-
-    // Send initial connection success message
-    ws.send(JSON.stringify({
-      type: 'CONNECTION_STATUS',
-      message: 'Connected to notification service',
-      timestamp: new Date()
-    }));
+    res.json(notifications);
   });
 
-  // Driver registration notification
+
   app.post("/api/register", async (req, res) => {
     // ... existing registration logic ...
 
-    broadcastToAdmins({
+    addNotification({
       type: 'NEW_DRIVER',
       message: `New driver registered: ${req.body.fullName}`,
       timestamp: new Date(),
@@ -389,6 +370,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
-
+  const httpServer = createServer(app);
   return httpServer;
 }
