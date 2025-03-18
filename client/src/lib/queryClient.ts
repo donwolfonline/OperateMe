@@ -1,18 +1,11 @@
-import { QueryClient, QueryFunction } from "@tanstack/react-query";
+import { QueryClient } from "@tanstack/react-query";
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
-    // Clone the response so we can read it multiple times
-    const resClone = res.clone();
-
-    try {
-      const errorData = await res.json();
-      throw new Error(errorData.message || res.statusText);
-    } catch (e) {
-      // If JSON parsing fails, try to get the text from the cloned response
-      const text = await resClone.text();
-      throw new Error(`${res.status}: ${text || res.statusText}`);
-    }
+    const errorData = await res.json().catch(() => ({
+      message: res.statusText
+    }));
+    throw new Error(errorData.message || res.statusText);
   }
 }
 
@@ -42,42 +35,18 @@ export async function apiRequest(
   return res;
 }
 
-export const getQueryFn: <T>(options: {
-  on401: UnauthorizedBehavior;
-}) => QueryFunction<T> =
-  ({ on401: unauthorizedBehavior }) =>
-  async ({ queryKey }) => {
-    try {
-      const res = await fetch(queryKey[0] as string, {
-        credentials: "include",
-        headers: {
-          "Cache-Control": "no-cache",
-          "Pragma": "no-cache"
-        }
-      });
-
-      if (unauthorizedBehavior === "returnNull" && res.status === 401) {
-        return null;
-      }
-
-      await throwIfResNotOk(res);
-      const data = await res.json();
-      return data;
-    } catch (error) {
-      console.error('Query error:', error);
-      throw error;
-    }
-  };
-
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      queryFn: getQueryFn({ on401: "throw" }),
-      retry: 1,
-      retryDelay: 1000,
+      retry: false,
       refetchOnWindowFocus: false,
-      staleTime: 5000, // 5 seconds
-      gcTime: 10 * 60 * 1000, // 10 minutes
+      queryFn: async ({ queryKey }) => {
+        const res = await fetch(queryKey[0] as string, {
+          credentials: "include",
+        });
+        await throwIfResNotOk(res);
+        return res.json();
+      }
     },
     mutations: {
       retry: false,

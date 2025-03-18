@@ -13,34 +13,24 @@ import AdminDashboard from "@/pages/admin-dashboard";
 import { ProtectedRoute } from "./lib/protected-route";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 
-function Router() {
-  return (
-    <ErrorBoundary>
-      <Switch>
-        <Route path="/" component={LandingPage} />
-        <Route path="/auth" component={DriverLoginPage} />
-        <Route path="/admin/login" component={AdminLoginPage} />
-        <Route path="/register" component={RegisterPage} />
-        <Route path="/driver">
-          <ProtectedRoute component={DriverDashboard} requiredRole="driver" />
-        </Route>
-        <Route path="/admin/dashboard">
-          <ProtectedRoute component={AdminDashboard} requiredRole="admin" />
-        </Route>
-        <Route path="/:rest*">
-          <NotFound />
-        </Route>
-      </Switch>
-    </ErrorBoundary>
-  );
-}
-
 function App() {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          <Router />
+          <Switch>
+            <Route path="/" component={LandingPage} />
+            <Route path="/auth" component={DriverLoginPage} />
+            <Route path="/admin/login" component={AdminLoginPage} />
+            <Route path="/register" component={RegisterPage} />
+            <Route path="/driver">
+              <ProtectedRoute component={DriverDashboard} requiredRole="driver" />
+            </Route>
+            <Route path="/admin/dashboard">
+              <ProtectedRoute component={AdminDashboard} requiredRole="admin" />
+            </Route>
+            <Route path="/:rest*" component={NotFound} />
+          </Switch>
           <Toaster />
         </AuthProvider>
       </QueryClientProvider>

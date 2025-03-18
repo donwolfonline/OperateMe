@@ -5,7 +5,7 @@ import {
   UseMutationResult,
 } from "@tanstack/react-query";
 import { insertUserSchema, User as SelectUser, InsertUser } from "@shared/schema";
-import { getQueryFn, apiRequest, queryClient } from "../lib/queryClient";
+import { apiRequest, queryClient } from "../lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 
@@ -21,46 +21,49 @@ type AuthContextType = {
 type LoginData = Pick<InsertUser, "username" | "password"> & { role?: string };
 
 export const AuthContext = createContext<AuthContextType | null>(null);
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
   const { t } = useTranslation();
+
   const {
     data: user,
     error,
     isLoading,
-  } = useQuery<SelectUser | undefined, Error>({
+  } = useQuery<SelectUser | null>({
     queryKey: ["/api/user"],
-    queryFn: getQueryFn({ on401: "returnNull" }),
+    queryFn: async () => {
+      try {
+        const res = await fetch("/api/user", {
+          credentials: "include",
+        });
+        if (res.status === 401) {
+          return null;
+        }
+        if (!res.ok) {
+          throw new Error(res.statusText);
+        }
+        return res.json();
+      } catch (error) {
+        console.error('Auth query error:', error);
+        return null;
+      }
+    },
   });
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginData) => {
       const res = await apiRequest("POST", "/api/login", credentials);
-      const userData = await res.json();
-
-      // Check if user is suspended - only during login
-      if (userData.status === 'suspended') {
-        toast({
-          title: t('notifications.accountSuspended'),
-          description: t('notifications.suspensionMessage'),
-          variant: "destructive",
-        });
-        return null;
-      }
-
-      return userData;
+      return res.json();
     },
-    onSuccess: (user: SelectUser | null) => {
-      if (user) {
-        queryClient.setQueryData(["/api/user"], user);
-        // Redirect based on user role
-        const redirectPath = user.role === "admin" ? "/admin-dashboard" : "/driver";
-        window.location.href = redirectPath;
-      }
+    onSuccess: (user: SelectUser) => {
+      queryClient.setQueryData(["/api/user"], user);
+      // Redirect based on user role
+      window.location.href = user.role === "admin" ? "/admin/dashboard" : "/driver";
     },
     onError: (error: Error) => {
       toast({
-        title: "Login failed",
+        title: t('auth.loginError'),
         description: error.message,
         variant: "destructive",
       });
@@ -75,18 +78,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       queryClient.removeQueries();
 
       const res = await apiRequest("POST", "/api/register", credentials);
-      const userData = await res.json();
-      return userData;
+      return res.json();
     },
     onSuccess: (user: SelectUser) => {
-      // Set the new user data
       queryClient.setQueryData(["/api/user"], user);
-      // After registration, redirect to driver dashboard
       window.location.href = "/driver";
     },
     onError: (error: Error) => {
       toast({
-        title: "Registration failed",
+        title: t('auth.registerError'),
         description: error.message,
         variant: "destructive",
       });
@@ -98,16 +98,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await apiRequest("POST", "/api/logout");
     },
     onSuccess: () => {
-      // Clear all queries and cached data
       queryClient.clear();
       queryClient.removeQueries();
       queryClient.setQueryData(["/api/user"], null);
-      // After logout, redirect to home
       window.location.href = "/";
     },
     onError: (error: Error) => {
       toast({
-        title: "Logout failed",
+        title: t('auth.logoutError'),
         description: error.message,
         variant: "destructive",
       });
