@@ -51,6 +51,10 @@ export const getQueryFn: <T>(options: {
     try {
       const res = await fetch(queryKey[0] as string, {
         credentials: "include",
+        headers: {
+          "Cache-Control": "no-cache",
+          "Pragma": "no-cache"
+        }
       });
 
       if (unauthorizedBehavior === "returnNull" && res.status === 401) {
@@ -58,7 +62,8 @@ export const getQueryFn: <T>(options: {
       }
 
       await throwIfResNotOk(res);
-      return await res.json();
+      const data = await res.json();
+      return data;
     } catch (error) {
       console.error('Query error:', error);
       throw error;
@@ -69,9 +74,11 @@ export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       queryFn: getQueryFn({ on401: "throw" }),
-      retry: false,
+      retry: 1,
+      retryDelay: 1000,
       refetchOnWindowFocus: false,
-      staleTime: 0, // Changed from Infinity to 0 to ensure fresh data
+      staleTime: 0,
+      cacheTime: 0
     },
     mutations: {
       retry: false,

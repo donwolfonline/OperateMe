@@ -65,7 +65,7 @@ function AdminLoginPage() {
     if (user.role === "admin") {
       return <Redirect to="/admin/dashboard" />;
     } else {
-      return <Redirect to="/driver" />;
+      return <Redirect to="/auth" />;
     }
   }
 

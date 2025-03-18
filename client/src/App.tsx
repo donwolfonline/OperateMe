@@ -20,10 +20,10 @@ function Router() {
       <Route path="/auth" component={DriverLoginPage} />
       <Route path="/admin/login" component={AdminLoginPage} />
       <Route path="/register" component={RegisterPage} />
-      <Route path="/driver" component={() => (
+      <Route path="/driver" component={({ params }) => (
         <ProtectedRoute component={DriverDashboard} requiredRole="driver" />
       )} />
-      <Route path="/admin/dashboard" component={() => (
+      <Route path="/admin/dashboard" component={({ params }) => (
         <ProtectedRoute component={AdminDashboard} requiredRole="admin" />
       )} />
       <Route component={NotFound} />
