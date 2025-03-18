@@ -35,7 +35,7 @@ function AdminLoginPage() {
 
   const onLogin = async (data: any) => {
     try {
-      console.log('Attempting login...'); // Debug log
+      console.log('Attempting admin login...'); // Debug log
       await loginMutation.mutateAsync({
         ...data,
         role: "admin"
