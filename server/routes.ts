@@ -52,7 +52,7 @@ const upload = multer({
 });
 
 // Notification types
-type NotificationType = 'NEW_DRIVER' | 'NEW_ORDER' | 'NEW_PDF' | 'VEHICLE_REGISTERED';
+type NotificationType = 'NEW_DRIVER' | 'NEW_ORDER' | 'NEW_PDF' | 'VEHICLE_REGISTERED' | 'CONNECTION_STATUS';
 
 interface Notification {
   type: NotificationType;
@@ -351,18 +351,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
 
   // Setup WebSocket server
-  const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
+  const wss = new WebSocketServer({ server: httpServer, path: '/api/notifications/ws' });
 
   wss.on('connection', (ws, req) => {
-    // Check if the connected user is an admin
+    // Get session and user information
+    const session = (req as any).session;
     const user = (req as any).user;
-    if (user?.role === 'admin') {
-      adminConnections.push(ws);
 
-      ws.on('close', () => {
-        adminConnections = adminConnections.filter(conn => conn !== ws);
-      });
+    if (!user || user.role !== 'admin') {
+      ws.close();
+      return;
     }
+
+    adminConnections.push(ws);
+
+    ws.on('close', () => {
+      adminConnections = adminConnections.filter(conn => conn !== ws);
+    });
+
+    // Send initial connection success message
+    ws.send(JSON.stringify({
+      type: 'CONNECTION_STATUS',
+      message: 'Connected to notification service',
+      timestamp: new Date()
+    }));
   });
 
   // Driver registration notification
@@ -376,9 +388,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       data: { username: req.body.username, fullName: req.body.fullName }
     });
   });
-
-
-  // Operation orders notification - already handled above.
 
 
   return httpServer;

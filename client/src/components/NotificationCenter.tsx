@@ -7,7 +7,7 @@ import { format } from 'date-fns';
 import { useAuth } from '@/hooks/use-auth';
 
 interface Notification {
-  type: 'NEW_DRIVER' | 'NEW_ORDER' | 'NEW_PDF' | 'VEHICLE_REGISTERED';
+  type: 'NEW_DRIVER' | 'NEW_ORDER' | 'NEW_PDF' | 'VEHICLE_REGISTERED' | 'CONNECTION_STATUS';
   message: string;
   timestamp: Date;
   data?: any;
@@ -17,52 +17,85 @@ export function NotificationCenter() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
+  const [isConnected, setIsConnected] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
 
   useEffect(() => {
-    // Only connect if user is admin
-    if (!user || user.role !== 'admin') return;
+    let socket: WebSocket | null = null;
+    let reconnectTimer: NodeJS.Timeout | null = null;
 
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${protocol}//${window.location.host}/ws`;
-    const socket = new WebSocket(wsUrl);
+    const connectWebSocket = () => {
+      if (!user || user.role !== 'admin') return;
 
-    socket.onopen = () => {
-      console.log('WebSocket Connected');
-    };
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const wsUrl = `${protocol}//${window.location.host}/api/notifications/ws`;
 
-    socket.onmessage = (event) => {
       try {
-        const notification: Notification = JSON.parse(event.data);
-        setNotifications(prev => [notification, ...prev]);
-        setUnreadCount(count => count + 1);
+        socket = new WebSocket(wsUrl);
 
-        // Show toast for new notifications
-        toast({
-          title: notification.type.split('_').join(' ').toLowerCase(),
-          description: notification.message,
-        });
+        socket.onopen = () => {
+          console.log('WebSocket Connected');
+          setIsConnected(true);
+        };
+
+        socket.onclose = () => {
+          console.log('WebSocket Disconnected');
+          setIsConnected(false);
+
+          // Attempt to reconnect after 5 seconds
+          reconnectTimer = setTimeout(connectWebSocket, 5000);
+        };
+
+        socket.onmessage = (event) => {
+          try {
+            const notification: Notification = JSON.parse(event.data);
+
+            if (notification.type === 'CONNECTION_STATUS') {
+              toast({
+                title: 'Notification Service',
+                description: notification.message,
+              });
+              return;
+            }
+
+            setNotifications(prev => [notification, ...prev]);
+            setUnreadCount(count => count + 1);
+
+            toast({
+              title: notification.type.split('_').join(' ').toLowerCase(),
+              description: notification.message,
+            });
+          } catch (error) {
+            console.error('Error parsing notification:', error);
+          }
+        };
+
+        socket.onerror = (error) => {
+          console.error('WebSocket error:', error);
+          setIsConnected(false);
+          toast({
+            title: 'Connection Error',
+            description: 'Failed to connect to notification service',
+            variant: 'destructive',
+          });
+        };
       } catch (error) {
-        console.error('Error parsing notification:', error);
+        console.error('Failed to create WebSocket:', error);
       }
     };
 
-    socket.onerror = (error) => {
-      console.error('WebSocket error:', error);
-      toast({
-        title: 'Connection Error',
-        description: 'Failed to connect to notification service',
-        variant: 'destructive',
-      });
-    };
+    connectWebSocket();
 
     return () => {
-      if (socket.readyState === WebSocket.OPEN) {
+      if (socket && socket.readyState === WebSocket.OPEN) {
         socket.close();
       }
+      if (reconnectTimer) {
+        clearTimeout(reconnectTimer);
+      }
     };
-  }, [user, toast]); // Dependencies properly listed
+  }, [user, toast]);
 
   const clearNotifications = () => {
     setNotifications([]);
@@ -76,7 +109,6 @@ export function NotificationCenter() {
     }
   };
 
-  // Only render for admin users
   if (!user || user.role !== 'admin') return null;
 
   return (
@@ -87,7 +119,7 @@ export function NotificationCenter() {
         onClick={toggleNotifications}
         className="relative"
       >
-        <Bell className="h-5 w-5" />
+        <Bell className={`h-5 w-5 ${isConnected ? 'text-primary' : 'text-muted-foreground'}`} />
         {unreadCount > 0 && (
           <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-xs text-white flex items-center justify-center">
             {unreadCount}
