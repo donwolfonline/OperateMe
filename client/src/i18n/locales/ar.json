@@ -1,0 +1,15 @@
+{
+  "notifications": {
+    "title": "الإشعارات",
+    "clearAll": "مسح الكل",
+    "noNotifications": "لا توجد إشعارات",
+    "connectionStatus": "حالة الاتصال",
+    "connected": "متصل بخدمة الإشعارات",
+    "error": "خطأ في الاتصال",
+    "connectionError": "فشل الاتصال بخدمة الإشعارات",
+    "new_driver": "سائق جديد",
+    "new_order": "طلب جديد",
+    "new_pdf": "مستند جديد",
+    "vehicle_registered": "تسجيل مركبة جديدة"
+  }
+}

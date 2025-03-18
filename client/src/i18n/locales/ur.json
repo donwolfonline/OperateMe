@@ -1,0 +1,15 @@
+{
+  "notifications": {
+    "title": "اطلاعات",
+    "clearAll": "سب صاف کریں",
+    "noNotifications": "کوئی اطلاع نہیں",
+    "connectionStatus": "کنکشن کی حالت",
+    "connected": "اطلاعات کی سروس سے منسلک",
+    "error": "کنکشن میں خرابی",
+    "connectionError": "اطلاعات کی سروس سے رابطہ ناکام",
+    "new_driver": "نیا ڈرائیور",
+    "new_order": "نیا آرڈر",
+    "new_pdf": "نیا دستاویز",
+    "vehicle_registered": "نئی گاڑی رجسٹرڈ"
+  }
+}

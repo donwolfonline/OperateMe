@@ -5,6 +5,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { useAuth } from '@/hooks/use-auth';
+import { useTranslation } from "react-i18next";
 
 interface Notification {
   type: 'NEW_DRIVER' | 'NEW_ORDER' | 'NEW_PDF' | 'VEHICLE_REGISTERED' | 'CONNECTION_STATUS';
@@ -20,6 +21,7 @@ export function NotificationCenter() {
   const [isConnected, setIsConnected] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
+  const { t } = useTranslation();
 
   useEffect(() => {
     let socket: WebSocket | null = null;
@@ -28,10 +30,12 @@ export function NotificationCenter() {
     const connectWebSocket = () => {
       if (!user || user.role !== 'admin') return;
 
-      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const wsUrl = `${protocol}//${window.location.host}/api/notifications/ws`;
-
       try {
+        // Get the current location's host and protocol
+        const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const wsHost = window.location.host;
+        const wsUrl = `${wsProtocol}//${wsHost}/api/notifications/ws`;
+
         socket = new WebSocket(wsUrl);
 
         socket.onopen = () => {
@@ -54,8 +58,8 @@ export function NotificationCenter() {
 
             if (notification.type === 'CONNECTION_STATUS') {
               toast({
-                title: 'Notification Service',
-                description: notification.message,
+                title: t('notifications.connectionStatus'),
+                description: t('notifications.connected'),
               });
               return;
             }
@@ -64,7 +68,7 @@ export function NotificationCenter() {
             setUnreadCount(count => count + 1);
 
             toast({
-              title: notification.type.split('_').join(' ').toLowerCase(),
+              title: t(`notifications.${notification.type.toLowerCase()}`),
               description: notification.message,
             });
           } catch (error) {
@@ -76,8 +80,8 @@ export function NotificationCenter() {
           console.error('WebSocket error:', error);
           setIsConnected(false);
           toast({
-            title: 'Connection Error',
-            description: 'Failed to connect to notification service',
+            title: t('notifications.error'),
+            description: t('notifications.connectionError'),
             variant: 'destructive',
           });
         };
@@ -96,7 +100,7 @@ export function NotificationCenter() {
         clearTimeout(reconnectTimer);
       }
     };
-  }, [user, toast]);
+  }, [user, toast, t]);
 
   const clearNotifications = () => {
     setNotifications([]);
@@ -131,14 +135,14 @@ export function NotificationCenter() {
       {isOpen && (
         <div className="absolute right-0 mt-2 w-96 bg-background border rounded-lg shadow-lg z-50">
           <div className="p-4 border-b flex justify-between items-center">
-            <h3 className="font-semibold">Notifications</h3>
+            <h3 className="font-semibold">{t('notifications.title')}</h3>
             <div className="flex gap-2">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={clearNotifications}
               >
-                Clear all
+                {t('notifications.clearAll')}
               </Button>
               <Button
                 variant="ghost"
@@ -153,7 +157,7 @@ export function NotificationCenter() {
           <ScrollArea className="h-[400px]">
             {notifications.length === 0 ? (
               <div className="p-4 text-center text-muted-foreground">
-                No notifications
+                {t('notifications.noNotifications')}
               </div>
             ) : (
               <div className="divide-y">
@@ -164,7 +168,7 @@ export function NotificationCenter() {
                   >
                     <div className="flex justify-between items-start mb-1">
                       <span className="font-medium">
-                        {notification.type.split('_').join(' ').toLowerCase()}
+                        {t(`notifications.${notification.type.toLowerCase()}`)}
                       </span>
                       <span className="text-xs text-muted-foreground">
                         {format(new Date(notification.timestamp), 'HH:mm')}

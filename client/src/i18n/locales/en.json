@@ -1,0 +1,15 @@
+{
+  "notifications": {
+    "title": "Notifications",
+    "clearAll": "Clear all",
+    "noNotifications": "No notifications",
+    "connectionStatus": "Connection Status",
+    "connected": "Connected to notification service",
+    "error": "Connection Error",
+    "connectionError": "Failed to connect to notification service",
+    "new_driver": "New Driver",
+    "new_order": "New Order",
+    "new_pdf": "New Document",
+    "vehicle_registered": "Vehicle Registered"
+  }
+}
