@@ -35,8 +35,11 @@ export async function apiRequest(
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: false,
+      retry: 1,
+      retryDelay: 500,
       refetchOnWindowFocus: false,
+      staleTime: 30000, // Cache data for 30 seconds
+      cacheTime: 3600000, // Keep unused data in cache for 1 hour
       queryFn: async ({ queryKey }) => {
         const res = await fetch(queryKey[0] as string, {
           credentials: "include",
