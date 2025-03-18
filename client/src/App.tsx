@@ -11,6 +11,7 @@ import RegisterPage from "@/pages/register-page";
 import DriverDashboard from "@/pages/driver-dashboard";
 import AdminDashboard from "@/pages/admin-dashboard";
 import { ProtectedRoute } from "./lib/protected-route";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 function Router() {
   return (
@@ -22,7 +23,7 @@ function Router() {
       <Route path="/driver" component={() => (
         <ProtectedRoute component={DriverDashboard} requiredRole="driver" />
       )} />
-      <Route path="/admin-dashboard" component={() => (
+      <Route path="/admin" component={() => ( //Corrected route here
         <ProtectedRoute component={AdminDashboard} requiredRole="admin" />
       )} />
       <Route component={NotFound} />
@@ -32,12 +33,14 @@ function Router() {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <Router />
-        <Toaster />
-      </AuthProvider>
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <Router />
+          <Toaster />
+        </AuthProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
 

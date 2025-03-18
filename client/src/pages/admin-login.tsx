@@ -11,10 +11,12 @@ import LanguageToggle from "@/components/LanguageToggle";
 import HomeButton from "@/components/HomeButton";
 import { Redirect } from "wouter";
 import { Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 function AdminLoginPage() {
   const { t } = useTranslation();
   const { user, loginMutation, isLoading } = useAuth();
+  const { toast } = useToast();
 
   const loginForm = useForm({
     resolver: zodResolver(
@@ -30,16 +32,24 @@ function AdminLoginPage() {
   });
 
   const onLogin = async (data: any) => {
-    await loginMutation.mutateAsync({
-      ...data,
-      role: "admin"
-    });
+    try {
+      await loginMutation.mutateAsync({
+        ...data,
+        role: "admin"
+      });
+    } catch (error: any) {
+      toast({
+        title: t('auth.loginError'),
+        description: error.message,
+        variant: "destructive"
+      });
+    }
   };
 
-  // Show loading state
+  // Show loading state while auth is initializing
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
@@ -55,8 +65,8 @@ function AdminLoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-secondary p-4">
-      <div className="container mx-auto">
+    <div className="min-h-screen bg-gradient-to-b from-background to-secondary">
+      <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-4">
           <HomeButton />
           <LanguageToggle />
