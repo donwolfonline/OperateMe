@@ -42,7 +42,6 @@ export async function apiRequest(
   return res;
 }
 
-type UnauthorizedBehavior = "returnNull" | "throw";
 export const getQueryFn: <T>(options: {
   on401: UnauthorizedBehavior;
 }) => QueryFunction<T> =
@@ -77,7 +76,7 @@ export const queryClient = new QueryClient({
       retry: 1,
       retryDelay: 1000,
       refetchOnWindowFocus: false,
-      staleTime: 5000, // Changed to 5 seconds
+      staleTime: 5000, // 5 seconds
       gcTime: 10 * 60 * 1000, // 10 minutes
     },
     mutations: {

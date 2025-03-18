@@ -15,21 +15,23 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 function Router() {
   return (
-    <Switch>
-      <Route path="/" component={LandingPage} />
-      <Route path="/auth" component={DriverLoginPage} />
-      <Route path="/admin/login" component={AdminLoginPage} />
-      <Route path="/register" component={RegisterPage} />
-      <Route path="/driver">
-        <ProtectedRoute component={DriverDashboard} requiredRole="driver" />
-      </Route>
-      <Route path="/admin/dashboard">
-        <ProtectedRoute component={AdminDashboard} requiredRole="admin" />
-      </Route>
-      <Route path="/:rest*">
-        <NotFound />
-      </Route>
-    </Switch>
+    <ErrorBoundary>
+      <Switch>
+        <Route path="/" component={LandingPage} />
+        <Route path="/auth" component={DriverLoginPage} />
+        <Route path="/admin/login" component={AdminLoginPage} />
+        <Route path="/register" component={RegisterPage} />
+        <Route path="/driver">
+          <ProtectedRoute component={DriverDashboard} requiredRole="driver" />
+        </Route>
+        <Route path="/admin/dashboard">
+          <ProtectedRoute component={AdminDashboard} requiredRole="admin" />
+        </Route>
+        <Route path="/:rest*">
+          <NotFound />
+        </Route>
+      </Switch>
+    </ErrorBoundary>
   );
 }
 
