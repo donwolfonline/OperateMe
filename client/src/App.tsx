@@ -26,7 +26,9 @@ function Router() {
       <Route path="/admin/dashboard">
         <ProtectedRoute component={AdminDashboard} requiredRole="admin" />
       </Route>
-      <Route component={NotFound} />
+      <Route>
+        <NotFound />
+      </Route>
     </Switch>
   );
 }
