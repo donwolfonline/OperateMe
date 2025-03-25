@@ -25,6 +25,15 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { insertUserSchema } from "@shared/schema";
 
+// Add this function near the top of the file, after imports
+const getPublicUrl = (path: string) => {
+  // Use the deployed domain for production, fallback to current origin for development
+  const baseUrl = process.env.NODE_ENV === 'production' 
+    ? 'https://operit.replit.app'
+    : window.location.origin;
+  return `${baseUrl}/uploads/${path}`;
+};
+
 export default function AdminDashboard() {
   const { t } = useTranslation();
   const { user, logoutMutation } = useAuth();
@@ -145,7 +154,7 @@ export default function AdminDashboard() {
         <div className="flex flex-wrap gap-2">
           {driver.idDocumentUrl && (
             <a
-              href={`/uploads/${driver.idDocumentUrl}`}
+              href={getPublicUrl(driver.idDocumentUrl)}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center text-sm text-primary hover:underline bg-muted px-3 py-2 rounded-md"
@@ -156,7 +165,7 @@ export default function AdminDashboard() {
           )}
           {driver.licenseDocumentUrl && (
             <a
-              href={`/uploads/${driver.licenseDocumentUrl}`}
+              href={getPublicUrl(driver.licenseDocumentUrl)}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center text-sm text-primary hover:underline bg-muted px-3 py-2 rounded-md"
@@ -210,7 +219,7 @@ export default function AdminDashboard() {
           </div>
           {order.pdfUrl && (
             <a
-              href={`/uploads/${order.pdfUrl}`}
+              href={getPublicUrl(order.pdfUrl)}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center text-sm text-primary hover:underline bg-muted px-3 py-2 rounded-md w-full sm:w-auto justify-center sm:justify-start"
@@ -353,6 +362,7 @@ export default function AdminDashboard() {
     filterDocuments(allOrders), [allOrders, searchTerm, activeFilters]);
 
 
+  // Then update all URL generations in the exportToExcel function to use this:
   const exportToExcel = async () => {
     try {
       const driversData = [
@@ -370,9 +380,9 @@ export default function AdminDashboard() {
         'Last Updated': new Date(driver.updatedAt || driver.createdAt).toLocaleString(),
         'Document Status': driver.idDocumentUrl && driver.licenseDocumentUrl ? 'Complete' : 'Incomplete',
         'Profile Status': driver.profileImageUrl ? 'Complete' : 'Incomplete',
-        'ID Document URL': driver.idDocumentUrl ? `${window.location.origin}/uploads/${driver.idDocumentUrl}` : 'N/A',
-        'License Document URL': driver.licenseDocumentUrl ? `${window.location.origin}/uploads/${driver.licenseDocumentUrl}` : 'N/A',
-        'Profile Image URL': driver.profileImageUrl ? `${window.location.origin}/uploads/${driver.profileImageUrl}` : 'N/A'
+        'ID Document URL': driver.idDocumentUrl ? `=HYPERLINK("${getPublicUrl(driver.idDocumentUrl)}", "View ID Document")` : 'N/A',
+        'License Document URL': driver.licenseDocumentUrl ? `=HYPERLINK("${getPublicUrl(driver.licenseDocumentUrl)}", "View License")` : 'N/A',
+        'Profile Image URL': driver.profileImageUrl ? `=HYPERLINK("${getPublicUrl(driver.profileImageUrl)}", "View Profile")` : 'N/A'
       }));
 
       const ordersData = (filteredOrders || []).map(order => ({
@@ -390,8 +400,8 @@ export default function AdminDashboard() {
         'Vehicle Type': order.vehicle?.type || 'N/A',
         'Vehicle Plate': order.vehicle?.plateNumber || 'N/A',
         'PDF Status': order.pdfUrl ? 'Generated' : 'Pending',
-        'PDF Link': order.pdfUrl ? `=HYPERLINK("${window.location.origin}/uploads/${order.pdfUrl}", "Click to View PDF")` : 'N/A',
-        'QR Code': order.qrCode ? `=HYPERLINK("${window.location.origin}/uploads/${order.qrCode}", "View QR Code")` : 'N/A'
+        'PDF Link': order.pdfUrl ? `=HYPERLINK("${getPublicUrl(order.pdfUrl)}", "Click to View PDF")` : 'N/A',
+        'QR Code': order.qrCode ? `=HYPERLINK("${getPublicUrl(order.qrCode)}", "View QR Code")` : 'N/A'
       }));
 
       const passengersData = (filteredOrders || []).flatMap(order =>
@@ -408,7 +418,7 @@ export default function AdminDashboard() {
           'Visa Type': order.visaType,
           'Order Created': new Date(order.createdAt).toLocaleString(),
           'PDF Available': order.pdfUrl ? 'Yes' : 'No',
-          'PDF Link': order.pdfUrl ? `=HYPERLINK("${window.location.origin}/uploads/${order.pdfUrl}", "Download Trip PDF")` : 'N/A'
+          'PDF Link': order.pdfUrl ? `=HYPERLINK("${getPublicUrl(order.pdfUrl)}", "Download Trip PDF")` : 'N/A'
         }))
       );
 
@@ -422,12 +432,12 @@ export default function AdminDashboard() {
           'Driver ID': order.driver?.uid || 'N/A',
           'Driver Contact': order.driver?.phoneNumber || 'N/A',
           'Status': 'Generated',
-          'Download PDF': `=HYPERLINK("${window.location.origin}/uploads/${order.pdfUrl}", "Download PDF")`,
-          'View Online': `=HYPERLINK("${window.location.origin}/uploads/${order.pdfUrl}", "View in Browser")`,
+          'Download PDF': `=HYPERLINK("${getPublicUrl(order.pdfUrl)}", "Download PDF")`,
+          'View Online': `=HYPERLINK("${getPublicUrl(order.pdfUrl)}", "View in Browser")`,
           'Associated Trip': order.tripNumber,
           'Route': `${order.fromCity} → ${order.toCity}`,
           'Passenger Count': order.passengers?.length || 0,
-          'QR Code': order.qrCode ? `=HYPERLINK("${window.location.origin}/uploads/${order.qrCode}", "View QR Code")` : 'N/A'
+          'QR Code': order.qrCode ? `=HYPERLINK("${getPublicUrl(order.qrCode)}", "View QR Code")` : 'N/A'
         }));
 
       const dailyTripsData = (filteredOrders || []).reduce((acc: any, order) => {
@@ -453,7 +463,7 @@ export default function AdminDashboard() {
         if (order.driver?.uid) acc[date]['Unique Drivers'].add(order.driver.uid);
         if (order.status === 'completed') acc[date]['Completed Orders']++;
         if (order.status === 'pending') acc[date]['Pending Orders']++;
-        if (order.pdfUrl) acc[date]['PDF Links'].add(`=HYPERLINK("${window.location.origin}/uploads/${order.pdfUrl}", "PDF ${order.tripNumber}")`);
+        if (order.pdfUrl) acc[date]['PDF Links'].add(`=HYPERLINK("${getPublicUrl(order.pdfUrl)}", "PDF ${order.tripNumber}")`);
         return acc;
       }, {});
 
@@ -781,8 +791,7 @@ export default function AdminDashboard() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="documents">
-            <Card>
+          <TabsContent value="documents"><Card>
               <CardContent className="p-6">
                 <h2 className="text-xl font-semibold mb-6">{t('admin.documents')}</h2>
                 <SearchAndFilter
@@ -836,7 +845,7 @@ export default function AdminDashboard() {
                                 asChild
                               >
                                 <a
-                                  href={`/uploads/${order.pdfUrl}`}
+                                  href={getPublicUrl(order.pdfUrl)}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="flex items-center gap-2"
@@ -848,7 +857,7 @@ export default function AdminDashboard() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => window.open(`/uploads/${order.pdfUrl}`, '_blank')}
+                                onClick={() => window.open(getPublicUrl(order.pdfUrl), '_blank')}
                               >
                                 <Download className="h-4 w-4 mr-2" />
                                 {t('order.download')}

@@ -17,6 +17,13 @@ logger = logging.getLogger(__name__)
 def get_replit_url():
     """Get the correct Replit URL for the current environment"""
     try:
+        # In production, always use operit.replit.app
+        if os.getenv('NODE_ENV') == 'production':
+            base_url = "https://operit.replit.app"
+            logger.info(f"Using production URL: {base_url}")
+            return base_url
+
+        # For development, try different options
         replit_domain = os.getenv('REPLIT_DOMAIN')  # Primary domain
         repl_id = os.getenv('REPL_ID')
         repl_slug = os.getenv('REPL_SLUG')
@@ -31,7 +38,7 @@ def get_replit_url():
             # Local development fallback
             base_url = "http://localhost:5000"
 
-        logger.info(f"Using base URL: {base_url}")
+        logger.info(f"Using development URL: {base_url}")
         return base_url
     except Exception as e:
         logger.error(f"Error getting Replit URL: {str(e)}")

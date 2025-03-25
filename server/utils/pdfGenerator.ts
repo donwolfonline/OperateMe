@@ -6,6 +6,26 @@ import { storage } from '../storage';
 import { spawn } from 'child_process';
 import { promisify } from 'util';
 
+const getBaseUrl = () => {
+  // In production, always use operit.replit.app
+  if (process.env.NODE_ENV === 'production') {
+    return 'https://operit.replit.app';
+  }
+
+  // For development environments
+  const replitDomain = process.env.REPLIT_DOMAIN;
+  const replId = process.env.REPL_ID;
+  const replSlug = process.env.REPL_SLUG;
+
+  if (replitDomain) {
+    return `https://${replitDomain}`;
+  } else if (replSlug && replId) {
+    return `https://${replSlug}.id.repl.co`;
+  }
+
+  return 'http://localhost:5000';
+};
+
 export async function generateOrderPDF(order: OperationOrder, driver: User): Promise<string> {
   try {
     // Get passengers for this order
@@ -49,7 +69,12 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
         path.join(process.cwd(), 'server/utils/pdf_generator.py'),
         tempDataPath,
         pdfPath
-      ]);
+      ], {
+        env: {
+          ...process.env,
+          NODE_ENV: process.env.NODE_ENV // Pass NODE_ENV to Python script
+        }
+      });
 
       pythonProcess.on('close', (code) => {
         // Clean up temp file
