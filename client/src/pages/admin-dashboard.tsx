@@ -24,7 +24,7 @@ export default function AdminDashboard() {
   const { user, logoutMutation } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [activeFilters, setActiveFilters] = useState({});
-  const { toast } = useToast(); // Added useToast hook
+  const { toast } = useToast(); 
 
   const { data: pendingDrivers } = useQuery<User[]>({
     queryKey: ["/api/admin/pending-drivers"],
@@ -320,7 +320,7 @@ export default function AdminDashboard() {
 
   const exportToExcel = async () => {
     try {
-      // Prepare data for export
+      // Prepare drivers data
       const driversData = [
         ...filteredPendingDrivers || [],
         ...filteredActiveDrivers || [],
@@ -332,35 +332,112 @@ export default function AdminDashboard() {
         'License Number': driver.licenseNumber,
         'Status': driver.status,
         'Is Approved': driver.isApproved ? 'Yes' : 'No',
-        'Created At': new Date(driver.createdAt).toLocaleString()
+        'Created At': new Date(driver.createdAt).toLocaleString(),
+        'Last Updated': new Date(driver.updatedAt || driver.createdAt).toLocaleString(),
+        'Document Status': driver.idDocumentUrl && driver.licenseDocumentUrl ? 'Complete' : 'Incomplete',
+        'Profile Status': driver.profileImageUrl ? 'Complete' : 'Incomplete'
       }));
 
+      // Enhanced orders data with more details
       const ordersData = (filteredOrders || []).map(order => ({
         'Trip Number': order.tripNumber,
         'From City': order.fromCity,
         'To City': order.toCity,
         'Departure Time': new Date(order.departureTime).toLocaleString(),
+        'Creation Date': new Date(order.createdAt).toLocaleString(),
+        'Last Update': new Date(order.updatedAt || order.createdAt).toLocaleString(),
         'Visa Type': order.visaType,
         'Status': order.status,
-        'Driver': order.driver?.fullName || 'N/A',
+        'Driver Name': order.driver?.fullName || 'N/A',
         'Driver ID': order.driver?.uid || 'N/A',
         'Passengers Count': order.passengers?.length || 0,
-        'Created At': new Date(order.createdAt).toLocaleString()
+        'Vehicle Type': order.vehicle?.type || 'N/A',
+        'Vehicle Plate': order.vehicle?.plateNumber || 'N/A',
+        'PDF Status': order.pdfUrl ? 'Generated' : 'Pending',
+        'PDF Link': order.pdfUrl ? `${window.location.origin}/uploads/${order.pdfUrl}` : 'N/A'
+      }));
+
+      // Detailed passengers data
+      const passengersData = (filteredOrders || []).flatMap(order =>
+        (order.passengers || []).map(passenger => ({
+          'Trip Number': order.tripNumber,
+          'Passenger Name': passenger.name,
+          'ID Number': passenger.idNumber,
+          'Nationality': passenger.nationality,
+          'From City': order.fromCity,
+          'To City': order.toCity,
+          'Departure Time': new Date(order.departureTime).toLocaleString(),
+          'Driver': order.driver?.fullName || 'N/A',
+          'Visa Type': order.visaType
+        }))
+      );
+
+      // Generated PDFs tracking
+      const documentsData = (filteredOrders || [])
+        .filter(order => order.pdfUrl)
+        .map(order => ({
+          'Document ID': order.tripNumber,
+          'Type': 'Operation Order',
+          'Generated Date': new Date(order.updatedAt || order.createdAt).toLocaleString(),
+          'Driver': order.driver?.fullName || 'N/A',
+          'Driver ID': order.driver?.uid || 'N/A',
+          'Status': 'Generated',
+          'Download Link': `${window.location.origin}/uploads/${order.pdfUrl}`,
+          'Associated Trip': order.tripNumber,
+          'Route': `${order.fromCity} → ${order.toCity}`,
+          'Passenger Count': order.passengers?.length || 0
+        }));
+
+      // Daily trips summary (grouped by date)
+      const dailyTripsData = (filteredOrders || []).reduce((acc, order) => {
+        const date = new Date(order.departureTime).toLocaleDateString();
+        if (!acc[date]) {
+          acc[date] = {
+            'Date': date,
+            'Total Trips': 0,
+            'Total Passengers': 0,
+            'Active Drivers': 0,
+            'Generated PDFs': 0,
+            'Routes': new Set()
+          };
+        }
+        acc[date]['Total Trips']++;
+        acc[date]['Total Passengers'] += order.passengers?.length || 0;
+        acc[date]['Generated PDFs'] += order.pdfUrl ? 1 : 0;
+        acc[date]['Routes'].add(`${order.fromCity} → ${order.toCity}`);
+        return acc;
+      }, {});
+
+      const dailyTripsArray = Object.values(dailyTripsData).map(day => ({
+        'Date': day.Date,
+        'Total Trips': day['Total Trips'],
+        'Total Passengers': day['Total Passengers'],
+        'Generated PDFs': day['Generated PDFs'],
+        'Routes': Array.from(day.Routes).join(', ')
       }));
 
       // Create workbook and add worksheets
       const wb = utils.book_new();
-      const wsDrivers = utils.json_to_sheet(driversData);
-      const wsOrders = utils.json_to_sheet(ordersData);
 
-      utils.book_append_sheet(wb, wsDrivers, "Drivers");
-      utils.book_append_sheet(wb, wsOrders, "Orders");
+      // Add all sheets with proper formatting
+      const sheets = [
+        { name: "Daily Summary", data: dailyTripsArray },
+        { name: "Orders", data: ordersData },
+        { name: "Drivers", data: driversData },
+        { name: "Passengers", data: passengersData },
+        { name: "Documents", data: documentsData }
+      ];
+
+      sheets.forEach(sheet => {
+        const ws = utils.json_to_sheet(sheet.data);
+        utils.book_append_sheet(wb, ws, sheet.name);
+      });
 
       // Generate Excel file
       const excelBuffer = write(wb, { bookType: 'xlsx', type: 'array' });
       const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
 
-      // Download file
+      // Download file with date in filename
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -368,9 +445,15 @@ export default function AdminDashboard() {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+
+      toast({
+        title: t('notifications.success'),
+        description: t('notifications.exportSuccess'),
+        variant: "default"
+      });
     } catch (error) {
       console.error('Error exporting data:', error);
-      toast({ // Using the useToast hook
+      toast({
         title: t('admin.exportError'),
         description: t('admin.exportErrorMessage'),
         variant: "destructive"
