@@ -320,7 +320,7 @@ export default function AdminDashboard() {
 
   const exportToExcel = async () => {
     try {
-      // Prepare drivers data
+      // Enhanced drivers data with more details
       const driversData = [
         ...filteredPendingDrivers || [],
         ...filteredActiveDrivers || [],
@@ -335,7 +335,10 @@ export default function AdminDashboard() {
         'Created At': new Date(driver.createdAt).toLocaleString(),
         'Last Updated': new Date(driver.updatedAt || driver.createdAt).toLocaleString(),
         'Document Status': driver.idDocumentUrl && driver.licenseDocumentUrl ? 'Complete' : 'Incomplete',
-        'Profile Status': driver.profileImageUrl ? 'Complete' : 'Incomplete'
+        'Profile Status': driver.profileImageUrl ? 'Complete' : 'Incomplete',
+        'ID Document URL': driver.idDocumentUrl ? `${window.location.origin}/uploads/${driver.idDocumentUrl}` : 'N/A',
+        'License Document URL': driver.licenseDocumentUrl ? `${window.location.origin}/uploads/${driver.licenseDocumentUrl}` : 'N/A',
+        'Profile Image URL': driver.profileImageUrl ? `${window.location.origin}/uploads/${driver.profileImageUrl}` : 'N/A'
       }));
 
       // Enhanced orders data with more details
@@ -354,7 +357,8 @@ export default function AdminDashboard() {
         'Vehicle Type': order.vehicle?.type || 'N/A',
         'Vehicle Plate': order.vehicle?.plateNumber || 'N/A',
         'PDF Status': order.pdfUrl ? 'Generated' : 'Pending',
-        'PDF Link': order.pdfUrl ? `${window.location.origin}/uploads/${order.pdfUrl}` : 'N/A'
+        'PDF Link': order.pdfUrl ? `${window.location.origin}/uploads/${order.pdfUrl}` : 'N/A',
+        'QR Code': order.qrCode ? `${window.location.origin}/uploads/${order.qrCode}` : 'N/A'
       }));
 
       // Detailed passengers data
@@ -368,11 +372,15 @@ export default function AdminDashboard() {
           'To City': order.toCity,
           'Departure Time': new Date(order.departureTime).toLocaleString(),
           'Driver': order.driver?.fullName || 'N/A',
-          'Visa Type': order.visaType
+          'Driver ID': order.driver?.uid || 'N/A',
+          'Visa Type': order.visaType,
+          'Order Created': new Date(order.createdAt).toLocaleString(),
+          'PDF Available': order.pdfUrl ? 'Yes' : 'No',
+          'PDF Link': order.pdfUrl ? `${window.location.origin}/uploads/${order.pdfUrl}` : 'N/A'
         }))
       );
 
-      // Generated PDFs tracking
+      // Generated PDFs tracking with enhanced details
       const documentsData = (filteredOrders || [])
         .filter(order => order.pdfUrl)
         .map(order => ({
@@ -381,15 +389,17 @@ export default function AdminDashboard() {
           'Generated Date': new Date(order.updatedAt || order.createdAt).toLocaleString(),
           'Driver': order.driver?.fullName || 'N/A',
           'Driver ID': order.driver?.uid || 'N/A',
+          'Driver Contact': order.driver?.phoneNumber || 'N/A',
           'Status': 'Generated',
           'Download Link': `${window.location.origin}/uploads/${order.pdfUrl}`,
           'Associated Trip': order.tripNumber,
           'Route': `${order.fromCity} → ${order.toCity}`,
-          'Passenger Count': order.passengers?.length || 0
+          'Passenger Count': order.passengers?.length || 0,
+          'QR Code Link': order.qrCode ? `${window.location.origin}/uploads/${order.qrCode}` : 'N/A'
         }));
 
       // Daily trips summary (grouped by date)
-      const dailyTripsData = (filteredOrders || []).reduce((acc, order) => {
+      const dailyTripsData = (filteredOrders || []).reduce((acc: any, order) => {
         const date = new Date(order.departureTime).toLocaleDateString();
         if (!acc[date]) {
           acc[date] = {
@@ -398,22 +408,32 @@ export default function AdminDashboard() {
             'Total Passengers': 0,
             'Active Drivers': 0,
             'Generated PDFs': 0,
-            'Routes': new Set()
+            'Routes': new Set(),
+            'Unique Drivers': new Set(),
+            'Completed Orders': 0,
+            'Pending Orders': 0
           };
         }
         acc[date]['Total Trips']++;
         acc[date]['Total Passengers'] += order.passengers?.length || 0;
         acc[date]['Generated PDFs'] += order.pdfUrl ? 1 : 0;
         acc[date]['Routes'].add(`${order.fromCity} → ${order.toCity}`);
+        if (order.driver?.uid) acc[date]['Unique Drivers'].add(order.driver.uid);
+        if (order.status === 'completed') acc[date]['Completed Orders']++;
+        if (order.status === 'pending') acc[date]['Pending Orders']++;
         return acc;
       }, {});
 
-      const dailyTripsArray = Object.values(dailyTripsData).map(day => ({
+      const dailyTripsArray = Object.values(dailyTripsData).map((day: any) => ({
         'Date': day.Date,
         'Total Trips': day['Total Trips'],
         'Total Passengers': day['Total Passengers'],
         'Generated PDFs': day['Generated PDFs'],
-        'Routes': Array.from(day.Routes).join(', ')
+        'Routes': Array.from(day.Routes).join(', '),
+        'Active Drivers Count': day['Unique Drivers'].size,
+        'Completed Orders': day['Completed Orders'],
+        'Pending Orders': day['Pending Orders'],
+        'Completion Rate': `${((day['Completed Orders'] / day['Total Trips']) * 100).toFixed(1)}%`
       }));
 
       // Create workbook and add worksheets
@@ -433,11 +453,9 @@ export default function AdminDashboard() {
         utils.book_append_sheet(wb, ws, sheet.name);
       });
 
-      // Generate Excel file
+      // Generate Excel file with date in filename
       const excelBuffer = write(wb, { bookType: 'xlsx', type: 'array' });
       const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-
-      // Download file with date in filename
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
