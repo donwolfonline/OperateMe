@@ -16,9 +16,14 @@ A comprehensive bilingual vehicle and driver management system designed to strea
 - 🚗 Vehicle Registration and Tracking
 - 📋 Operation Order Management
 - 🔎 Advanced Search and Filtering System
+- 📊 Comprehensive Data Export
+  - Daily updated Excel reports
+  - Complete trip and passenger statistics
+  - PDF document tracking with direct links
+  - Driver performance metrics
+  - Route analytics and completion rates
 
 ## Key Features
-
 ### Driver Management
 - Driver registration and profile management
 - Document upload capability (ID, license, profile picture)
@@ -52,6 +57,38 @@ A comprehensive bilingual vehicle and driver management system designed to strea
   - Document type filters
   - Status filters for orders
   - Date-based filtering
+
+
+## Administrative Features
+
+### Advanced Excel Export System
+- **Daily Trip Reports**
+  - Comprehensive daily statistics
+  - Trip counts and passenger totals
+  - Route summaries and completion rates
+  - Active driver tracking
+  - PDF generation statistics
+
+- **Driver Information**
+  - Complete driver profiles
+  - Document verification status
+  - Performance metrics
+  - Document URLs and verification links
+
+- **Operation Orders**
+  - Detailed trip information
+  - Vehicle assignments
+  - Passenger manifests
+  - PDF and QR code tracking
+  - Real-time status updates
+
+- **Document Management**
+  - Generated PDF tracking
+  - Direct download links
+  - QR code access
+  - Creation timestamps
+  - Document status monitoring
+
 
 ## Tech Stack
 
