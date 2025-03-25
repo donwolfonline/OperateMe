@@ -195,3 +195,312 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 - UI components from [shadcn/ui](https://ui.shadcn.com)
 - Icons from [Lucide](https://lucide.dev)
+
+## VPS Deployment Guide
+
+### Prerequisites
+- A VPS server (Ubuntu 22.04 LTS recommended)
+- A domain name pointing to your server
+- SSH access to your server
+- Root or sudo privileges
+
+### Step 1: Initial Server Setup
+```bash
+# Update system packages
+sudo apt update && sudo apt upgrade -y
+
+# Install required system dependencies
+sudo apt install -y curl git nginx certbot python3-certbot-nginx
+
+# Install Node.js 20.x
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt install -y nodejs
+
+# Install PM2 globally
+sudo npm install -y pm2 -g
+```
+
+### Step 2: PostgreSQL Database Setup
+```bash
+# Install PostgreSQL
+sudo apt install -y postgresql postgresql-contrib
+
+# Start PostgreSQL service
+sudo systemctl start postgresql
+sudo systemctl enable postgresql
+
+# Create database and user
+sudo -u postgres psql -c "CREATE DATABASE operateme;"
+sudo -u postgres psql -c "CREATE USER operateuser WITH PASSWORD 'your_secure_password';"
+sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE operateme TO operateuser;"
+```
+
+### Step 3: Application Deployment
+
+1. **Clone the Repository**:
+```bash
+# Create application directory
+sudo mkdir -p /var/www/operateme
+sudo chown $USER:$USER /var/www/operateme
+
+# Clone the repository
+git clone https://github.com/yourusername/operateme.git /var/www/operateme
+cd /var/www/operateme
+```
+
+2. **Setup Environment Variables**:
+```bash
+# Create and edit .env file
+nano .env
+
+# Add required environment variables
+DATABASE_URL=postgresql://operateuser:your_secure_password@localhost:5432/operateme
+NODE_ENV=production
+SESSION_SECRET=your_secure_session_secret
+# Add other required environment variables
+```
+
+3. **Install Dependencies and Build**:
+```bash
+# Install dependencies
+npm install
+
+# Build the application
+npm run build
+```
+
+### Step 4: Nginx Configuration
+
+1. **Create Nginx Configuration**:
+```bash
+sudo nano /etc/nginx/sites-available/operateme
+```
+
+2. **Add the Following Configuration**:
+```nginx
+server {
+    listen 80;
+    server_name your-domain.com;
+
+    location / {
+        proxy_pass http://localhost:5000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+
+    location /uploads/ {
+        alias /var/www/operateme/uploads/;
+        expires 30d;
+        add_header Cache-Control "public, no-transform";
+    }
+
+    client_max_body_size 50M;
+}
+```
+
+3. **Enable the Site**:
+```bash
+sudo ln -s /etc/nginx/sites-available/operateme /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl restart nginx
+```
+
+### Step 5: SSL Configuration
+
+```bash
+# Install SSL certificate
+sudo certbot --nginx -d your-domain.com
+```
+
+### Step 6: Application Launch
+
+1. **Setup PM2 Process**:
+```bash
+# Start the application with PM2
+pm2 start server/index.ts --name "operateme" --interpreter="node_modules/.bin/tsx"
+
+# Save PM2 configuration
+pm2 save
+
+# Setup PM2 startup script
+sudo pm2 startup
+```
+
+2. **Monitor the Application**:
+```bash
+# View logs
+pm2 logs operateme
+
+# Monitor application
+pm2 monit
+```
+
+### Step 7: Upload Directory Setup
+```bash
+# Create uploads directory
+mkdir -p /var/www/operateme/uploads
+sudo chown -R $USER:www-data /var/www/operateme/uploads
+sudo chmod -R 775 /var/www/operateme/uploads
+```
+
+### Maintenance and Updates
+
+1. **Application Updates**:
+```bash
+# Pull latest changes
+git pull origin main
+
+# Install any new dependencies
+npm install
+
+# Rebuild the application
+npm run build
+
+# Restart the application
+pm2 restart operateme
+```
+
+2. **Database Backup**:
+```bash
+# Create backup script
+sudo nano /usr/local/bin/backup-db.sh
+
+# Add the following content:
+#!/bin/bash
+BACKUP_DIR="/var/backups/operateme"
+TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+mkdir -p $BACKUP_DIR
+pg_dump -U operateuser operateme > "$BACKUP_DIR/backup_$TIMESTAMP.sql"
+
+# Make script executable
+sudo chmod +x /usr/local/bin/backup-db.sh
+
+# Add to crontab for daily backup
+sudo crontab -e
+# Add line: 0 2 * * * /usr/local/bin/backup-db.sh
+```
+
+### Security Considerations
+
+1. **Firewall Setup**:
+```bash
+# Enable UFW
+sudo ufw enable
+
+# Allow SSH
+sudo ufw allow ssh
+
+# Allow HTTP/HTTPS
+sudo ufw allow http
+sudo ufw allow https
+```
+
+2. **Secure PostgreSQL**:
+```bash
+# Edit PostgreSQL configuration
+sudo nano /etc/postgresql/14/main/postgresql.conf
+
+# Set the following parameters:
+listen_addresses = 'localhost'
+max_connections = 100
+```
+
+3. **Regular Updates**:
+```bash
+# Create update script
+sudo nano /usr/local/bin/update-system.sh
+
+# Add content:
+#!/bin/bash
+apt update
+apt upgrade -y
+npm audit fix
+
+# Make executable
+sudo chmod +x /usr/local/bin/update-system.sh
+
+# Add to weekly cron
+sudo crontab -e
+# Add line: 0 3 * * 0 /usr/local/bin/update-system.sh
+```
+
+### Monitoring and Logging
+
+1. **Setup Log Rotation**:
+```bash
+sudo nano /etc/logrotate.d/operateme
+
+# Add configuration:
+/var/www/operateme/logs/*.log {
+    daily
+    rotate 14
+    compress
+    delaycompress
+    notifempty
+    create 0640 www-data adm
+    sharedscripts
+    postrotate
+        pm2 reloadLogs
+    endscript
+}
+```
+
+2. **Monitor System Resources**:
+```bash
+# Install monitoring tools
+sudo apt install -y htop vnstat iotop
+
+# Setup basic monitoring
+vnstat -u -i eth0
+```
+
+### Troubleshooting
+
+1. **Check Application Logs**:
+```bash
+# View PM2 logs
+pm2 logs operateme
+
+# View Nginx error logs
+sudo tail -f /var/log/nginx/error.log
+
+# View PostgreSQL logs
+sudo tail -f /var/log/postgresql/postgresql-14-main.log
+```
+
+2. **Common Issues**:
+- If the application fails to start, check PM2 logs
+- For database connection issues, verify PostgreSQL service status
+- For upload issues, check directory permissions
+- For SSL issues, verify certbot renewal status
+
+### Backup and Recovery
+
+1. **Full System Backup**:
+```bash
+# Install backup tool
+sudo apt install -y restic
+
+# Initialize backup repository
+restic init --repo /path/to/backup/location
+
+# Create backup
+restic backup /var/www/operateme
+```
+
+2. **Recovery Process**:
+```bash
+# Restore from backup
+restic restore latest --target /var/www/operateme-restore
+```
+
+Remember to regularly:
+- Monitor system resources
+- Check application logs
+- Update system packages
+- Backup database and files
+- Verify SSL certificate renewal
+- Test backup restoration process
