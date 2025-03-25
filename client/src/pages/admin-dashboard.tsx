@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { User, OperationOrder } from "@shared/schema";
+import { User, OperationOrder, InsertUser } from "@shared/schema";
 import LanguageToggle from "@/components/LanguageToggle";
 import HomeButton from "@/components/HomeButton";
 import { Badge } from "@/components/ui/badge";
@@ -17,14 +17,20 @@ import React, { useState, useMemo } from 'react';
 import SearchAndFilter from "@/components/SearchAndFilter";
 import { utils, write } from 'xlsx';
 import { useToast } from "@/hooks/use-toast";
-
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { insertUserSchema } from "@shared/schema";
 
 export default function AdminDashboard() {
   const { t } = useTranslation();
   const { user, logoutMutation } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [activeFilters, setActiveFilters] = useState({});
-  const { toast } = useToast(); 
+  const { toast } = useToast();
 
   const { data: pendingDrivers } = useQuery<User[]>({
     queryKey: ["/api/admin/pending-drivers"],
@@ -69,6 +75,29 @@ export default function AdminDashboard() {
     queryClient.invalidateQueries({ queryKey: ["/api/admin/active-drivers"] });
   };
 
+  const addDriver = async (data: InsertUser) => {
+    await apiRequest("POST", "/api/admin/drivers", data);
+    queryClient.invalidateQueries({ queryKey: ["/api/admin/pending-drivers"] });
+    toast({
+      title: t('notifications.success'),
+      description: t('admin.addDriverSuccess'),
+      variant: "default"
+    });
+  };
+
+  const removeDriver = async (driverId: number) => {
+    if (window.confirm(t('admin.removeConfirm'))) {
+      await apiRequest("DELETE", `/api/admin/drivers/${driverId}`);
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/active-drivers"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/suspended-drivers"] });
+      toast({
+        title: t('notifications.success'),
+        description: t('admin.removeDriverSuccess'),
+        variant: "default"
+      });
+    }
+  };
+
   const renderDriverCard = (driver: User, actions: React.ReactNode) => (
     <div key={driver.id} className="flex flex-col space-y-4 p-4 border rounded-lg bg-card">
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
@@ -100,6 +129,13 @@ export default function AdminDashboard() {
         </div>
         <div className="flex flex-wrap gap-2">
           {actions}
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={() => removeDriver(driver.id)}
+          >
+            {t('admin.removeDriver')}
+          </Button>
         </div>
       </div>
 
@@ -276,7 +312,6 @@ export default function AdminDashboard() {
     });
   };
 
-  // Add a filter function for documents
   const filterDocuments = (orders: (OperationOrder & { passengers: any[]; driver?: any })[] | undefined) => {
     if (!orders) return [];
 
@@ -320,7 +355,6 @@ export default function AdminDashboard() {
 
   const exportToExcel = async () => {
     try {
-      // Enhanced drivers data with more details
       const driversData = [
         ...filteredPendingDrivers || [],
         ...filteredActiveDrivers || [],
@@ -341,7 +375,6 @@ export default function AdminDashboard() {
         'Profile Image URL': driver.profileImageUrl ? `${window.location.origin}/uploads/${driver.profileImageUrl}` : 'N/A'
       }));
 
-      // Enhanced orders data with more details
       const ordersData = (filteredOrders || []).map(order => ({
         'Trip Number': order.tripNumber,
         'From City': order.fromCity,
@@ -361,7 +394,6 @@ export default function AdminDashboard() {
         'QR Code': order.qrCode ? `=HYPERLINK("${window.location.origin}/uploads/${order.qrCode}", "View QR Code")` : 'N/A'
       }));
 
-      // Detailed passengers data
       const passengersData = (filteredOrders || []).flatMap(order =>
         (order.passengers || []).map(passenger => ({
           'Trip Number': order.tripNumber,
@@ -380,7 +412,6 @@ export default function AdminDashboard() {
         }))
       );
 
-      // Generated PDFs tracking with enhanced details
       const documentsData = (filteredOrders || [])
         .filter(order => order.pdfUrl)
         .map(order => ({
@@ -399,7 +430,6 @@ export default function AdminDashboard() {
           'QR Code': order.qrCode ? `=HYPERLINK("${window.location.origin}/uploads/${order.qrCode}", "View QR Code")` : 'N/A'
         }));
 
-      // Daily trips summary (grouped by date)
       const dailyTripsData = (filteredOrders || []).reduce((acc: any, order) => {
         const date = new Date(order.departureTime).toLocaleDateString();
         if (!acc[date]) {
@@ -440,10 +470,8 @@ export default function AdminDashboard() {
         'PDF Documents': Array.from(day['PDF Links']).join(', ')
       }));
 
-      // Create workbook and add worksheets
       const wb = utils.book_new();
 
-      // Add all sheets with proper formatting
       const sheets = [
         { name: "Daily Summary", data: dailyTripsArray },
         { name: "Orders", data: ordersData },
@@ -457,7 +485,6 @@ export default function AdminDashboard() {
         utils.book_append_sheet(wb, ws, sheet.name);
       });
 
-      // Generate Excel file with date in filename
       const excelBuffer = write(wb, { bookType: 'xlsx', type: 'array' });
       const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       const url = window.URL.createObjectURL(blob);
@@ -481,6 +508,105 @@ export default function AdminDashboard() {
         variant: "destructive"
       });
     }
+  };
+
+  const AddDriverForm = () => {
+    const form = useForm<InsertUser>({
+      resolver: zodResolver(insertUserSchema),
+      defaultValues: {
+        role: "driver",
+        status: "pending",
+        isApproved: false
+      }
+    });
+
+    const onSubmit = async (data: InsertUser) => {
+      try {
+        await addDriver(data);
+        form.reset();
+      } catch (error) {
+        toast({
+          title: t('notifications.error'),
+          description: error.message,
+          variant: "destructive"
+        });
+      }
+    };
+
+    return (
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="username"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t('auth.username')} <span className="text-red-500">*</span></FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t('auth.password')} <span className="text-red-500">*</span></FormLabel>
+                <FormControl>
+                  <Input type="password" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="fullName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t('auth.fullName')} <span className="text-red-500">*</span></FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="idNumber"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t('auth.idNumber')} <span className="text-red-500">*</span></FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="licenseNumber"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t('auth.licenseNumber')} <span className="text-red-500">*</span></FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Button type="submit" className="w-full">
+            {t('admin.addDriver')}
+          </Button>
+        </form>
+      </Form>
+    );
   };
 
   return (
@@ -549,7 +675,22 @@ export default function AdminDashboard() {
           <TabsContent value="active">
             <Card>
               <CardContent className="p-6">
-                <h2 className="text-xl font-semibold mb-4">{t('admin.activeDrivers')}</h2>
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-xl font-semibold">{t('admin.activeDrivers')}</h2>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant="outline">
+                        {t('admin.addDriver')}
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>{t('admin.formTitle')}</DialogTitle>
+                      </DialogHeader>
+                      <AddDriverForm />
+                    </DialogContent>
+                  </Dialog>
+                </div>
                 <SearchAndFilter
                   type="drivers"
                   onSearch={setSearchTerm}
@@ -578,7 +719,22 @@ export default function AdminDashboard() {
           <TabsContent value="suspended">
             <Card>
               <CardContent className="p-6">
-                <h2 className="text-xl font-semibold mb-4">{t('admin.suspendedDrivers')}</h2>
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-xl font-semibold">{t('admin.suspendedDrivers')}</h2>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant="outline">
+                        {t('admin.addDriver')}
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>{t('admin.formTitle')}</DialogTitle>
+                      </DialogHeader>
+                      <AddDriverForm />
+                    </DialogContent>
+                  </Dialog>
+                </div>
                 <SearchAndFilter
                   type="drivers"
                   onSearch={setSearchTerm}
@@ -637,7 +793,7 @@ export default function AdminDashboard() {
                   driversList={[...(activeDrivers || []), ...(suspendedDrivers || [])]}
                 />
                 {filteredDocuments.length === 0 ? (
-                  <p className="text-muted-foreground text-center py-4">{t('admin.noDocuments')}</p>
+                  <p className="text-muted-foreground textcenter py-4">{t('admin.noDocuments')}</p>
                 ) : (
                   <div className="grid gap-6">
                     {filteredDocuments.map((order) => (

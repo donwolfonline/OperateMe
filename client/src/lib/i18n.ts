@@ -114,7 +114,14 @@ const resources = {
         noDocuments: "No documents found",
         exportData: "Export Data",
         exportError: "Export Failed",
-        exportErrorMessage: "Failed to export data. Please try again."
+        exportErrorMessage: "Failed to export data. Please try again.",
+        addDriver: "Add Driver",
+        removeDriver: "Remove Driver",
+        removeConfirm: "Are you sure you want to remove this driver?",
+        addDriverSuccess: "Driver added successfully",
+        removeDriverSuccess: "Driver removed successfully",
+        formTitle: "Add New Driver",
+        required: "Required field"
       },
       common: {
         logout: "Logout",
@@ -256,7 +263,14 @@ const resources = {
         noDocuments: "لا توجد مستندات",
         exportData: "تصدير البيانات",
         exportError: "فشل التصدير",
-        exportErrorMessage: "فشل تصدير البيانات. يرجى المحاولة مرة أخرى."
+        exportErrorMessage: "فشل تصدير البيانات. يرجى المحاولة مرة أخرى.",
+        addDriver: "إضافة سائق",
+        removeDriver: "إزالة السائق",
+        removeConfirm: "هل أنت متأكد أنك تريد إزالة هذا السائق؟",
+        addDriverSuccess: "تمت إضافة السائق بنجاح",
+        removeDriverSuccess: "تمت إزالة السائق بنجاح",
+        formTitle: "إضافة سائق جديد",
+        required: "حقل مطلوب"
       },
       common: {
         logout: "تسجيل الخروج",
@@ -403,7 +417,14 @@ const resources = {
         noDocuments: "کوئی دستاویز نہیں ملی",
         exportData: "ڈیٹا برآمد کریں",
         exportError: "برآمد ناکام",
-        exportErrorMessage: "ڈیٹا برآمد کرنے میں ناکام۔ دوبارہ کوشش کریں۔"
+        exportErrorMessage: "ڈیٹا برآمد کرنے میں ناکام۔ دوبارہ کوشش کریں۔",
+        addDriver: "ڈرائیور شامل کریں",
+        removeDriver: "ڈرائیور کو ہٹائیں",
+        removeConfirm: "کیا آپ واقعی اس ڈرائیور کو ہٹانا چاہتے ہیں؟",
+        addDriverSuccess: "ڈرائیور کامیابی سے شامل کر دیا گیا",
+        removeDriverSuccess: "ڈرائیور کامیابی سے ہٹا دیا گیا",
+        formTitle: "نیا ڈرائیور شامل کریں",
+        required: "مطلوب فیلڈ"
       },
       common: {
         logout: "لاگ آؤٹ",
