@@ -17,14 +17,17 @@ import { FileText, Plus, Trash2, AlertCircle } from "lucide-react";
 const saudiCities = [
   { value: "Riyadh", label: "الرياض / Riyadh" },
   { value: "Jeddah", label: "جدة / Jeddah" },
+  { value: "JeddahAirport", label: "مطار جدة / Jeddah Airport" },
   { value: "Mecca", label: "مكة المكرمة / Mecca" },
   { value: "Medina", label: "المدينة المنورة / Medina" },
+  { value: "MedinaAirport", label: "مطار المدينة المنورة / Medina Airport" },
   { value: "Dammam", label: "الدمام / Dammam" },
   { value: "Khobar", label: "الخبر / Khobar" },
   { value: "Dhahran", label: "الظهران / Dhahran" },
   { value: "Tabuk", label: "تبوك / Tabuk" },
   { value: "Abha", label: "أبها / Abha" },
-  { value: "Taif", label: "الطائف / Taif" }
+  { value: "Taif", label: "الطائف / Taif" },
+  { value: "TaifAirport", label: "مطار الطائف / Taif Airport" }
 ];
 
 export default function OperationOrder() {

@@ -275,6 +275,11 @@ const resources = {
         registrationDocument: "وثيقة التسجيل",
         clearAll: "مسح جميع عوامل التصفية",
         selectDriver: "اختر السائق"
+      },
+      cities: {
+        jeddahAirport: "مطار جدة",
+        taifAirport: "مطار الطائف",
+        medinaAirport: "مطار المدينة المنورة",
       }
     }
   },
@@ -413,6 +418,11 @@ const resources = {
         registrationDocument: "رجسٹریشن دستاویز",
         clearAll: "تمام فلٹرز صاف کریں",
         selectDriver: "ڈرائیور منتخب کریں"
+      },
+      cities: {
+        jeddahAirport: "جدہ ائرپورٹ",
+        taifAirport: "طائف ائرپورٹ",
+        medinaAirport: "مدینہ ائرپورٹ",
       }
     }
   }
