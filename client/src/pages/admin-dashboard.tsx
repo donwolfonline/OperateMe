@@ -15,12 +15,16 @@ import { UserCircle2 } from "lucide-react";
 import { Redirect } from "wouter";
 import React, { useState, useMemo } from 'react';
 import SearchAndFilter from "@/components/SearchAndFilter";
+import { utils, write } from 'xlsx';
+import { useToast } from "@/hooks/use-toast";
+
 
 export default function AdminDashboard() {
   const { t } = useTranslation();
   const { user, logoutMutation } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [activeFilters, setActiveFilters] = useState({});
+  const { toast } = useToast(); // Added useToast hook
 
   const { data: pendingDrivers } = useQuery<User[]>({
     queryKey: ["/api/admin/pending-drivers"],
@@ -314,12 +318,81 @@ export default function AdminDashboard() {
     filterDocuments(allOrders), [allOrders, searchTerm, activeFilters]);
 
 
+  const exportToExcel = async () => {
+    try {
+      // Prepare data for export
+      const driversData = [
+        ...filteredPendingDrivers || [],
+        ...filteredActiveDrivers || [],
+        ...filteredSuspendedDrivers || []
+      ].map(driver => ({
+        'Driver ID': driver.uid,
+        'Full Name': driver.fullName,
+        'ID Number': driver.idNumber,
+        'License Number': driver.licenseNumber,
+        'Status': driver.status,
+        'Is Approved': driver.isApproved ? 'Yes' : 'No',
+        'Created At': new Date(driver.createdAt).toLocaleString()
+      }));
+
+      const ordersData = (filteredOrders || []).map(order => ({
+        'Trip Number': order.tripNumber,
+        'From City': order.fromCity,
+        'To City': order.toCity,
+        'Departure Time': new Date(order.departureTime).toLocaleString(),
+        'Visa Type': order.visaType,
+        'Status': order.status,
+        'Driver': order.driver?.fullName || 'N/A',
+        'Driver ID': order.driver?.uid || 'N/A',
+        'Passengers Count': order.passengers?.length || 0,
+        'Created At': new Date(order.createdAt).toLocaleString()
+      }));
+
+      // Create workbook and add worksheets
+      const wb = utils.book_new();
+      const wsDrivers = utils.json_to_sheet(driversData);
+      const wsOrders = utils.json_to_sheet(ordersData);
+
+      utils.book_append_sheet(wb, wsDrivers, "Drivers");
+      utils.book_append_sheet(wb, wsOrders, "Orders");
+
+      // Generate Excel file
+      const excelBuffer = write(wb, { bookType: 'xlsx', type: 'array' });
+      const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+
+      // Download file
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `admin-report-${new Date().toISOString().split('T')[0]}.xlsx`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error('Error exporting data:', error);
+      toast({ // Using the useToast hook
+        title: t('admin.exportError'),
+        description: t('admin.exportErrorMessage'),
+        variant: "destructive"
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
           <HomeButton />
           <div className="flex items-center gap-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={exportToExcel}
+              className="flex items-center gap-2"
+            >
+              <Download className="h-4 w-4" />
+              {t('admin.exportData')}
+            </Button>
             <LanguageToggle />
             <button
               onClick={() => logoutMutation.mutate()}

@@ -110,7 +110,10 @@ const resources = {
         noOrders: "No orders found",
         orders: "Orders",
         documents: "Document History",
-        noDocuments: "No documents found"
+        noDocuments: "No documents found",
+        exportData: "Export Data",
+        exportError: "Export Failed",
+        exportErrorMessage: "Failed to export data. Please try again."
       },
       common: {
         logout: "Logout",
@@ -248,7 +251,10 @@ const resources = {
         noOrders: "لا يوجد طلبات",
         orders: "الطلبات",
         documents: "سجل المستندات",
-        noDocuments: "لا توجد مستندات"
+        noDocuments: "لا توجد مستندات",
+        exportData: "تصدير البيانات",
+        exportError: "فشل التصدير",
+        exportErrorMessage: "فشل تصدير البيانات. يرجى المحاولة مرة أخرى."
       },
       common: {
         logout: "تسجيل الخروج",
@@ -391,7 +397,10 @@ const resources = {
         noOrders: "کوئی آرڈر نہیں ملا",
         orders: "آرڈرز",
         documents: "دستاویزات کی تاریخ",
-        noDocuments: "کوئی دستاویز نہیں ملی"
+        noDocuments: "کوئی دستاویز نہیں ملی",
+        exportData: "ڈیٹا برآمد کریں",
+        exportError: "برآمد ناکام",
+        exportErrorMessage: "ڈیٹا برآمد کرنے میں ناکام۔ دوبارہ کوشش کریں۔"
       },
       common: {
         logout: "لاگ آؤٹ",
