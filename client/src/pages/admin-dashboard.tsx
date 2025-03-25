@@ -357,8 +357,8 @@ export default function AdminDashboard() {
         'Vehicle Type': order.vehicle?.type || 'N/A',
         'Vehicle Plate': order.vehicle?.plateNumber || 'N/A',
         'PDF Status': order.pdfUrl ? 'Generated' : 'Pending',
-        'PDF Link': order.pdfUrl ? `${window.location.origin}/uploads/${order.pdfUrl}` : 'N/A',
-        'QR Code': order.qrCode ? `${window.location.origin}/uploads/${order.qrCode}` : 'N/A'
+        'PDF Link': order.pdfUrl ? `=HYPERLINK("${window.location.origin}/uploads/${order.pdfUrl}", "Click to View PDF")` : 'N/A',
+        'QR Code': order.qrCode ? `=HYPERLINK("${window.location.origin}/uploads/${order.qrCode}", "View QR Code")` : 'N/A'
       }));
 
       // Detailed passengers data
@@ -376,7 +376,7 @@ export default function AdminDashboard() {
           'Visa Type': order.visaType,
           'Order Created': new Date(order.createdAt).toLocaleString(),
           'PDF Available': order.pdfUrl ? 'Yes' : 'No',
-          'PDF Link': order.pdfUrl ? `${window.location.origin}/uploads/${order.pdfUrl}` : 'N/A'
+          'PDF Link': order.pdfUrl ? `=HYPERLINK("${window.location.origin}/uploads/${order.pdfUrl}", "Download Trip PDF")` : 'N/A'
         }))
       );
 
@@ -391,11 +391,12 @@ export default function AdminDashboard() {
           'Driver ID': order.driver?.uid || 'N/A',
           'Driver Contact': order.driver?.phoneNumber || 'N/A',
           'Status': 'Generated',
-          'Download Link': `${window.location.origin}/uploads/${order.pdfUrl}`,
+          'Download PDF': `=HYPERLINK("${window.location.origin}/uploads/${order.pdfUrl}", "Download PDF")`,
+          'View Online': `=HYPERLINK("${window.location.origin}/uploads/${order.pdfUrl}", "View in Browser")`,
           'Associated Trip': order.tripNumber,
           'Route': `${order.fromCity} → ${order.toCity}`,
           'Passenger Count': order.passengers?.length || 0,
-          'QR Code Link': order.qrCode ? `${window.location.origin}/uploads/${order.qrCode}` : 'N/A'
+          'QR Code': order.qrCode ? `=HYPERLINK("${window.location.origin}/uploads/${order.qrCode}", "View QR Code")` : 'N/A'
         }));
 
       // Daily trips summary (grouped by date)
@@ -411,7 +412,8 @@ export default function AdminDashboard() {
             'Routes': new Set(),
             'Unique Drivers': new Set(),
             'Completed Orders': 0,
-            'Pending Orders': 0
+            'Pending Orders': 0,
+            'PDF Links': new Set()
           };
         }
         acc[date]['Total Trips']++;
@@ -421,6 +423,7 @@ export default function AdminDashboard() {
         if (order.driver?.uid) acc[date]['Unique Drivers'].add(order.driver.uid);
         if (order.status === 'completed') acc[date]['Completed Orders']++;
         if (order.status === 'pending') acc[date]['Pending Orders']++;
+        if (order.pdfUrl) acc[date]['PDF Links'].add(`=HYPERLINK("${window.location.origin}/uploads/${order.pdfUrl}", "PDF ${order.tripNumber}")`);
         return acc;
       }, {});
 
@@ -433,7 +436,8 @@ export default function AdminDashboard() {
         'Active Drivers Count': day['Unique Drivers'].size,
         'Completed Orders': day['Completed Orders'],
         'Pending Orders': day['Pending Orders'],
-        'Completion Rate': `${((day['Completed Orders'] / day['Total Trips']) * 100).toFixed(1)}%`
+        'Completion Rate': `${((day['Completed Orders'] / day['Total Trips']) * 100).toFixed(1)}%`,
+        'PDF Documents': Array.from(day['PDF Links']).join(', ')
       }));
 
       // Create workbook and add worksheets
