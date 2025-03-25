@@ -68,13 +68,14 @@ A comprehensive bilingual vehicle and driver management system designed to strea
 - Multer for file uploads
 - PDF generation capabilities
 
-## Getting Started
+## Development Setup
 
 ### Prerequisites
 - Node.js (v20.x or later)
 - PostgreSQL database
+- Python 3.11+ (for PDF generation)
 
-### Installation
+## Installation
 
 1. Clone the repository:
 ```bash
@@ -82,21 +83,196 @@ git clone https://github.com/donwolfonline/OperateMe.git
 cd OperateMe
 ```
 
-2. Install dependencies:
+2. Copy the environment template and configure your variables:
+```bash
+cp .env.template .env
+```
+
+3. Update the .env file with your specific configuration:
+   - Set your PostgreSQL database URL
+   - Configure a secure session secret
+   - Adjust other settings as needed
+
+4. Install dependencies:
 ```bash
 npm install
 ```
 
-3. Set up environment variables:
-```env
-DATABASE_URL=your_postgresql_connection_string
-SESSION_SECRET=your_session_secret
-```
-
-4. Start the development server:
+5. Start the development server:
 ```bash
 npm run dev
 ```
+
+## Environment Variables
+
+The following environment variables are required for the application to function properly:
+
+### Database Configuration
+| Variable | Description | Example |
+|----------|-------------|---------|
+| DATABASE_URL | PostgreSQL connection string | postgresql://user:pass@host:5432/db |
+| PGPORT | PostgreSQL port | 5432 |
+| PGHOST | Database host | localhost |
+| PGUSER | Database user | postgres |
+| PGPASSWORD | Database password | your-secure-password |
+| PGDATABASE | Database name | your_database_name |
+
+### Session Management
+| Variable | Description | Example |
+|----------|-------------|---------|
+| SESSION_SECRET | Secret key for session encryption | your-secure-secret |
+
+### Server Configuration
+| Variable | Description | Example |
+|----------|-------------|---------|
+| PORT | Server port | 3000 |
+| NODE_ENV | Environment mode | development |
+
+### File Upload Settings
+| Variable | Description | Example |
+|----------|-------------|---------|
+| UPLOAD_DIR | Directory for file uploads | uploads |
+| MAX_FILE_SIZE | Maximum file upload size | 10mb |
+| ALLOWED_FILE_TYPES | Comma-separated list of allowed MIME types | image/jpeg,image/png,application/pdf |
+
+### PDF Generation
+| Variable | Description | Example |
+|----------|-------------|---------|
+| PDF_TEMPLATES_DIR | Directory containing PDF templates | server/utils/pdf_templates |
+| PDF_OUTPUT_DIR | Directory for generated PDFs | uploads |
+| PDF_FONT_DIR | Directory containing custom fonts | server/utils/fonts |
+
+### Internationalization
+| Variable | Description | Example |
+|----------|-------------|---------|
+| DEFAULT_LANGUAGE | Default application language | en |
+| SUPPORTED_LANGUAGES | Comma-separated list of supported languages | en,ar,ur |
+
+### Security Settings
+| Variable | Description | Example |
+|----------|-------------|---------|
+| CORS_ORIGIN | CORS allowed origins | * |
+| RATE_LIMIT_WINDOW | Rate limiting time window | 15m |
+| RATE_LIMIT_MAX_REQUESTS | Maximum requests per window | 100 |
+
+### Optional External Services
+
+#### AWS S3 Configuration (Optional)
+| Variable | Description |
+|----------|-------------|
+| AWS_ACCESS_KEY_ID | AWS access key |
+| AWS_SECRET_ACCESS_KEY | AWS secret key |
+| AWS_BUCKET_NAME | S3 bucket name |
+| AWS_REGION | AWS region |
+
+#### Monitoring (Optional)
+| Variable | Description |
+|----------|-------------|
+| SENTRY_DSN | Sentry error tracking DSN |
+| LOG_LEVEL | Application log level |
+
+#### Cache Configuration (Optional)
+| Variable | Description |
+|----------|-------------|
+| REDIS_URL | Redis connection URL |
+| CACHE_TTL | Cache time-to-live in seconds |
+
+To get started:
+1. Copy `.env.template` to `.env`
+2. Fill in the required values
+3. Optional services can be configured as needed
+
+Note: Never commit the `.env` file to version control. The `.env.template` file serves as a template for required environment variables.
+
+
+## Deployment Guide
+
+### Recommended Hosting Solutions
+
+1. **Application Hosting**:
+   - **Replit**: Ideal for full-stack deployment with built-in CI/CD
+   - **Vercel**: Great for frontend deployment
+   - **Railway.app**: Excellent for full-stack Node.js applications
+   - **Heroku**: Reliable platform with good scaling options
+
+2. **Database Hosting**:
+   - **Neon**: Recommended PostgreSQL provider with serverless capabilities
+   - **Supabase**: Good alternative with additional features
+   - **Railway.app**: Integrated PostgreSQL hosting
+
+3. **File Storage**:
+   - **AWS S3**: For document and image storage
+   - **Cloudinary**: For image optimization and delivery
+   - **DigitalOcean Spaces**: Cost-effective S3-compatible storage
+
+### Deployment Steps
+
+1. **Database Setup**:
+   ```bash
+   # Initialize database
+   npm run db:push
+   ```
+
+2. **Environment Configuration**:
+   - Set up production environment variables:
+     ```env
+     NODE_ENV=production
+     DATABASE_URL=your_production_db_url
+     SESSION_SECRET=your_secure_session_secret
+     ```
+
+3. **Build Process**:
+   ```bash
+   # Build frontend assets
+   npm run build
+   ```
+
+4. **Replit Deployment**:
+   - Fork the project on Replit
+   - Configure secrets in Replit's secrets manager
+   - Use the "Run" button to deploy
+
+5. **Alternative Deployment (Vercel/Railway)**:
+   - Connect your GitHub repository
+   - Configure build settings:
+     ```json
+     {
+       "version": 2,
+       "builds": [
+         {
+           "src": "server/index.ts",
+           "use": "@vercel/node"
+         },
+         {
+           "src": "client/package.json",
+           "use": "@vercel/static-build"
+         }
+       ]
+     }
+     ```
+
+### Production Considerations
+
+1. **Performance Optimization**:
+   - Enable server-side caching
+   - Implement rate limiting
+   - Use CDN for static assets
+
+2. **Security Measures**:
+   - Enable CORS properly
+   - Implement CSRF protection
+   - Use secure session settings
+   - Regular dependency updates
+
+3. **Monitoring**:
+   - Set up error tracking (e.g., Sentry)
+   - Implement application logging
+   - Monitor database performance
+
+4. **Scaling**:
+   - Use load balancing for high traffic
+   - Implement database connection pooling
+   - Consider serverless functions for specific features
 
 ## Project Structure
 
