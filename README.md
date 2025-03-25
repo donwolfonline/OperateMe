@@ -4,7 +4,7 @@ A comprehensive bilingual vehicle and driver management system designed to strea
 
 ## Features
 
-- 🌐 Multilingual Support (Arabic, English, and Urdu)
+- 🌐 Multilingual Support (Arabic, English, and Urdu):
   - Full translation support for all cities and airports
   - Includes major Saudi cities and international airports
   - Bidirectional text support (RTL/LTR)
@@ -16,7 +16,7 @@ A comprehensive bilingual vehicle and driver management system designed to strea
 - 🚗 Vehicle Registration and Tracking
 - 📋 Operation Order Management
 - 🔎 Advanced Search and Filtering System
-- 📊 Comprehensive Data Export
+- 📊 Comprehensive Data Export:
   - Daily updated Excel reports
   - Complete trip and passenger statistics
   - PDF document tracking with direct links
