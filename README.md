@@ -82,7 +82,7 @@ A comprehensive bilingual vehicle and driver management system designed to strea
   - PDF and QR code tracking
   - Real-time status updates
 
-- **Document Management**
+- **Documentation Management**
   - Generated PDF tracking
   - Direct download links
   - QR code access
@@ -320,9 +320,24 @@ Note: Never commit the `.env` file to version control. The `.env.template` file 
 ├── client/                 # Frontend React application
 │   ├── src/
 │   │   ├── components/    # Reusable components
+│   │   │   ├── ui/       # shadcn UI components
+│   │   │   ├── LanguageToggle.tsx  # Language switcher
+│   │   │   ├── HomeButton.tsx      # Navigation component
+│   │   │   ├── SearchAndFilter.tsx # Search functionality
+│   │   │   └── ...
 │   │   ├── hooks/        # Custom React hooks
+│   │   │   ├── use-auth.ts    # Authentication hook
+│   │   │   ├── use-toast.ts   # Toast notifications
+│   │   │   └── ...
 │   │   ├── lib/          # Utility functions and configurations
+│   │   │   ├── i18n.ts         # Internationalization setup
+│   │   │   ├── queryClient.ts  # React Query configuration
+│   │   │   └── ...
 │   │   └── pages/        # Page components
+│   │       ├── admin-dashboard.tsx
+│   │       ├── admin-login.tsx
+│   │       ├── driver-dashboard.tsx
+│   │       └── ...
 ├── server/                # Backend Express application
 │   ├── routes.ts         # API routes
 │   ├── auth.ts           # Authentication logic
