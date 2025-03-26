@@ -145,7 +145,9 @@ const resources = {
         selectDate: "Select date",
         documentType: "Document Type",
         clearAll: "Clear all filters",
-        selectDriver: "Select Driver"
+        selectDriver: "Select Driver",
+        registrationDocument: "Registration Document",
+        licenseDocument: "License Document"
       },
       common: {
         logout: "Logout",
@@ -294,7 +296,9 @@ const resources = {
         selectDate: "اختر التاريخ",
         documentType: "نوع المستند",
         clearAll: "مسح جميع عوامل التصفية",
-        selectDriver: "اختر السائق"
+        selectDriver: "اختر السائق",
+        registrationDocument: "وثيقة التسجيل",
+        licenseDocument: "وثيقة الرخصة"
       },
       common: {
         logout: "تسجيل الخروج",
@@ -405,32 +409,6 @@ const resources = {
         licenseNumber: "لائسنس نمبر",
         uniqueId: "منفرد شناخت"
       },
-      admin: {
-        dashboard: "ایڈمن ڈیش بورڈ",
-        removeDriverSuccess: "ڈرائیور کامیابی سے ہٹا دیا گیا",
-        removeDriverError: "ڈرائیور کو ہٹانے میں ناکامی",
-        removeConfirm: "کیا آپ واقعی اس ڈرائیور کو ہٹانا چاہتے ہیں؟",
-        addDriver: "ڈرائیور شامل کریں",
-        addNewDriver: "نیا ڈرائیور شامل کریں",
-        exportDrivers: "ڈرائیورز کی فہرست برآمد کریں",
-        exportOrders: "آرڈرز کی فہرست برآمد کریں",
-        exportData: "ڈیٹا برآمد کریں",
-        pendingDrivers: "زیر التواء ڈرائیورز",
-        activeDrivers: "فعال ڈرائیورز",
-        suspendedDrivers: "معطل ڈرائیورز",
-        allOrders: "تمام آرڈرز",
-        orders: "آرڈرز",
-        documents: "دستاویزات",
-        noDrivers: "کوئی ڈرائیور نہیں ملا",
-        noActiveDrivers: "کوئی فعال ڈرائیور نہیں ملا",
-        noSuspendedDrivers: "کوئی معطل ڈرائیور نہیں ملا",
-        noOrders: "کوئی آرڈر نہیں ملا",
-        noDocuments: "کوئی دستاویز نہیں ملی",
-        approve: "منظور کریں",
-        suspend: "معطل کریں",
-        activate: "فعال کریں",
-        removeDriver: "ڈرائیور کو ہٹائیں"
-      },
       filter: {
         registrationDate: "رجسٹریشن کی تاریخ",
         today: "آج",
@@ -443,7 +421,9 @@ const resources = {
         selectDate: "تاریخ منتخب کریں",
         documentType: "دستاویز کی قسم",
         clearAll: "تمام فلٹرز صاف کریں",
-        selectDriver: "ڈرائیور منتخب کریں"
+        selectDriver: "ڈرائیور منتخب کریں",
+        registrationDocument: "رجسٹریشن دستاویز",
+        licenseDocument: "لائسنس دستاویز"
       },
       common: {
         logout: "لاگ آؤٹ",
