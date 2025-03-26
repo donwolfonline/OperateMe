@@ -212,14 +212,27 @@ export default function AdminDashboard() {
 
   const removeDriver = async (driverId: number) => {
     if (window.confirm(t('admin.removeConfirm'))) {
-      await apiRequest("DELETE", `/api/admin/drivers/${driverId}`);
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/active-drivers"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/suspended-drivers"] });
-      toast({
-        title: t('notifications.success'),
-        description: t('admin.removeDriverSuccess'),
-        variant: "default"
-      });
+      try {
+        await apiRequest("DELETE", `/api/admin/drivers/${driverId}`);
+
+        // Invalidate all relevant queries
+        queryClient.invalidateQueries({ queryKey: ["/api/admin/active-drivers"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/admin/suspended-drivers"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/admin/pending-drivers"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/admin/all-orders"] });
+
+        toast({
+          title: t('notifications.success'),
+          description: t('admin.removeDriverSuccess'),
+          variant: "default"
+        });
+      } catch (error: any) {
+        toast({
+          title: t('notifications.error'),
+          description: error.message || t('admin.removeDriverError'),
+          variant: "destructive"
+        });
+      }
     }
   };
 

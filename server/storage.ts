@@ -103,7 +103,7 @@ export class DatabaseStorage implements IStorage {
     const [user] = await db.insert(users).values({
       ...insertUser,
       role: insertUser.role || 'driver',
-      status: insertUser.status || 'pending', // Changed default from 'active' to 'pending'
+      status: insertUser.status || 'pending',
       isApproved: insertUser.isApproved || false,
       uid: generateUID(insertUser.role || 'driver', Date.now()),
       createdAt: new Date()
@@ -237,6 +237,7 @@ export class DatabaseStorage implements IStorage {
       .returning();
     return updatedUser;
   }
+
   async getVehicleByOrder(orderId: number): Promise<Vehicle | undefined> {
     const [order] = await db.select().from(operationOrders).where(eq(operationOrders.id, orderId));
     if (!order || !order.vehicleId) return undefined;
@@ -244,26 +245,32 @@ export class DatabaseStorage implements IStorage {
     const [vehicle] = await db.select().from(vehicles).where(eq(vehicles.id, order.vehicleId));
     return vehicle;
   }
+
   async deleteDriver(id: number): Promise<void> {
-    // Get driver's orders first to cascade delete passengers
-    const orders = await this.getOperationOrdersByDriver(id);
+    try {
+      // Get driver's orders first to cascade delete passengers
+      const orders = await this.getOperationOrdersByDriver(id);
 
-    // Delete all passengers from driver's orders
-    for (const order of orders) {
-      await db.delete(passengers).where(eq(passengers.orderId, order.id));
+      // Delete all passengers from driver's orders
+      for (const order of orders) {
+        await db.delete(passengers).where(eq(passengers.orderId, order.id));
+      }
+
+      // Delete all orders associated with the driver
+      await db.delete(operationOrders).where(eq(operationOrders.driverId, id));
+
+      // Delete all vehicles associated with the driver
+      await db.delete(vehicles).where(eq(vehicles.driverId, id));
+
+      // Finally delete the driver user record
+      await db.delete(users).where(and(
+        eq(users.id, id),
+        eq(users.role, "driver")
+      ));
+    } catch (error) {
+      console.error('Error deleting driver:', error);
+      throw new Error('Failed to delete driver and associated data');
     }
-
-    // Delete all orders associated with the driver
-    await db.delete(operationOrders).where(eq(operationOrders.driverId, id));
-
-    // Delete all vehicles associated with the driver
-    await db.delete(vehicles).where(eq(vehicles.driverId, id));
-
-    // Finally delete the driver user record
-    await db.delete(users).where(and(
-      eq(users.id, id),
-      eq(users.role, "driver")
-    ));
   }
 }
 
