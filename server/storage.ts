@@ -13,12 +13,14 @@ import connectPg from "connect-pg-simple";
 const PostgresSessionStore = connectPg(session);
 const scryptAsync = promisify(scrypt);
 
-// Function to generate unique identifier
+// Function to generate unique identifier with max 7 chars after prefix
 function generateUID(role: string, id: number): string {
   const prefix = role === 'admin' ? 'ADM' : 'DRV';
-  const timestamp = Date.now().toString(36);
+  // Get last 4 chars of timestamp in base36
+  const timestamp = Date.now().toString(36).slice(-4);
+  // Get 3 random chars
   const randomSuffix = Math.random().toString(36).substring(2, 5);
-  return `${prefix}-${id}${timestamp}${randomSuffix}`.toUpperCase();
+  return `${prefix}-${timestamp}${randomSuffix}`.toUpperCase();
 }
 
 export interface IStorage {
