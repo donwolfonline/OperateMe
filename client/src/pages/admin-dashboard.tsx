@@ -24,7 +24,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { insertUserSchema } from "@shared/schema";
-import {QrCode} from "lucide-react"; // Added import
+import { QrCode } from "lucide-react";
 
 // Add this function near the top of the file, after imports
 const getPublicUrl = (path: string) => {
@@ -34,29 +34,6 @@ const getPublicUrl = (path: string) => {
     : window.location.origin;
   return `${baseUrl}/uploads/${path}`;
 };
-
-const addDriver = async (data: InsertUser) => {
-    try {
-      await apiRequest("POST", "/api/admin/drivers", data);
-      // Invalidate all relevant queries to refresh the UI
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/pending-drivers"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/active-drivers"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/suspended-drivers"] });
-
-      toast({
-        title: t('notifications.success'),
-        description: t('admin.addDriverSuccess'),
-        variant: "default"
-      });
-    } catch (error: any) {
-      console.error('Error adding driver:', error);
-      toast({
-        title: t('notifications.error'),
-        description: error.message || t('admin.addDriverError'),
-        variant: "destructive"
-      });
-    }
-  };
 
 export default function AdminDashboard() {
   const { t } = useTranslation();
@@ -84,6 +61,29 @@ export default function AdminDashboard() {
     queryKey: ["/api/admin/all-orders"],
     enabled: !!user && user.role === "admin",
   });
+
+  const addDriver = async (data: InsertUser) => {
+    try {
+      await apiRequest("POST", "/api/admin/drivers", data);
+      // Invalidate all relevant queries to refresh the UI
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/pending-drivers"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/active-drivers"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/suspended-drivers"] });
+
+      toast({
+        title: t('notifications.success'),
+        description: t('admin.addDriverSuccess'),
+        variant: "default"
+      });
+    } catch (error: any) {
+      console.error('Error adding driver:', error);
+      toast({
+        title: t('notifications.error'),
+        description: error.message || t('admin.addDriverError'),
+        variant: "destructive"
+      });
+    }
+  };
 
   // If not authenticated or not admin, show the login page
   if (!user || user.role !== "admin") {
