@@ -12,14 +12,31 @@ import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 
-// Vehicle types with bilingual names
-const vehicleTypes = [
-  { value: "Sedan", label: "سيدان / Sedan" },
-  { value: "SUV", label: "دفع رباعي / SUV" },
-  { value: "Van", label: "فان / Van" },
-  { value: "Bus", label: "حافلة / Bus" },
-  { value: "Truck", label: "شاحنة / Truck" }
-];
+// Vehicle manufacturers and their models
+const vehicleManufacturers = {
+  Hyundai: {
+    label: "هيونداي / Hyundai",
+    models: [
+      { value: "Staria", label: "ستاريا / Staria" }
+    ]
+  },
+  GMC: {
+    label: "جي ام سي / GMC",
+    models: [
+      { value: "Yukon", label: "يوكن / Yukon" },
+      { value: "Acadia", label: "أكاديا / Acadia" },
+      { value: "Sierra", label: "سييرا / Sierra" }
+    ]
+  },
+  Chevrolet: {
+    label: "شيفروليه / Chevrolet",
+    models: [
+      { value: "Suburban", label: "سوبربان / Suburban" },
+      { value: "Tahoe", label: "تاهو / Tahoe" },
+      { value: "Traverse", label: "ترافيرس / Traverse" }
+    ]
+  }
+};
 
 export default function VehicleForm() {
   const { t } = useTranslation();
@@ -27,6 +44,7 @@ export default function VehicleForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [photoPreview, setPhotoPreview] = useState<string[]>([]);
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
+  const [selectedManufacturer, setSelectedManufacturer] = useState<string>("");
 
   // Query to check if user already has vehicles
   const { data: vehicles } = useQuery({
@@ -59,23 +77,18 @@ export default function VehicleForm() {
     );
   }
 
+  const handleManufacturerChange = (value: string) => {
+    setSelectedManufacturer(value);
+    form.setValue('type', value);
+    form.setValue('model', ''); // Reset model when manufacturer changes
+  };
+
   const onSubmit = async (data: any) => {
     try {
-      // Validate required fields
-      if (!data.type || !data.model || !data.year || !data.plateNumber) {
-        toast({
-          title: "Error",
-          description: "Please fill in all required fields",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Validate photos
       if (!selectedFiles || selectedFiles.length === 0) {
         toast({
-          title: "Error",
-          description: "Please select at least one photo",
+          title: t('notifications.error'),
+          description: t('vehicle.photoRequired'),
           variant: "destructive",
         });
         return;
@@ -84,13 +97,11 @@ export default function VehicleForm() {
       setIsSubmitting(true);
       const formData = new FormData();
 
-      // Add basic fields to FormData
       formData.append('type', data.type);
       formData.append('model', data.model);
       formData.append('year', data.year);
       formData.append('plateNumber', data.plateNumber);
 
-      // Handle multiple files
       Array.from(selectedFiles).forEach((file) => {
         formData.append('photos', file);
       });
@@ -99,21 +110,20 @@ export default function VehicleForm() {
       const vehicle = await response.json();
 
       toast({
-        title: "Success",
-        description: "Vehicle information saved successfully",
+        title: t('notifications.success'),
+        description: t('vehicle.saveSuccess'),
       });
 
-      // Reset form and preview
       form.reset();
       setPhotoPreview([]);
       setSelectedFiles(null);
+      setSelectedManufacturer("");
 
-      // Invalidate and refetch vehicles query
       queryClient.invalidateQueries({ queryKey: ["/api/vehicles/driver"] });
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Failed to save vehicle information",
+        title: t('notifications.error'),
+        description: error.message || t('vehicle.saveError'),
         variant: "destructive",
       });
     } finally {
@@ -124,7 +134,6 @@ export default function VehicleForm() {
   const handleFileChange = (files: FileList | null) => {
     if (files && files.length > 0) {
       setSelectedFiles(files);
-      // Create preview URLs
       const previews = Array.from(files).map(file => URL.createObjectURL(file));
       setPhotoPreview(previews);
     }
@@ -140,20 +149,20 @@ export default function VehicleForm() {
               name="type"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t('vehicle.type')}</FormLabel>
+                  <FormLabel>{t('vehicle.manufacturer')}</FormLabel>
                   <Select 
-                    onValueChange={field.onChange} 
-                    defaultValue={field.value}
+                    onValueChange={handleManufacturerChange}
+                    value={selectedManufacturer}
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder={t('vehicle.selectType')} />
+                        <SelectValue placeholder={t('vehicle.selectManufacturer')} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {vehicleTypes.map((type) => (
-                        <SelectItem key={type.value} value={type.value}>
-                          {type.label}
+                      {Object.entries(vehicleManufacturers).map(([key, value]) => (
+                        <SelectItem key={key} value={key}>
+                          {value.label}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -169,9 +178,26 @@ export default function VehicleForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>{t('vehicle.model')}</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder={t('vehicle.modelPlaceholder')} />
-                  </FormControl>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value}
+                    disabled={!selectedManufacturer}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder={t('vehicle.selectModel')} />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {selectedManufacturer && 
+                        vehicleManufacturers[selectedManufacturer as keyof typeof vehicleManufacturers].models.map((model) => (
+                          <SelectItem key={model.value} value={model.value}>
+                            {model.label}
+                          </SelectItem>
+                        ))
+                      }
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
