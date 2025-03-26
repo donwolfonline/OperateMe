@@ -13,17 +13,6 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
     const vehicle = await storage.getVehicleByOrder(order.id);
     console.log('Raw vehicle information:', vehicle);
 
-    // Validate vehicle type/model for template selection
-    const vehicleType = (vehicle?.type || '').toLowerCase().trim();
-    const vehicleModel = (vehicle?.model || '').toLowerCase().trim();
-
-    // Log vehicle information for debugging
-    console.log('Processed vehicle info for template:', {
-      vehicleType,
-      vehicleModel,
-      isHyundaiStaria: vehicleType === 'hyundai' && vehicleModel === 'staria'
-    });
-
     // Get passengers for this order
     const passengers = await storage.getPassengersByOrder(order.id);
 
@@ -50,20 +39,29 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
         id_number: p.idNumber,
         nationality: p.nationality
       })),
-      vehicle_type: vehicleType,
-      vehicle_model: vehicleModel
+      vehicle_type: vehicle?.type || '',
+      vehicle_model: vehicle?.model || ''
     };
 
+    // Ensure uploads directory exists
+    const uploadsDir = path.join(process.cwd(), 'uploads');
+    if (!fs.existsSync(uploadsDir)) {
+      await promisify(fs.mkdir)(uploadsDir, { recursive: true });
+      console.log('Created uploads directory');
+    }
+
     const pdfFileName = `order_${order.id}_${Date.now()}.pdf`;
-    const pdfPath = path.join(process.cwd(), 'uploads', pdfFileName);
+    const pdfPath = path.join(uploadsDir, pdfFileName);
     console.log('PDF will be generated at:', pdfPath);
 
     // Write data to temporary JSON file
-    const tempDataPath = path.join(process.cwd(), 'uploads', `temp_${Date.now()}.json`);
-    await promisify(fs.writeFile)(tempDataPath, JSON.stringify(data));
+    const tempDataPath = path.join(uploadsDir, `temp_${Date.now()}.json`);
+    await promisify(fs.writeFile)(tempDataPath, JSON.stringify(data, null, 2));
+    console.log('Temporary data file written to:', tempDataPath);
 
-    // Run Python script
+    // Run Python script with detailed error handling
     await new Promise((resolve, reject) => {
+      console.log('Spawning Python process...');
       const pythonProcess = spawn('python', [
         path.join(process.cwd(), 'server/utils/pdf_generator.py'),
         tempDataPath,
@@ -75,31 +73,60 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
         }
       });
 
+      let stdoutData = '';
+      let stderrData = '';
+
       pythonProcess.stdout.on('data', (data) => {
+        stdoutData += data.toString();
         console.log('Python script output:', data.toString());
       });
 
       pythonProcess.stderr.on('data', (data) => {
+        stderrData += data.toString();
         console.error('Python script error:', data.toString());
       });
 
       pythonProcess.on('close', (code) => {
         // Clean up temp file
-        fs.unlink(tempDataPath, () => {});
+        fs.unlink(tempDataPath, (err) => {
+          if (err) console.error('Error deleting temp file:', err);
+        });
 
         if (code === 0) {
           if (fs.existsSync(pdfPath)) {
             console.log('PDF generated successfully at:', pdfPath);
             resolve(null);
           } else {
-            reject(new Error('PDF file was not created'));
+            console.error('PDF file was not created at expected path:', pdfPath);
+            reject(new Error(`PDF file was not created at ${pdfPath}`));
           }
         } else {
-          reject(new Error(`Python process exited with code ${code}`));
+          console.error('Python process failed:', {
+            code,
+            stdout: stdoutData,
+            stderr: stderrData
+          });
+          reject(new Error(`Python process exited with code ${code}. Error: ${stderrData}`));
         }
+      });
+
+      pythonProcess.on('error', (err) => {
+        console.error('Failed to start Python process:', err);
+        reject(err);
       });
     });
 
+    // Verify the PDF was created
+    if (!fs.existsSync(pdfPath)) {
+      throw new Error(`PDF file does not exist after generation: ${pdfPath}`);
+    }
+
+    const stats = await promisify(fs.stat)(pdfPath);
+    if (stats.size === 0) {
+      throw new Error(`Generated PDF file is empty: ${pdfPath}`);
+    }
+
+    console.log('PDF generation completed successfully');
     return pdfFileName;
   } catch (error) {
     console.error('Error generating PDF:', error);
