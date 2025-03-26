@@ -337,18 +337,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status: user.status
       });
 
-      // Login the user after registration if this is an admin-created driver
+      // If the request is from an admin, just return the created user
+      // without logging them in as the new user
       if (req.user?.role === 'admin') {
-        res.status(201).json(user);
-      } else {
-        req.login(user, (err) => {
-          if (err) {
-            console.error('Login after registration failed:', err);
-            return res.status(201).json(user);
-          }
-          res.status(201).json(user);
-        });
+        return res.status(201).json(user);
       }
+
+      // For regular registration, log the user in
+      req.login(user, (err) => {
+        if (err) {
+          console.error('Login after registration failed:', err);
+          return res.status(500).json({ message: "Failed to login after registration" });
+        }
+        res.status(201).json(user);
+      });
     } catch (error: any) {
       console.error('Registration error:', error);
       res.status(400).json({ message: error.message || "Failed to create user" });
