@@ -23,11 +23,16 @@ export function PDFViewer({ url, className = '' }: PDFViewerProps) {
     setNumPages(numPages);
     setLoading(false);
     setError(null);
+    console.log('PDF loaded successfully with', numPages, 'pages');
   }
 
   function changePage(offset: number) {
     setPageNumber(prevPageNumber => prevPageNumber + offset);
   }
+
+  // Generate a unique URL to prevent caching
+  const pdfUrl = `/uploads/${url}?t=${new Date().getTime()}`;
+  console.log('Loading PDF from:', pdfUrl);
 
   return (
     <div className={`flex flex-col items-center ${className}`}>
@@ -39,7 +44,7 @@ export function PDFViewer({ url, className = '' }: PDFViewerProps) {
         )}
 
         <Document
-          file={`/uploads/${url}`}
+          file={pdfUrl}
           onLoadSuccess={onDocumentLoadSuccess}
           onLoadError={(error) => {
             console.error('Error loading PDF:', error);

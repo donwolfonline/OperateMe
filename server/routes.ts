@@ -9,9 +9,15 @@ import { generateOrderPDF } from './utils/pdfGenerator';
 import express from "express";
 import fs from 'fs';
 
+// Configure uploads directory
+const uploadsDir = path.join(process.cwd(), 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
 // Configure multer for file uploads
 const upload = multer({
-  dest: path.join(process.cwd(), 'uploads'),
+  dest: uploadsDir,
   limits: {
     fileSize: 10 * 1024 * 1024, // 10MB limit
   }
@@ -20,12 +26,16 @@ const upload = multer({
 export async function registerRoutes(app: Express): Promise<Server> {
   setupAuth(app);
 
-  // Configure static file serving for uploads
-  app.use('/uploads', express.static(path.join(process.cwd(), 'uploads'), {
+  // Configure static file serving for uploads with proper headers
+  app.use('/uploads', express.static(uploadsDir, {
     setHeaders: (res, filePath) => {
       if (filePath.endsWith('.pdf')) {
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', 'inline');
+        // Add Cache-Control header to prevent caching
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
       }
     }
   }));
@@ -48,12 +58,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ...req.body,
         departureTime: new Date(req.body.departureTime).toISOString()
       });
-
-      // Ensure uploads directory exists
-      const uploadsDir = path.join(process.cwd(), 'uploads');
-      if (!fs.existsSync(uploadsDir)) {
-        fs.mkdirSync(uploadsDir, { recursive: true });
-      }
 
       console.log('Creating new order:', {
         fromCity: orderData.fromCity,
@@ -85,6 +89,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         // Verify PDF exists and has content
         const pdfPath = path.join(uploadsDir, pdfFileName);
+        console.log('Checking PDF at path:', pdfPath);
+
         if (!fs.existsSync(pdfPath)) {
           throw new Error(`PDF file not found at ${pdfPath}`);
         }
@@ -94,7 +100,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           throw new Error(`Generated PDF is empty: ${pdfPath}`);
         }
 
-        console.log('PDF verified:', {
+        console.log('PDF file verified:', {
           path: pdfPath,
           size: stats.size,
           exists: fs.existsSync(pdfPath)
@@ -107,12 +113,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           status: "active"
         });
 
-        console.log('Order updated with PDF:', {
-          id: updatedOrder.id,
-          pdfUrl: updatedOrder.pdfUrl,
-          status: updatedOrder.status
-        });
-
+        console.log('Order updated with PDF:', updatedOrder);
         res.status(201).json(updatedOrder);
 
       } catch (pdfError) {
