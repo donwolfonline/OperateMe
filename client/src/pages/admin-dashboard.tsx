@@ -215,8 +215,8 @@ export default function AdminDashboard() {
       try {
         // Show loading toast while deleting
         toast({
-          title: t('admin.deletingDriver'),
-          description: t('admin.pleaseWait'),
+          title: t('notifications.deletingDriver'),
+          description: t('notifications.pleaseWait'),
           variant: "default"
         });
 
@@ -238,7 +238,7 @@ export default function AdminDashboard() {
         // Show success message
         toast({
           title: t('notifications.success'),
-          description: t('admin.driverDeleted'),
+          description: t('notifications.driverDeleted'),
           variant: "default"
         });
       } catch (error: any) {

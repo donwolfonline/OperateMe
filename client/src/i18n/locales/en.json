@@ -13,18 +13,15 @@
     "vehicle_registered": "Vehicle Registered",
     "sessionExpired": "Session Expired",
     "sessionExpiredMessage": "Your session has expired. Please log in again.",
-    "deletingDriver": "Deleting Driver",
-    "pleaseWait": "Please wait...",
-    "driverDeleted": "Driver deleted successfully",
+    "deletingDriver": "Removing driver from system...",
+    "pleaseWait": "Please wait while we process your request...",
+    "driverDeleted": "Driver has been successfully removed",
     "invalidCredentials": "Account not found or invalid credentials",
     "success": "Success"
   },
   "admin": {
     "removeDriverSuccess": "Driver has been successfully removed",
     "removeDriverError": "Failed to remove driver",
-    "removeConfirm": "Are you sure you want to remove this driver?",
-    "deletingDriver": "Removing driver from system...",
-    "driverDeleted": "Driver has been successfully removed",
-    "pleaseWait": "Please wait while we process your request..."
+    "removeConfirm": "Are you sure you want to remove this driver?"
   }
 }

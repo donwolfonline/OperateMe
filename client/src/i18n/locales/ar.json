@@ -13,18 +13,15 @@
     "vehicle_registered": "تسجيل مركبة جديدة",
     "sessionExpired": "انتهت الجلسة",
     "sessionExpiredMessage": "انتهت جلستك. يرجى تسجيل الدخول مرة أخرى.",
-    "deletingDriver": "جاري حذف السائق",
-    "pleaseWait": "يرجى الانتظار...",
-    "driverDeleted": "تم حذف السائق بنجاح",
+    "deletingDriver": "جاري إزالة السائق من النظام...",
+    "pleaseWait": "يرجى الانتظار ريثما نعالج طلبك...",
+    "driverDeleted": "تم إزالة السائق بنجاح",
     "invalidCredentials": "الحساب غير موجود أو بيانات الاعتماد غير صحيحة",
     "success": "نجاح"
   },
   "admin": {
     "removeDriverSuccess": "تم إزالة السائق بنجاح",
     "removeDriverError": "فشل في إزالة السائق",
-    "removeConfirm": "هل أنت متأكد أنك تريد إزالة هذا السائق؟",
-    "deletingDriver": "جاري إزالة السائق من النظام...",
-    "driverDeleted": "تم إزالة السائق بنجاح",
-    "pleaseWait": "يرجى الانتظار ريثما نعالج طلبك..."
+    "removeConfirm": "هل أنت متأكد أنك تريد إزالة هذا السائق؟"
   }
 }
