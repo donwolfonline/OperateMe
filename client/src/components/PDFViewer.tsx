@@ -2,18 +2,16 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { FileText, Download, RefreshCw, AlertCircle } from 'lucide-react';
+import { FileText, Download, RefreshCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { QRCodePreview } from './QRCodePreview';
 
 interface PDFViewerProps {
   pdfUrl: string;
   title?: string;
-  qrData?: string;
   onError?: (error: Error) => void;
 }
 
-export function PDFViewer({ pdfUrl, title, qrData, onError }: PDFViewerProps) {
+export function PDFViewer({ pdfUrl, title, onError }: PDFViewerProps) {
   const { t } = useTranslation();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
@@ -60,11 +58,6 @@ export function PDFViewer({ pdfUrl, title, qrData, onError }: PDFViewerProps) {
     if (onError) {
       onError(new Error('PDF loading failed'));
     }
-    toast({
-      title: t('pdf.loadError'),
-      description: t('pdf.tryAgain'),
-      variant: "destructive",
-    });
   };
 
   return (
@@ -73,29 +66,21 @@ export function PDFViewer({ pdfUrl, title, qrData, onError }: PDFViewerProps) {
         {title && (
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold">{title}</h3>
-            <div className="flex gap-2">
-              {qrData && (
-                <QRCodePreview 
-                  qrData={qrData} 
-                  title={t('qr.documentTitle', { title })}
-                />
-              )}
-              <Button
-                onClick={handleDownload}
-                variant="outline"
-                size="sm"
-              >
-                <Download className="mr-2 h-4 w-4" />
-                {t('pdf.download')}
-              </Button>
-            </div>
+            <Button
+              onClick={handleDownload}
+              variant="outline"
+              size="sm"
+            >
+              <Download className="mr-2 h-4 w-4" />
+              {t('pdf.download')}
+            </Button>
           </div>
         )}
 
         <div className="relative aspect-[16/9] w-full bg-muted rounded-lg overflow-hidden">
           {hasError ? (
             <div className="absolute inset-0 flex flex-col items-center justify-center space-y-4 p-4 text-center">
-              <AlertCircle className="h-8 w-8 text-destructive" />
+              <FileText className="h-8 w-8 text-destructive" />
               <p className="text-destructive font-medium">
                 {t('pdf.loadError')}
               </p>
@@ -103,7 +88,6 @@ export function PDFViewer({ pdfUrl, title, qrData, onError }: PDFViewerProps) {
                 onClick={handleRetry} 
                 variant="outline" 
                 size="sm"
-                className="mt-2"
               >
                 <RefreshCw className="mr-2 h-4 w-4" />
                 {t('common.retry')}

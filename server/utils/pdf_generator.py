@@ -9,7 +9,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import cm
 
 # Configure logging
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 def generate_qr_code(pdf_filename):
@@ -17,7 +17,7 @@ def generate_qr_code(pdf_filename):
     try:
         base_url = "http://localhost:5000"
         pdf_url = f"{base_url}/uploads/{pdf_filename}"
-        logger.debug(f"Generating QR code for URL: {pdf_url}")
+        logger.info(f"Generating QR code for URL: {pdf_url}")
 
         qr = qrcode.QRCode(
             version=1,
@@ -45,11 +45,11 @@ def generate_pdf(data_path, output_path):
         # Load data
         with open(data_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
-        logger.debug("Data loaded successfully")
+        logger.info("Data loaded successfully")
 
         # Generate QR code
         qr_code_bytes = generate_qr_code(Path(output_path).name)
-        logger.debug("QR code generated")
+        logger.info("QR code generated")
 
         # Create PDF
         c = canvas.Canvas(str(output_path), pagesize=A4)
@@ -110,16 +110,7 @@ def generate_pdf(data_path, output_path):
         c.save()
         logger.info(f"PDF saved at: {output_path}")
 
-        # Verify file exists and has content
-        output_file = Path(output_path)
-        if not output_file.exists():
-            raise FileNotFoundError(f"PDF file not found at {output_path}")
-
-        if output_file.stat().st_size == 0:
-            raise ValueError(f"Generated PDF is empty at {output_path}")
-
-        logger.info("PDF generation completed successfully")
-        return output_file.name
+        return Path(output_path).name
 
     except Exception as e:
         logger.error(f"Error generating PDF: {str(e)}")
@@ -127,7 +118,7 @@ def generate_pdf(data_path, output_path):
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
-        logger.error("Usage: python pdf_generator.py <data_path> <output_path>")
+        print("Usage: python pdf_generator.py <data_path> <output_path>")
         sys.exit(1)
 
     try:
@@ -135,5 +126,5 @@ if __name__ == "__main__":
         output_path = sys.argv[2]
         generate_pdf(data_path, output_path)
     except Exception as e:
-        logger.error(f"Main execution error: {str(e)}")
+        print(f"Error: {str(e)}")
         sys.exit(1)

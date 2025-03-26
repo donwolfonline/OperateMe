@@ -32,10 +32,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (filePath.endsWith('.pdf')) {
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', 'inline');
-        // Add Cache-Control header to prevent caching
-        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-        res.setHeader('Pragma', 'no-cache');
-        res.setHeader('Expires', '0');
       }
     }
   }));
@@ -59,12 +55,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         departureTime: new Date(req.body.departureTime).toISOString()
       });
 
-      console.log('Creating new order:', {
-        fromCity: orderData.fromCity,
-        toCity: orderData.toCity,
-        passengers: orderData.passengers.length
-      });
-
       // Create initial order
       const order = await storage.createOperationOrder({
         fromCity: orderData.fromCity,
@@ -81,30 +71,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }, orderData.passengers);
 
       try {
-        console.log('Starting PDF generation for order:', order.id);
-
         // Generate PDF
         const pdfFileName = await generateOrderPDF(order, req.user);
-        console.log('PDF generation completed:', pdfFileName);
-
-        // Verify PDF exists and has content
-        const pdfPath = path.join(uploadsDir, pdfFileName);
-        console.log('Checking PDF at path:', pdfPath);
-
-        if (!fs.existsSync(pdfPath)) {
-          throw new Error(`PDF file not found at ${pdfPath}`);
-        }
-
-        const stats = fs.statSync(pdfPath);
-        if (stats.size === 0) {
-          throw new Error(`Generated PDF is empty: ${pdfPath}`);
-        }
-
-        console.log('PDF file verified:', {
-          path: pdfPath,
-          size: stats.size,
-          exists: fs.existsSync(pdfPath)
-        });
 
         // Update order with PDF URL
         const updatedOrder = await storage.updateOperationOrder({
@@ -113,12 +81,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           status: "active"
         });
 
-        console.log('Order updated with PDF:', updatedOrder);
         res.status(201).json(updatedOrder);
-
       } catch (pdfError) {
-        console.error('PDF generation failed:', pdfError);
+        console.error('PDF generation error:', pdfError);
 
+        // Update order to indicate error
         const errorOrder = await storage.updateOperationOrder({
           ...order,
           status: "error",
@@ -127,8 +94,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         res.status(201).json({
           ...errorOrder,
-          error: 'PDF generation failed',
-          details: pdfError.message
+          error: 'PDF generation failed'
         });
       }
     } catch (error: any) {
