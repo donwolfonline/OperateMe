@@ -29,13 +29,10 @@ def get_replit_url():
         repl_slug = os.getenv('REPL_SLUG')
 
         if replit_domain:
-            # Use the primary domain if available
             base_url = f"https://{replit_domain}"
         elif repl_slug and repl_id:
-            # Fallback to repl.co domain
             base_url = f"https://{repl_slug}.id.repl.co"
         else:
-            # Local development fallback
             base_url = "http://localhost:5000"
 
         logger.info(f"Using development URL: {base_url}")
@@ -47,16 +44,13 @@ def get_replit_url():
 def generate_qr_code(pdf_filename):
     """Generate QR code and return as base64 string"""
     try:
-        # Get the base URL for the current environment
         base_url = get_replit_url()
-
-        # Create a full URL to the PDF
         pdf_url = f"{base_url}/uploads/{pdf_filename}"
         logger.info(f"Generated PDF URL for QR: {pdf_url}")
 
         qr = qrcode.QRCode(
             version=1,
-            error_correction=qrcode.constants.ERROR_CORRECT_H,  # Higher error correction
+            error_correction=qrcode.constants.ERROR_CORRECT_H,
             box_size=10,
             border=4,
         )
@@ -93,7 +87,16 @@ def generate_pdf(data_path, output_path):
         # Set up Jinja2 environment
         template_dir = Path(__file__).parent / 'pdf_templates'
         env = Environment(loader=FileSystemLoader(template_dir))
-        template = env.get_template('transport_contract.html')
+
+        # Select template based on vehicle type
+        vehicle_type = data.get('vehicle_type', '').lower()
+        if vehicle_type == 'hyundai' and data.get('vehicle_model', '').lower() == 'staria':
+            template_name = 'hyundai_contract.html'
+        else:
+            template_name = 'gmc_contract.html'
+
+        logger.info(f"Using template: {template_name}")
+        template = env.get_template(template_name)
 
         # Render template
         html_content = template.render(

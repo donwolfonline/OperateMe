@@ -31,6 +31,9 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
     // Get passengers for this order
     const passengers = await storage.getPassengersByOrder(order.id);
 
+    // Get vehicle information for this order
+    const vehicle = await storage.getVehicleByOrder(order.id);
+
     // Format date
     const dateStr = new Date(order.departureTime).toLocaleString('ar-SA', {
       timeZone: 'Asia/Riyadh',
@@ -53,7 +56,9 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
         name: p.name,
         id_number: p.idNumber,
         nationality: p.nationality
-      }))
+      })),
+      vehicle_type: vehicle?.type || '',
+      vehicle_model: vehicle?.model || ''
     };
 
     const pdfFileName = `order_${order.id}_${Date.now()}.pdf`;
