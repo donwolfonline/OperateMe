@@ -74,7 +74,9 @@ const resources = {
         photos: "Vehicle Photos",
         save: "Save Vehicle",
         registered: "Vehicle Registered",
-        noAdditional: "No additional vehicles"
+        noAdditional: "No additional vehicles",
+        saving: "Saving vehicle details...",
+        registrationSuccess: "Vehicle registration successful"
       },
       order: {
         fromCity: "From City",
@@ -233,7 +235,9 @@ const resources = {
         photos: "صور المركبة",
         save: "حفظ المركبة",
         registered: "تم تسجيل المركبة",
-        noAdditional: "لا توجد مركبات إضافية"
+        noAdditional: "لا توجد مركبات إضافية",
+        saving: "جاري حفظ بيانات المركبة...",
+        registrationSuccess: "تم تسجيل المركبة بنجاح"
       },
       order: {
         fromCity: "مدينة الانطلاق",
@@ -397,7 +401,9 @@ const resources = {
         photos: "گاڑی کی تصاویر",
         save: "گاڑی محفوظ کریں",
         registered: "گاڑی رجسٹرڈ ہو گئی",
-        noAdditional: "کوئی اضافی گاڑی نہیں"
+        noAdditional: "کوئی اضافی گاڑی نہیں",
+        saving: "گاڑی کی تفصیلات محفوظ کی جا رہی ہیں...",
+        registrationSuccess: "گاڑی کی رجسٹریشن کامیاب ہو گئی"
       },
       order: {
         fromCity: "کس شہر سے",
