@@ -9,11 +9,25 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Configure uploads directory
+const uploadsDir = path.join(process.cwd(), 'uploads');
+
+// Ensure uploads directory exists
+if (!existsSync(uploadsDir)) {
+  await mkdir(uploadsDir, { recursive: true });
+}
+
 // Serve uploaded files with proper MIME types
-app.use('/uploads', express.static(path.join(process.cwd(), 'uploads'), {
-  setHeaders: (res, path) => {
-    if (path.endsWith('.pdf')) {
+app.use('/api/uploads', express.static(uploadsDir, {
+  setHeaders: (res, filePath) => {
+    // Set proper content types
+    if (filePath.endsWith('.pdf')) {
       res.set('Content-Type', 'application/pdf');
+      res.set('Content-Disposition', 'inline');
+    } else if (filePath.endsWith('.jpg') || filePath.endsWith('.jpeg')) {
+      res.set('Content-Type', 'image/jpeg');
+    } else if (filePath.endsWith('.png')) {
+      res.set('Content-Type', 'image/png');
     }
   }
 }));
@@ -49,11 +63,6 @@ app.use((req, res, next) => {
 
 (async () => {
   try {
-    // Create uploads directory if it doesn't exist
-    if (!existsSync('uploads')) {
-      await mkdir('uploads', { recursive: true });
-    }
-
     const server = await registerRoutes(app);
 
     // Setup vite in development

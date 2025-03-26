@@ -206,7 +206,7 @@ function DriverDashboardContent() {
                                     asChild
                                   >
                                     <a
-                                      href={`/uploads/${order.pdfUrl}`}
+                                      href={`/api/uploads/${order.pdfUrl}`}
                                       target="_blank"
                                       rel="noopener noreferrer"
                                       className="flex items-center gap-2"
@@ -218,7 +218,7 @@ function DriverDashboardContent() {
                                   <Button
                                     variant="outline"
                                     size="sm"
-                                    onClick={() => window.open(`/uploads/${order.pdfUrl}`, '_blank')}
+                                    onClick={() => window.open(`/api/uploads/${order.pdfUrl}`, '_blank')}
                                   >
                                     <Download className="h-4 w-4 mr-2" />
                                     {t('order.download')}
