@@ -169,6 +169,7 @@ A comprehensive bilingual vehicle and driver management system designed to strea
   - Enhanced document view and status information translations
   - Fixed vehicle registration and status message translations
   - Added missing translations for all dashboard components
+  - Added passenger limit notifications in all languages
   - Improved error notifications in all supported languages
   - Added proper translations for registration workflow
 - System Improvements:
