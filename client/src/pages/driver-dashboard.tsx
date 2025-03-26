@@ -1,6 +1,13 @@
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import DriverProfile from "@/components/DriverProfile";
@@ -20,6 +27,7 @@ import { useToast } from "@/hooks/use-toast";
 
 function DriverDashboardContent() {
   const [showWelcome, setShowWelcome] = useState(true);
+  const [activeTab, setActiveTab] = useState("profile");
   const { t } = useTranslation();
   const { user, logoutMutation } = useAuth();
   const { toast } = useToast();
@@ -61,6 +69,10 @@ function DriverDashboardContent() {
     return <Redirect to="/auth" />;
   }
 
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+  };
+
   return (
     <>
       {showWelcome && user && (
@@ -84,8 +96,29 @@ function DriverDashboardContent() {
             </div>
           </div>
 
-          <Tabs defaultValue="profile" className="space-y-4">
-            <TabsList>
+          {/* Mobile Navigation */}
+          <div className="block lg:hidden mb-4">
+            <Select value={activeTab} onValueChange={handleTabChange}>
+              <SelectTrigger className="w-full">
+                <SelectValue>
+                  {activeTab === "profile" && t('driver.profile')}
+                  {activeTab === "vehicles" && t('driver.vehicles')}
+                  {activeTab === "orders" && t('driver.orders')}
+                  {activeTab === "history" && t('driver.history')}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="profile">{t('driver.profile')}</SelectItem>
+                <SelectItem value="vehicles">{t('driver.vehicles')}</SelectItem>
+                <SelectItem value="orders">{t('driver.orders')}</SelectItem>
+                <SelectItem value="history">{t('driver.history')}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Desktop Navigation */}
+          <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-4">
+            <TabsList className="hidden lg:flex">
               <TabsTrigger value="profile">{t('driver.profile')}</TabsTrigger>
               <TabsTrigger value="vehicles">{t('driver.vehicles')}</TabsTrigger>
               <TabsTrigger value="orders">{t('driver.orders')}</TabsTrigger>
