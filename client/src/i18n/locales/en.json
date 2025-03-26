@@ -17,16 +17,14 @@
     "pleaseWait": "Please wait...",
     "driverDeleted": "Driver deleted successfully",
     "invalidCredentials": "Account not found or invalid credentials",
-    "success": "Success",
-    "adminActions": {
-      "deletingDriver": "Removing driver from system...",
-      "driverDeleted": "Driver has been successfully removed",
-      "pleaseWait": "Please wait while we process your request..."
-    }
+    "success": "Success"
   },
   "admin": {
     "removeDriverSuccess": "Driver has been successfully removed",
     "removeDriverError": "Failed to remove driver",
-    "removeConfirm": "Are you sure you want to remove this driver?"
+    "removeConfirm": "Are you sure you want to remove this driver?",
+    "deletingDriver": "Removing driver from system...",
+    "driverDeleted": "Driver has been successfully removed",
+    "pleaseWait": "Please wait while we process your request..."
   }
 }
