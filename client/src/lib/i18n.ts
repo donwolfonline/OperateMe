@@ -38,7 +38,7 @@ const resources = {
         deletingDriver: "Removing driver...",
         pleaseWait: "Please wait...",
         driverDeleted: "Driver deleted successfully",
-        invalidCredentials: "Account not found or invalid credentials",
+        invalidCredentials: "Invalid username or password",
         success: "Success",
         pendingApproval: "Your account is pending approval. You'll be able to create orders once approved.",
         orderSuccess: "Success",
@@ -107,7 +107,8 @@ const resources = {
         fullName: "Full Name",
         idNumber: "ID Number",
         licenseNumber: "License Number",
-        uniqueId: "Unique Identifier"
+        uniqueId: "Unique Identifier",
+        loginError: "Login failed. Please check your credentials and try again."
       },
       admin: {
         dashboard: "Admin Dashboard",
@@ -191,7 +192,7 @@ const resources = {
         deletingDriver: "جاري حذف السائق...",
         pleaseWait: "يرجى الانتظار...",
         driverDeleted: "تم حذف السائق بنجاح",
-        invalidCredentials: "الحساب غير موجود أو بيانات الاعتماد غير صحيحة",
+        invalidCredentials: "اسم المستخدم أو كلمة المرور غير صحيحة",
         success: "نجاح",
         pendingApproval: "حسابك قيد الموافقة. ستتمكن من إنشاء الطلبات بمجرد الموافقة عليه.",
         orderSuccess: "نجاح",
@@ -260,7 +261,8 @@ const resources = {
         fullName: "الاسم الكامل",
         idNumber: "رقم الهوية",
         licenseNumber: "رقم الرخصة",
-        uniqueId: "المعرف الفريد"
+        uniqueId: "المعرف الفريد",
+        loginError: "فشل تسجيل الدخول. يرجى التحقق من بيانات الاعتماد والمحاولة مرة أخرى."
       },
       admin: {
         dashboard: "لوحة تحكم المشرف",
@@ -344,7 +346,7 @@ const resources = {
         deletingDriver: "ڈرائیور کو حذف کیا جا رہا ہے...",
         pleaseWait: "براہ کرم انتظار کریں...",
         driverDeleted: "ڈرائیور کامیابی سے حذف کر دیا گیا",
-        invalidCredentials: "اکاؤنٹ نہیں ملا یا غلط کریڈنشلز",
+        invalidCredentials: "غلط صارف نام یا پاس ورڈ",
         success: "کامیابی",
         pendingApproval: "آپ کا اکاؤنٹ منظوری کے انتظار میں ہے۔ منظوری کے بعد آپ آرڈر بنا سکیں گے۔",
         orderSuccess: "کامیابی",
@@ -413,7 +415,8 @@ const resources = {
         fullName: "پورا نام",
         idNumber: "شناختی نمبر",
         licenseNumber: "لائسنس نمبر",
-        uniqueId: "منفرد شناخت"
+        uniqueId: "منفرد شناخت",
+        loginError: "لاگ ان ناکام ہو گیا۔ براہ کرم اپنی تفصیلات چیک کریں اور دوبارہ کوشش کریں۔"
       },
       filter: {
         registrationDate: "رجسٹریشن کی تاریخ",
