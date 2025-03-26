@@ -161,19 +161,20 @@ A comprehensive bilingual vehicle and driver management system designed to strea
 
 ## Recent Updates (March 26, 2025)
 - Enhanced mobile navigation:
-  - Improved tab layout for mobile devices
-  - Added responsive dropdown menu for better mobile navigation
-  - Fixed tab overlapping issues on smaller screens
+  - Added dropdown menu navigation for driver dashboard on mobile devices
+  - Improved tab layout responsiveness across all screen sizes
+  - Optimized mobile UI for better user experience
 - Fixed and enhanced multilingual support:
-  - Added missing translations for authentication messages
-  - Enhanced error notifications in all supported languages
-  - Improved document handling translations
+  - Added complete Urdu translations for admin dashboard
+  - Enhanced document view and status information translations
+  - Improved error notifications in all supported languages
   - Added proper translations for registration workflow
 - System Improvements:
   - Enhanced error handling for login and registration
   - Improved notification system with proper localization
   - Fixed runtime error overlay handling
   - Enhanced toast notifications for better user feedback
+  - Optimized mobile performance and accessibility
 
 
 ### UI/UX Enhancements (March 26, 2025)
