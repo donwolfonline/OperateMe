@@ -72,7 +72,9 @@ const resources = {
         plateNumber: "Plate Number",
         plateNumberPlaceholder: "Enter plate number",
         photos: "Vehicle Photos",
-        save: "Save Vehicle"
+        save: "Save Vehicle",
+        registered: "Vehicle Registered",
+        noAdditional: "No additional vehicles"
       },
       order: {
         fromCity: "From City",
@@ -229,7 +231,9 @@ const resources = {
         plateNumber: "رقم اللوحة",
         plateNumberPlaceholder: "أدخل رقم اللوحة",
         photos: "صور المركبة",
-        save: "حفظ المركبة"
+        save: "حفظ المركبة",
+        registered: "تم تسجيل المركبة",
+        noAdditional: "لا توجد مركبات إضافية"
       },
       order: {
         fromCity: "مدينة الانطلاق",
@@ -391,7 +395,9 @@ const resources = {
         plateNumber: "پلیٹ نمبر",
         plateNumberPlaceholder: "پلیٹ نمبر درج کریں",
         photos: "گاڑی کی تصاویر",
-        save: "گاڑی محفوظ کریں"
+        save: "گاڑی محفوظ کریں",
+        registered: "گاڑی رجسٹرڈ ہو گئی",
+        noAdditional: "کوئی اضافی گاڑی نہیں"
       },
       order: {
         fromCity: "کس شہر سے",
