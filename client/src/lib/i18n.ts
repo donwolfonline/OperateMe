@@ -375,7 +375,12 @@ const resources = {
         uploadId: "شناختی دستاویز اپلوڈ کریں",
         uploadLicense: "لائسنس دستاویز اپلوڈ کریں",
         uploadProfileImage: "پروفائل تصویر اپ لوڈ کریں",
-        uniqueId: "UID"
+        uniqueId: "UID",
+        documents: "دستاویزات",
+        viewIdDocument: "شناختی دستاویز دیکھیں",
+        statusInformation: "حیثیت کی معلومات",
+        active: "فعال",
+        approved: "منظور شدہ"
       },
       vehicle: {
         manufacturer: "گاڑی کی کمپنی",
