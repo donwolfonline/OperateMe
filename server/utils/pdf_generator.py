@@ -10,10 +10,25 @@ from weasyprint import HTML, CSS
 from weasyprint.text.fonts import FontConfiguration
 import os
 import shutil
+from functools import lru_cache
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+# Cache font configuration
+FONT_CONFIG = FontConfiguration()
+
+@lru_cache(maxsize=1)
+def get_template_dir():
+    """Get and cache template directory path"""
+    return Path(__file__).parent / 'pdf_templates'
+
+@lru_cache(maxsize=1)
+def get_template_env():
+    """Get and cache Jinja2 environment"""
+    template_dir = get_template_dir()
+    return Environment(loader=FileSystemLoader(template_dir))
 
 def get_replit_url():
     """Get the correct Replit URL for the current environment"""
@@ -32,10 +47,10 @@ def get_replit_url():
         logger.error(f"Error getting Replit URL: {str(e)}")
         return "http://localhost:5000"
 
-def generate_qr_code(pdf_filename):
+@lru_cache(maxsize=100)
+def generate_qr_code(pdf_url):
+    """Generate and cache QR code for PDF URL"""
     try:
-        base_url = get_replit_url()
-        pdf_url = f"{base_url}/uploads/{pdf_filename}"
         qr = qrcode.QRCode(
             version=1,
             error_correction=qrcode.constants.ERROR_CORRECT_H,
@@ -56,15 +71,12 @@ def generate_qr_code(pdf_filename):
 def setup_template_assets():
     """Setup template assets including background image"""
     try:
-        template_dir = Path(__file__).parent / 'pdf_templates'
-
-        # Copy background image to template directory if it doesn't exist
+        template_dir = get_template_dir()
         bg_image_source = Path(__file__).parent.parent.parent / 'attached_assets' / 'Screenshot 2025-03-26 at 8.03.07 AM.png'
         bg_image_dest = template_dir / 'lightning_road_bg.png'
 
         if bg_image_source.exists() and not bg_image_dest.exists():
             shutil.copy(bg_image_source, bg_image_dest)
-            logger.info("Background image copied successfully")
 
         return template_dir
     except Exception as e:
@@ -72,12 +84,13 @@ def setup_template_assets():
         raise
 
 def render_pdf(data, qr_code_base64, output_path):
-    """Generate PDF using the standard template"""
+    """Generate PDF using the standard template with optimized performance"""
     try:
-        template_dir = setup_template_assets()
-        env = Environment(loader=FileSystemLoader(template_dir))
+        # Get cached environment and template
+        env = get_template_env()
         template = env.get_template('transport_contract.html')
 
+        # Render template
         html_content = template.render(
             date=data['date'],
             main_passenger=data['main_passenger'],
@@ -92,33 +105,36 @@ def render_pdf(data, qr_code_base64, output_path):
             qr_code=qr_code_base64
         )
 
-        font_config = FontConfiguration()
-
-        # Create PDF with background image
+        # Create PDF with background image and cached font config
         HTML(string=html_content).write_pdf(
             output_path,
-            font_config=font_config,
-            presentational_hints=True
+            font_config=FONT_CONFIG,
+            presentational_hints=True,
+            optimize_size=('fonts', 'images')
         )
 
-        logger.info("Generated transport contract successfully")
     except Exception as e:
         logger.error(f"Error in PDF generation: {str(e)}")
         raise
 
 def generate_pdf(data_path, output_path):
+    """Main PDF generation function with optimized performance"""
     try:
+        # Ensure template assets are set up
+        setup_template_assets()
+
         # Load data
         with open(data_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
 
         # Generate QR code
         pdf_filename = Path(output_path).name
-        qr_code_base64 = generate_qr_code(pdf_filename)
+        base_url = get_replit_url()
+        pdf_url = f"{base_url}/uploads/{pdf_filename}"
+        qr_code_base64 = generate_qr_code(pdf_url)
 
         # Generate PDF
         render_pdf(data, qr_code_base64, output_path)
-        logger.info(f"PDF generation completed successfully: {output_path}")
         return pdf_filename
 
     except Exception as e:
