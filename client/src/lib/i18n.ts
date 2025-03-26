@@ -88,7 +88,10 @@ const resources = {
         documentReady: "Document Ready",
         viewDocument: "View Document",
         download: "Download",
-        downloadPdf: "Download PDF"
+        downloadPdf: "Download PDF",
+        passengerCount: "Passenger Count",
+        idNumber: "ID Number",
+        driver: "Driver"
       },
       auth: {
         driverLogin: "Driver Login",
@@ -234,7 +237,10 @@ const resources = {
         documentReady: "المستند جاهز",
         viewDocument: "عرض المستند",
         download: "تحميل",
-        downloadPdf: "تحميل PDF"
+        downloadPdf: "تحميل PDF",
+        passengerCount: "عدد الركاب",
+        idNumber: "رقم الهوية",
+        driver: "السائق"
       },
       auth: {
         driverLogin: "تسجيل دخول السائق",
@@ -380,7 +386,10 @@ const resources = {
         documentReady: "دستاویز تیار ہے",
         viewDocument: "دستاویز دیکھیں",
         download: "ڈاؤن لوڈ کریں",
-        downloadPdf: "PDF ڈاؤن لوڈ کریں"
+        downloadPdf: "PDF ڈاؤن لوڈ کریں",
+        passengerCount: "مسافروں کی تعداد",
+        idNumber: "شناختی نمبر",
+        driver: "ڈرائیور"
       },
       auth: {
         driverLogin: "ڈرائیور لاگ ان",
