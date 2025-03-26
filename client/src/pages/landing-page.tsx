@@ -16,12 +16,22 @@ export default function LandingPage() {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5 }}
+            className="flex items-center gap-4"
           >
-            <img 
-              src="/attached_assets/Screenshot_2025-03-26_at_9.21.31_AM-removebg-preview.png" 
-              alt="Lightning Road Logo"
-              className="h-12 md:h-16"
-            />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              className="h-12 w-12 text-primary"
+            >
+              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+            </svg>
+            <div className="flex items-center">
+              <span className="text-3xl font-bold text-primary">LIGHTNING</span>
+              <span className="mx-2 text-3xl font-bold text-muted-foreground">ROAD</span>
+            </div>
           </motion.div>
           <LanguageToggle />
         </div>
