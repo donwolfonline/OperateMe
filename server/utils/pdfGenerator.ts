@@ -1,6 +1,5 @@
 import { OperationOrder, User } from "@shared/schema";
 import path from 'path';
-import QRCode from 'qrcode';
 import fs from 'fs';
 import { storage } from '../storage';
 import { spawn } from 'child_process';
@@ -15,8 +14,8 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
     console.log('Raw vehicle information:', vehicle);
 
     // Validate vehicle type/model for template selection
-    const vehicleType = (vehicle?.type || '').toLowerCase();
-    const vehicleModel = (vehicle?.model || '').toLowerCase();
+    const vehicleType = (vehicle?.type || '').toLowerCase().trim();
+    const vehicleModel = (vehicle?.model || '').toLowerCase().trim();
 
     // Log vehicle information for debugging
     console.log('Processed vehicle info for template:', {
@@ -98,10 +97,6 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
         } else {
           reject(new Error(`Python process exited with code ${code}`));
         }
-      });
-
-      pythonProcess.on('error', (err) => {
-        reject(err);
       });
     });
 
