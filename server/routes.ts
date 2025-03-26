@@ -164,85 +164,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Operation orders routes
   app.post("/api/operation-orders", async (req, res) => {
     try {
-        if (!req.user) return res.sendStatus(401);
+      if (!req.user) return res.sendStatus(401);
 
-        const orderData = insertOperationOrderSchema.parse({
-            ...req.body,
-            departureTime: new Date(req.body.departureTime).toISOString()
+      const orderData = insertOperationOrderSchema.parse({
+        ...req.body,
+        departureTime: new Date(req.body.departureTime).toISOString()
+      });
+
+      // Create initial order
+      const order = await storage.createOperationOrder({
+        fromCity: orderData.fromCity,
+        toCity: orderData.toCity,
+        departureTime: new Date(orderData.departureTime),
+        visaType: orderData.visaType,
+        tripNumber: orderData.tripNumber,
+        driverId: req.user.id,
+        vehicleId: null,
+        qrCode: "",
+        pdfUrl: "",
+        status: "pending",
+        createdAt: new Date()
+      }, orderData.passengers);
+
+      try {
+        // Generate PDF
+        console.log('Starting PDF generation for order:', order.id);
+        const pdfFileName = await generateOrderPDF(order, req.user);
+
+        // Verify PDF exists
+        const pdfPath = path.join(process.cwd(), 'uploads', pdfFileName);
+        if (!fs.existsSync(pdfPath)) {
+          throw new Error('PDF file not found after generation');
+        }
+
+        // Update order with PDF URL
+        const updatedOrder = await storage.updateOperationOrder({
+          ...order,
+          pdfUrl: pdfFileName,
+          status: "active"
         });
 
-        // First create order without PDF
-        const order = await storage.createOperationOrder(
-            {
-                fromCity: orderData.fromCity,
-                toCity: orderData.toCity,
-                departureTime: new Date(orderData.departureTime),
-                visaType: orderData.visaType,
-                tripNumber: orderData.tripNumber,
-                driverId: req.user.id,
-                vehicleId: null,
-                qrCode: "",
-                pdfUrl: "",
-                status: "pending",  // Start with pending status
-                createdAt: new Date()
-            },
-            orderData.passengers
-        );
+        console.log('Order updated with PDF URL:', {
+          orderId: updatedOrder.id,
+          pdfUrl: updatedOrder.pdfUrl
+        });
 
-        try {
-            console.log('Starting PDF generation for order:', order.id);
+        res.status(201).json(updatedOrder);
+      } catch (pdfError) {
+        console.error('PDF generation failed:', pdfError);
 
-            // Ensure uploads directory exists
-            const uploadsDir = path.join(process.cwd(), 'uploads');
-            if (!fs.existsSync(uploadsDir)) {
-                fs.mkdirSync(uploadsDir, { recursive: true });
-            }
+        // Update order to error state
+        const errorOrder = await storage.updateOperationOrder({
+          ...order,
+          status: "error",
+          pdfUrl: ""
+        });
 
-            // Generate PDF
-            const pdfFileName = await generateOrderPDF(order, req.user);
-
-            // Verify PDF was created and has content
-            const pdfPath = path.join(uploadsDir, pdfFileName);
-            console.log('Checking PDF at path:', pdfPath);
-
-            if (!fs.existsSync(pdfPath)) {
-                throw new Error(`PDF file not found at ${pdfPath}`);
-            }
-
-            const stats = fs.statSync(pdfPath);
-            if (stats.size === 0) {
-                throw new Error(`Generated PDF is empty: ${pdfPath}`);
-            }
-
-            console.log('PDF file verified, size:', stats.size);
-
-            // Update order with PDF URL and status
-            const updatedOrder = await storage.updateOperationOrder({
-                ...order,
-                pdfUrl: pdfFileName,
-                status: "active"
-            });
-
-            console.log('Order updated with PDF:', updatedOrder);
-            res.status(201).json(updatedOrder);
-        } catch (pdfError) {
-            console.error('PDF generation error:', pdfError);
-            // Update order to indicate error
-            const failedOrder = await storage.updateOperationOrder({
-                ...order,
-                status: "error",
-                pdfUrl: ""
-            });
-            res.status(201).json({
-                ...failedOrder,
-                pdfGenerationError: pdfError.message
-            });
-        }
+        res.status(201).json({
+          ...errorOrder,
+          error: 'PDF generation failed'
+        });
+      }
     } catch (error: any) {
-        console.error('Operation order creation error:', error);
-        res.status(400).json({ message: error.message });
+      console.error('Operation order creation error:', error);
+      res.status(400).json({ message: error.message });
     }
-});
+  });
 
   app.get("/api/operation-orders/driver", async (req, res) => {
     if (!req.user) return res.sendStatus(401);
