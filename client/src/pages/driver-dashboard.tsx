@@ -15,13 +15,14 @@ import { Badge } from "@/components/ui/badge";
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { useState, useEffect } from "react";
 import { WelcomeAnimation } from "@/components/WelcomeAnimation";
-import { Logo } from "@/components/Logo"; // Fixed import to use named import
-
+import { Logo } from "@/components/Logo";
+import { useToast } from "@/hooks/use-toast";
 
 function DriverDashboardContent() {
   const [showWelcome, setShowWelcome] = useState(true);
   const { t } = useTranslation();
   const { user, logoutMutation } = useAuth();
+  const { toast } = useToast();
 
   // Hide welcome animation after 2 seconds
   useEffect(() => {
@@ -33,9 +34,19 @@ function DriverDashboardContent() {
     }
   }, [showWelcome]);
 
-  const { data: driverOrders, isLoading: isOrdersLoading } = useQuery<(OperationOrderType & { passengers: any[]; pdfUrl?: string })[]>({
+  const { data: driverOrders, isLoading: isOrdersLoading, error } = useQuery<(OperationOrderType & { passengers: any[]; pdfUrl?: string })[]>({
     queryKey: ["/api/driver/orders"],
     enabled: !!user && user.role === "driver",
+    onError: (error: any) => {
+      if (error.message === 'notifications.sessionExpired') {
+        toast({
+          title: t('notifications.sessionExpired'),
+          description: t('notifications.sessionExpiredMessage'),
+          variant: "destructive"
+        });
+        logoutMutation.mutate();
+      }
+    }
   });
 
   if (isOrdersLoading) {
@@ -44,6 +55,10 @@ function DriverDashboardContent() {
         <LoadingSpinner size="lg" text={t('common.loading')} />
       </div>
     );
+  }
+
+  if (error) {
+    return <Redirect to="/auth" />;
   }
 
   return (
@@ -194,7 +209,19 @@ function DriverDashboardContent() {
 }
 
 export default function DriverDashboard() {
-  const { user } = useAuth();
+  const { user, error } = useAuth();
+  const { t } = useTranslation();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    if (error?.message === 'notifications.sessionExpired') {
+      toast({
+        title: t('notifications.sessionExpired'),
+        description: t('notifications.sessionExpiredMessage'),
+        variant: "destructive"
+      });
+    }
+  }, [error, t, toast]);
 
   if (!user || user.role !== "driver") {
     return <Redirect to="/auth" />;

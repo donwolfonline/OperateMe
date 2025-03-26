@@ -10,6 +10,11 @@
     "new_driver": "سائق جديد",
     "new_order": "طلب جديد",
     "new_pdf": "مستند جديد",
-    "vehicle_registered": "تسجيل مركبة جديدة"
+    "vehicle_registered": "تسجيل مركبة جديدة",
+    "sessionExpired": "انتهت الجلسة",
+    "sessionExpiredMessage": "انتهت جلستك. يرجى تسجيل الدخول مرة أخرى.",
+    "deletingDriver": "جاري حذف السائق",
+    "pleaseWait": "يرجى الانتظار...",
+    "driverDeleted": "تم حذف السائق بنجاح"
   }
 }

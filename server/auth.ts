@@ -72,10 +72,22 @@ export function setupAuth(app: Express) {
   passport.deserializeUser(async (id: number, done) => {
     try {
       const user = await storage.getUser(id);
+      if (!user) {
+        // User not found - session is invalid
+        return done(null, false, { message: 'notifications.sessionExpired' });
+      }
       done(null, user);
     } catch (error) {
-      done(error);
+      console.error('Deserialize user error:', error);
+      done(null, false, { message: 'notifications.sessionExpired' });
     }
+  });
+
+  app.get("/api/user", (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: 'notifications.sessionExpired' });
+    }
+    res.json(req.user);
   });
 
   app.post("/api/login", (req, res, next) => {
@@ -89,11 +101,6 @@ export function setupAuth(app: Express) {
         res.json(user);
       });
     })(req, res, next);
-  });
-
-  app.get("/api/user", (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
-    res.json(req.user);
   });
 
   app.post("/api/logout", (req, res, next) => {

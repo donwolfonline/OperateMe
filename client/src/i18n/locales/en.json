@@ -10,6 +10,11 @@
     "new_driver": "New Driver",
     "new_order": "New Order",
     "new_pdf": "New Document",
-    "vehicle_registered": "Vehicle Registered"
+    "vehicle_registered": "Vehicle Registered",
+    "sessionExpired": "Session Expired",
+    "sessionExpiredMessage": "Your session has expired. Please log in again.",
+    "deletingDriver": "Deleting Driver",
+    "pleaseWait": "Please wait...",
+    "driverDeleted": "Driver deleted successfully"
   }
 }
