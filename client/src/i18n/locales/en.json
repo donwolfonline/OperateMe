@@ -22,6 +22,9 @@
   "admin": {
     "removeDriverSuccess": "Driver has been successfully removed",
     "removeDriverError": "Failed to remove driver",
-    "removeConfirm": "Are you sure you want to remove this driver?"
+    "removeConfirm": "Are you sure you want to remove this driver?",
+    "exportDrivers": "Export Drivers",
+    "exportOrders": "Export Orders",
+    "exportData": "Export Data"
   }
 }

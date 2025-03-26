@@ -563,20 +563,38 @@ export default function AdminDashboard() {
               <CardContent className="p-6">
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-xl font-semibold">{t('admin.activeDrivers')}</h2>
-                  <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                    <DialogTrigger asChild>
-                      <Button>
-                        <UserIcon className="w-4 h-4 mr-2" />
-                        {t('admin.addDriver')}
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>{t('admin.addNewDriver')}</DialogTitle>
-                      </DialogHeader>
-                      <AddDriverForm onSuccess={handleAddDriverSuccess} />
-                    </DialogContent>
-                  </Dialog>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        const ws = utils.json_to_sheet(activeDrivers || []);
+                        const wb = utils.book_new();
+                        utils.book_append_sheet(wb, ws, "Drivers");
+                        const wbOut = write(wb, { bookType: 'xlsx', type: 'buffer' });
+                        const a = document.createElement('a');
+                        a.href = URL.createObjectURL(new Blob([wbOut]));
+                        a.download = `drivers_${new Date().toISOString().split('T')[0]}.xlsx`;
+                        a.click();
+                      }}
+                    >
+                      <Download className="w-4 h-4 mr-2" />
+                      {t('admin.exportDrivers')}
+                    </Button>
+                    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                      <DialogTrigger asChild>
+                        <Button>
+                          <UserIcon className="w-4 h-4 mr-2" />
+                          {t('admin.addDriver')}
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>{t('admin.addNewDriver')}</DialogTitle>
+                        </DialogHeader>
+                        <AddDriverForm onSuccess={handleAddDriverSuccess} />
+                      </DialogContent>
+                    </Dialog>
+                  </div>
                 </div>
                 <SearchAndFilter
                   type="drivers"
@@ -637,7 +655,36 @@ export default function AdminDashboard() {
           <TabsContent value="orders">
             <Card>
               <CardContent className="p-6">
-                <h2 className="text-xl font-semibold mb-4">{t('admin.allOrders')}</h2>
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-xl font-semibold">{t('admin.allOrders')}</h2>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      const exportData = allOrders?.map(order => ({
+                        tripNumber: order.tripNumber,
+                        fromCity: order.fromCity,
+                        toCity: order.toCity,
+                        departureTime: new Date(order.departureTime).toLocaleString(),
+                        driver: order.driver?.fullName || 'N/A',
+                        passengers: order.passengers?.length || 0,
+                        status: order.status,
+                        visaType: order.visaType
+                      }));
+
+                      const ws = utils.json_to_sheet(exportData || []);
+                      const wb = utils.book_new();
+                      utils.book_append_sheet(wb, ws, "Orders");
+                      const wbOut = write(wb, { bookType: 'xlsx', type: 'buffer' });
+                      const a = document.createElement('a');
+                      a.href = URL.createObjectURL(new Blob([wbOut]));
+                      a.download = `orders_${new Date().toISOString().split('T')[0]}.xlsx`;
+                      a.click();
+                    }}
+                  >
+                    <Download className="w-4 h-4 mr-2" />
+                    {t('admin.exportOrders')}
+                  </Button>
+                </div>
                 <SearchAndFilter
                   type="orders"
                   onSearch={setSearchTerm}

@@ -22,6 +22,9 @@
   "admin": {
     "removeDriverSuccess": "تم إزالة السائق بنجاح",
     "removeDriverError": "فشل في إزالة السائق",
-    "removeConfirm": "هل أنت متأكد أنك تريد إزالة هذا السائق؟"
+    "removeConfirm": "هل أنت متأكد أنك تريد إزالة هذا السائق؟",
+    "exportDrivers": "تصدير السائقين",
+    "exportOrders": "تصدير الطلبات",
+    "exportData": "تصدير البيانات"
   }
 }
