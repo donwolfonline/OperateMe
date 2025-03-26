@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { apiRequest } from "@/lib/queryClient";
-import { User, OperationOrder, InsertUser } from "@shared/schema";
+import { User, OperationOrder, InsertUser, insertUserSchema } from "@shared/schema";
 import LanguageToggle from "@/components/LanguageToggle";
 import HomeButton from "@/components/HomeButton";
 import { Badge } from "@/components/ui/badge";
