@@ -1,6 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { setupAuth } from "./auth";
+import { setupAuth, hashPassword } from "./auth";
 import { storage } from "./storage";
 import multer from "multer";
 import path from "path";
@@ -306,6 +306,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Registration endpoint
   app.post("/api/register", async (req, res) => {
     try {
       // Check for existing user
@@ -320,9 +321,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         password: '[REDACTED]'
       });
 
+      // Hash password and create user
+      const hashedPassword = await hashPassword(req.body.password);
       const user = await storage.createUser({
         ...req.body,
-        password: await hashPassword(req.body.password),
+        password: hashedPassword,
         createdAt: new Date()
       });
 
@@ -334,24 +337,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status: user.status
       });
 
-      res.status(201).json(user);
+      // Login the user after registration if this is an admin-created driver
+      if (req.user?.role === 'admin') {
+        res.status(201).json(user);
+      } else {
+        req.login(user, (err) => {
+          if (err) {
+            console.error('Login after registration failed:', err);
+            return res.status(201).json(user);
+          }
+          res.status(201).json(user);
+        });
+      }
     } catch (error: any) {
       console.error('Registration error:', error);
       res.status(400).json({ message: error.message || "Failed to create user" });
     }
   });
 
-  // Add DELETE route for driver deletion
-  app.delete("/api/admin/drivers/:id", async (req, res) => {
-    if (!req.user || req.user.role !== "admin") return res.sendStatus(403);
-    try {
-      await storage.deleteDriver(parseInt(req.params.id));
-      res.sendStatus(200);
-    } catch (error: any) {
-      console.error('Error deleting driver:', error);
-      res.status(500).json({ message: error.message });
-    }
-  });
 
   const httpServer = createServer(app);
   return httpServer;

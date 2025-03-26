@@ -68,7 +68,6 @@ export class DatabaseStorage implements IStorage {
 
   private async createDefaultUsers() {
     const adminUser = await this.getUserByUsername("admin");
-    const driverUser = await this.getUserByUsername("driver");
 
     if (!adminUser) {
       const adminSalt = randomBytes(16).toString("hex");
@@ -83,25 +82,6 @@ export class DatabaseStorage implements IStorage {
         isApproved: true,
         fullName: "Admin User",
         uid: generateUID('admin', 1),
-        createdAt: new Date()
-      });
-    }
-
-    if (!driverUser) {
-      const driverSalt = randomBytes(16).toString("hex");
-      const driverBuf = (await scryptAsync("driver123", driverSalt, 64)) as Buffer;
-      const driverHashedPassword = `${driverBuf.toString("hex")}.${driverSalt}`;
-
-      await db.insert(users).values({
-        username: "driver",
-        password: driverHashedPassword,
-        role: "driver",
-        status: "active",
-        isApproved: true,
-        fullName: "Test Driver",
-        idNumber: "DRV123",
-        licenseNumber: "LIC456",
-        uid: generateUID('driver', 2),
         createdAt: new Date()
       });
     }
@@ -120,6 +100,9 @@ export class DatabaseStorage implements IStorage {
   async createUser(insertUser: InsertUser): Promise<User> {
     const [user] = await db.insert(users).values({
       ...insertUser,
+      role: insertUser.role || 'driver',
+      status: insertUser.status || 'active',
+      isApproved: insertUser.isApproved || false,
       uid: generateUID(insertUser.role || 'driver', Date.now()),
       createdAt: new Date()
     }).returning();
