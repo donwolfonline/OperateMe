@@ -10,17 +10,22 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
   try {
     console.log('Starting PDF generation for order:', order.id);
 
-    // Get vehicle information for this order - this is crucial for template selection
+    // Get vehicle information for this order
     const vehicle = await storage.getVehicleByOrder(order.id);
-    console.log('Vehicle information for template selection:', {
-      vehicleType: vehicle?.type,
-      vehicleModel: vehicle?.model,
-      orderId: order.id
+    console.log('Raw vehicle information:', vehicle);
+
+    // Validate vehicle type/model for template selection
+    const vehicleType = (vehicle?.type || '').toLowerCase();
+    const vehicleModel = (vehicle?.model || '').toLowerCase();
+
+    console.log('Processed vehicle info for template:', {
+      vehicleType,
+      vehicleModel,
+      isHyundaiStaria: vehicleType === 'hyundai' && vehicleModel === 'staria'
     });
 
     // Get passengers for this order
     const passengers = await storage.getPassengersByOrder(order.id);
-    console.log('Found passengers:', passengers.length);
 
     // Format date
     const dateStr = new Date(order.departureTime).toLocaleString('ar-SA', {
@@ -45,8 +50,8 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
         id_number: p.idNumber,
         nationality: p.nationality
       })),
-      vehicle_type: vehicle?.type?.toLowerCase() || '',
-      vehicle_model: vehicle?.model?.toLowerCase() || ''
+      vehicle_type: vehicleType,
+      vehicle_model: vehicleModel
     };
 
     const pdfFileName = `order_${order.id}_${Date.now()}.pdf`;
@@ -56,7 +61,6 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
     // Write data to temporary JSON file
     const tempDataPath = path.join(process.cwd(), 'uploads', `temp_${Date.now()}.json`);
     await promisify(fs.writeFile)(tempDataPath, JSON.stringify(data));
-    console.log('Temporary data file created at:', tempDataPath);
 
     // Run Python script
     await new Promise((resolve, reject) => {
@@ -84,7 +88,6 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
         fs.unlink(tempDataPath, () => {});
 
         if (code === 0) {
-          // Verify the PDF was created
           if (fs.existsSync(pdfPath)) {
             console.log('PDF generated successfully at:', pdfPath);
             resolve(null);

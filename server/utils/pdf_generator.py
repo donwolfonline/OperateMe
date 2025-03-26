@@ -11,7 +11,7 @@ from weasyprint.text.fonts import FontConfiguration
 import os
 
 # Configure logging
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 def get_replit_url():
@@ -19,7 +19,6 @@ def get_replit_url():
     try:
         if os.getenv('NODE_ENV') == 'production':
             base_url = "https://operit.replit.app"
-            logger.info(f"Using production URL: {base_url}")
             return base_url
 
         replit_domain = os.getenv('REPLIT_DOMAIN')
@@ -33,18 +32,15 @@ def get_replit_url():
         else:
             base_url = "http://localhost:5000"
 
-        logger.info(f"Using development URL: {base_url}")
         return base_url
     except Exception as e:
         logger.error(f"Error getting Replit URL: {str(e)}")
         return "http://localhost:5000"
 
 def generate_qr_code(pdf_filename):
-    """Generate QR code and return as base64 string"""
     try:
         base_url = get_replit_url()
         pdf_url = f"{base_url}/uploads/{pdf_filename}"
-        logger.info(f"Generated PDF URL for QR: {pdf_url}")
 
         qr = qrcode.QRCode(
             version=1,
@@ -65,77 +61,91 @@ def generate_qr_code(pdf_filename):
         logger.error(f"Error generating QR code: {str(e)}")
         raise
 
-def get_hyundai_staria_template(env):
-    """Get Hyundai Staria specific template"""
-    template = env.get_template('hyundai_contract.html')
-    if "شركة صاعقة الطريق للنقل البري" not in template.render():
-        logger.error("Hyundai template verification failed!")
-        raise ValueError("Invalid Hyundai template content")
-    return template
+def load_and_verify_template(env, template_name, required_text):
+    """Load and verify template contains required text"""
+    try:
+        template = env.get_template(template_name)
+        rendered = template.render(
+            date="", main_passenger="", from_city="", to_city="",
+            driver_name="", driver_id="", license_number="",
+            trip_number="", visa_type="", passengers=[],
+            qr_code=""
+        )
 
-def get_gmc_template(env):
-    """Get GMC/Chevrolet specific template"""
-    template = env.get_template('gmc_contract.html')
-    if "شركة النجمة الفارهة للنقل البري" not in template.render():
-        logger.error("GMC template verification failed!")
-        raise ValueError("Invalid GMC template content")
-    return template
+        if required_text not in rendered:
+            raise ValueError(f"Template {template_name} does not contain required company name: {required_text}")
+
+        logger.info(f"Successfully verified template {template_name} contains {required_text}")
+        return template
+    except Exception as e:
+        logger.error(f"Error loading template {template_name}: {str(e)}")
+        raise
 
 def select_template(env, vehicle_type, vehicle_model):
-    """Select and verify the appropriate template"""
-    vehicle_type = (vehicle_type or '').lower()
-    vehicle_model = (vehicle_model or '').lower()
+    """Select the appropriate template based on vehicle type and model"""
+    logger.info(f"Selecting template for vehicle: type={vehicle_type}, model={vehicle_model}")
 
-    logger.info(f"Selecting template for vehicle type: {vehicle_type}, model: {vehicle_model}")
+    # Force lowercase for comparison
+    vehicle_type = (vehicle_type or '').lower().strip()
+    vehicle_model = (vehicle_model or '').lower().strip()
 
-    if vehicle_type == 'hyundai' and vehicle_model == 'staria':
+    is_hyundai_staria = vehicle_type == 'hyundai' and vehicle_model == 'staria'
+    logger.info(f"Is Hyundai Staria: {is_hyundai_staria}")
+
+    if is_hyundai_staria:
         logger.info("Using Hyundai Staria template")
-        return get_hyundai_staria_template(env)
+        return load_and_verify_template(
+            env,
+            'hyundai_contract.html',
+            'شركة صاعقة الطريق للنقل البري'
+        )
     else:
         logger.info("Using GMC/Chevrolet template")
-        return get_gmc_template(env)
+        return load_and_verify_template(
+            env,
+            'gmc_contract.html',
+            'شركة النجمة الفارهة للنقل البري'
+        )
 
 def generate_pdf(data_path, output_path):
-    """Generate PDF with proper Arabic text rendering using WeasyPrint"""
     try:
-        logger.info(f"Starting PDF generation. Data path: {data_path}, Output path: {output_path}")
+        logger.info(f"Starting PDF generation with data from: {data_path}")
 
         # Load data
         with open(data_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
 
         # Log vehicle information
-        logger.info(f"Vehicle type: {data.get('vehicle_type')}, model: {data.get('vehicle_model')}")
+        logger.info(f"Vehicle information received: type={data.get('vehicle_type')}, model={data.get('vehicle_model')}")
 
         # Get the PDF filename
         pdf_filename = Path(output_path).name
-        logger.info(f"PDF filename: {pdf_filename}")
 
-        # Generate QR code with the PDF filename
+        # Generate QR code
         qr_code_base64 = generate_qr_code(pdf_filename)
 
-        # Set up Jinja2 environment
+        # Setup Jinja2 environment
         template_dir = Path(__file__).parent / 'pdf_templates'
         env = Environment(loader=FileSystemLoader(template_dir))
 
         # Select and verify template based on vehicle type
         template = select_template(
-            env, 
-            data.get('vehicle_type'), 
+            env,
+            data.get('vehicle_type'),
             data.get('vehicle_model')
         )
 
         # Render template
         html_content = template.render(
-            main_passenger=data['main_passenger'],
             date=data['date'],
+            main_passenger=data['main_passenger'],
             from_city=data['from_city'],
             to_city=data['to_city'],
-            visa_type=data['visa_type'],
-            trip_number=data['trip_number'],
             driver_name=data['driver_name'],
             driver_id=data['driver_id'],
             license_number=data['license_number'],
+            trip_number=data['trip_number'],
+            visa_type=data['visa_type'],
             passengers=data['passengers'],
             qr_code=qr_code_base64
         )
@@ -149,7 +159,7 @@ def generate_pdf(data_path, output_path):
             font_config=font_config
         )
 
-        logger.info(f"PDF saved successfully at: {output_path}")
+        logger.info(f"PDF generated successfully at: {output_path}")
         return pdf_filename
 
     except Exception as e:
