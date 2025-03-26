@@ -167,9 +167,12 @@ A comprehensive bilingual vehicle and driver management system designed to strea
 - Fixed and enhanced multilingual support:
   - Added complete Urdu translations for admin dashboard
   - Enhanced document view and status information translations
+  - Fixed vehicle registration and status message translations
+  - Added missing translations for all dashboard components
   - Improved error notifications in all supported languages
   - Added proper translations for registration workflow
 - System Improvements:
+  - Fixed document viewing and downloading paths
   - Enhanced error handling for login and registration
   - Improved notification system with proper localization
   - Fixed runtime error overlay handling
