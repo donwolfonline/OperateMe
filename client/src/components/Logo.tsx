@@ -14,17 +14,17 @@ export const Logo = ({ className = "", size = 'md' }: LogoProps) => {
     sm: {
       wrapper: "gap-2",
       icon: "h-4 w-4",
-      text: "text-sm"
+      text: "text-base"  
     },
     md: {
       wrapper: "gap-2",
       icon: "h-5 w-5",
-      text: "text-base"
+      text: "text-lg"    
     },
     lg: {
       wrapper: "gap-3",
       icon: "h-6 w-6",
-      text: "text-lg"
+      text: "text-xl"    
     }
   };
 
