@@ -4,7 +4,7 @@ import { setupAuth } from "./auth";
 import { storage } from "./storage";
 import multer from "multer";
 import path from "path";
-import { insertVehicleSchema, insertOperationOrderSchema } from "@shared/schema";
+import { insertVehicleSchema, insertOperationOrderSchema, insertCompanyMappingSchema } from "@shared/schema";
 import { generateOrderPDF } from './utils/pdfGenerator';
 import express from "express";
 import fs from 'fs';
@@ -339,6 +339,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Add DELETE route for driver deletion
+  app.delete("/api/admin/drivers/:id", async (req, res) => {
+    if (!req.user || req.user.role !== "admin") return res.sendStatus(403);
+    try {
+      await storage.deleteDriver(parseInt(req.params.id));
+      res.sendStatus(200);
+    } catch (error: any) {
+      console.error('Error deleting driver:', error);
+      res.status(500).json({ message: error.message });
+    }
+  });
 
   const httpServer = createServer(app);
   return httpServer;

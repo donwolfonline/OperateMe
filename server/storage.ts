@@ -48,6 +48,7 @@ export interface IStorage {
   getAllOperationOrders(): Promise<OperationOrder[]>;
   updateDriver(id: number, updates: { status: string; isApproved: boolean }): Promise<User | undefined>;
   getVehicleByOrder(orderId: number): Promise<Vehicle | undefined>;
+  deleteDriver(id: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -257,6 +258,27 @@ export class DatabaseStorage implements IStorage {
 
     const [vehicle] = await db.select().from(vehicles).where(eq(vehicles.id, order.vehicleId));
     return vehicle;
+  }
+  async deleteDriver(id: number): Promise<void> {
+    // Get driver's orders first to cascade delete passengers
+    const orders = await this.getOperationOrdersByDriver(id);
+
+    // Delete all passengers from driver's orders
+    for (const order of orders) {
+      await db.delete(passengers).where(eq(passengers.orderId, order.id));
+    }
+
+    // Delete all orders associated with the driver
+    await db.delete(operationOrders).where(eq(operationOrders.driverId, id));
+
+    // Delete all vehicles associated with the driver
+    await db.delete(vehicles).where(eq(vehicles.driverId, id));
+
+    // Finally delete the driver user record
+    await db.delete(users).where(and(
+      eq(users.id, id),
+      eq(users.role, "driver")
+    ));
   }
 }
 
