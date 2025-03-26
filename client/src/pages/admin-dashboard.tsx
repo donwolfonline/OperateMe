@@ -1,10 +1,10 @@
 import { useTranslation } from "react-i18next";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { apiRequest } from "@/lib/queryClient";
 import { User, OperationOrder, InsertUser } from "@shared/schema";
 import LanguageToggle from "@/components/LanguageToggle";
 import HomeButton from "@/components/HomeButton";
@@ -23,16 +23,136 @@ import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { insertUserSchema } from "@shared/schema";
-import { QrCode } from "lucide-react";
 
-// Add this function near the top of the file, after imports
 const getPublicUrl = (path: string) => {
-  // Use the deployed domain for production, fallback to current origin for development
   const baseUrl = process.env.NODE_ENV === 'production'
     ? 'https://operit.replit.app'
     : window.location.origin;
   return `${baseUrl}/uploads/${path}`;
+};
+
+const AddDriverForm = ({ onSuccess }: { onSuccess: () => void }) => {
+  const { t } = useTranslation();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const form = useForm<InsertUser>({
+    resolver: zodResolver(insertUserSchema),
+    defaultValues: {
+      username: "",
+      password: "",
+      fullName: "",
+      idNumber: "",
+      licenseNumber: "",
+      role: "driver",
+      status: "active",
+      isApproved: true
+    }
+  });
+
+  const onSubmit = async (data: any) => {
+    try {
+      await apiRequest("POST", "/api/register", {
+        ...data,
+        role: "driver",
+        status: "active",
+        isApproved: true
+      });
+
+      // Invalidate queries to refresh the UI
+      await queryClient.invalidateQueries({ queryKey: ["/api/admin/active-drivers"] });
+
+      form.reset();
+      onSuccess();
+
+      toast({
+        title: t('notifications.success'),
+        description: t('admin.addDriverSuccess'),
+        variant: "default"
+      });
+    } catch (error: any) {
+      toast({
+        title: t('notifications.error'),
+        description: error.message || t('admin.addDriverError'),
+        variant: "destructive"
+      });
+    }
+  };
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="username"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t('auth.username')}</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t('auth.password')}</FormLabel>
+              <FormControl>
+                <Input type="password" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="fullName"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t('auth.fullName')}</FormLabel>
+              <FormControl>
+                <Input {...field} value={field.value || ''} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="idNumber"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t('auth.idNumber')}</FormLabel>
+              <FormControl>
+                <Input {...field} value={field.value || ''} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="licenseNumber"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t('auth.licenseNumber')}</FormLabel>
+              <FormControl>
+                <Input {...field} value={field.value || ''} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <Button type="submit" className="w-full">
+          {t('admin.addDriver')}
+        </Button>
+      </form>
+    </Form>
+  );
 };
 
 export default function AdminDashboard() {
@@ -41,66 +161,36 @@ export default function AdminDashboard() {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeFilters, setActiveFilters] = useState({});
   const { toast } = useToast();
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const queryClient = useQueryClient();
 
   const { data: pendingDrivers } = useQuery<User[]>({
     queryKey: ["/api/admin/pending-drivers"],
-    enabled: !!user && user.role === "admin",
+    enabled: !!user && user.role === "admin"
   });
 
   const { data: activeDrivers } = useQuery<User[]>({
     queryKey: ["/api/admin/active-drivers"],
-    enabled: !!user && user.role === "admin",
+    enabled: !!user && user.role === "admin"
   });
 
   const { data: suspendedDrivers } = useQuery<User[]>({
     queryKey: ["/api/admin/suspended-drivers"],
-    enabled: !!user && user.role === "admin",
+    enabled: !!user && user.role === "admin"
   });
 
   const { data: allOrders } = useQuery<(OperationOrder & { passengers: any[]; driver?: any })[]>({
     queryKey: ["/api/admin/all-orders"],
-    enabled: !!user && user.role === "admin",
+    enabled: !!user && user.role === "admin"
   });
 
-  const addDriver = async (data: InsertUser) => {
-    try {
-      // Add logging to debug
-      console.log('Adding driver with data:', data);
-
-      const response = await apiRequest("POST", "/api/register", {
-        ...data,
-        role: "driver",
-        status: "active", // Change default status to active
-        isApproved: true // Set as approved by default when admin creates
-      });
-
-      // Invalidate queries to refresh the UI
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/pending-drivers"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/active-drivers"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/suspended-drivers"] });
-
-      toast({
-        title: t('notifications.success'),
-        description: t('admin.addDriverSuccess'),
-        variant: "default"
-      });
-
-      return response;
-    } catch (error: any) {
-      console.error('Error adding driver:', error);
-      toast({
-        title: t('notifications.error'),
-        description: error.message || t('admin.addDriverError'),
-        variant: "destructive"
-      });
-      throw error;
-    }
-  };
-
-  // If not authenticated or not admin, show the login page
   if (!user || user.role !== "admin") {
     return <Redirect to="/auth" />;
   }
+
+  const handleAddDriverSuccess = () => {
+    setDialogOpen(false);
+  };
 
   const approveDriver = async (driverId: number) => {
     await apiRequest("POST", `/api/admin/drivers/${driverId}/status`, { status: 'active' });
@@ -119,7 +209,6 @@ export default function AdminDashboard() {
     queryClient.invalidateQueries({ queryKey: ["/api/admin/suspended-drivers"] });
     queryClient.invalidateQueries({ queryKey: ["/api/admin/active-drivers"] });
   };
-
 
   const removeDriver = async (driverId: number) => {
     if (window.confirm(t('admin.removeConfirm'))) {
@@ -175,7 +264,6 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* Documents Section */}
       <div className="space-y-2 pt-2 border-t">
         <p className="text-sm font-medium">Documents:</p>
         <div className="flex flex-wrap gap-2">
@@ -204,7 +292,6 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* Status Information Section */}
       <div className="space-y-2 pt-2 border-t">
         <p className="text-sm font-medium">Status Information:</p>
         <div className="flex flex-wrap gap-2">
@@ -364,7 +451,7 @@ export default function AdminDashboard() {
             return doc.driver?.fullName === value;
           }
           if (key === 'documentType') {
-            return true; // Implement if you have specific document types
+            return true;
           }
           return true;
         });
@@ -388,284 +475,12 @@ export default function AdminDashboard() {
   const filteredDocuments = useMemo(() =>
     filterDocuments(allOrders), [allOrders, searchTerm, activeFilters]);
 
-
-  // Then update all URL generations in the exportToExcel function to use this:
-  const exportToExcel = async () => {
-    try {
-      const driversData = [
-        ...filteredPendingDrivers || [],
-        ...filteredActiveDrivers || [],
-        ...filteredSuspendedDrivers || []
-      ].map(driver => ({
-        'Driver ID': driver.uid,
-        'Full Name': driver.fullName,
-        'ID Number': driver.idNumber,
-        'License Number': driver.licenseNumber,
-        'Status': driver.status,
-        'Is Approved': driver.isApproved ? 'Yes' : 'No',
-        'Created At': new Date(driver.createdAt).toLocaleString(),
-        'Last Updated': new Date(driver.updatedAt || driver.createdAt).toLocaleString(),
-        'Document Status': driver.idDocumentUrl && driver.licenseDocumentUrl ? 'Complete' : 'Incomplete',
-        'Profile Status': driver.profileImageUrl ? 'Complete' : 'Incomplete',
-        'ID Document URL': driver.idDocumentUrl ? `=HYPERLINK("${getPublicUrl(driver.idDocumentUrl)}", "View ID Document")` : 'N/A',
-        'License Document URL': driver.licenseDocumentUrl ? `=HYPERLINK("${getPublicUrl(driver.licenseDocumentUrl)}", "View License")` : 'N/A',
-        'Profile Image URL': driver.profileImageUrl ? `=HYPERLINK("${getPublicUrl(driver.profileImageUrl)}", "View Profile")` : 'N/A'
-      }));
-
-      const ordersData = (filteredOrders || []).map(order => ({
-        'Trip Number': order.tripNumber,
-        'From City': order.fromCity,
-        'To City': order.toCity,
-        'Departure Time': new Date(order.departureTime).toLocaleString(),
-        'Creation Date': new Date(order.createdAt).toLocaleString(),
-        'Last Update': new Date(order.updatedAt || order.createdAt).toLocaleString(),
-        'Visa Type': order.visaType,
-        'Status': order.status,
-        'Driver Name': order.driver?.fullName || 'N/A',
-        'Driver ID': order.driver?.uid || 'N/A',
-        'Passengers Count': order.passengers?.length || 0,
-        'Vehicle Type': order.vehicle?.type || 'N/A',
-        'Vehicle Plate': order.vehicle?.plateNumber || 'N/A',
-        'PDF Status': order.pdfUrl ? 'Generated' : 'Pending',
-        'PDF Link': order.pdfUrl ? `=HYPERLINK("${getPublicUrl(order.pdfUrl)}", "Click to View PDF")` : 'N/A',
-        'QR Code': order.qrCode ? `=HYPERLINK("${getPublicUrl(order.qrCode)}", "View QR Code")` : 'N/A'
-      }));
-
-      const passengersData = (filteredOrders || []).flatMap(order =>
-        (order.passengers || []).map(passenger => ({
-          'Trip Number': order.tripNumber,
-          'Passenger Name': passenger.name,
-          'ID Number': passenger.idNumber,
-          'Nationality': passenger.nationality,
-          'From City': order.fromCity,
-          'To City': order.toCity,
-          'Departure Time': new Date(order.departureTime).toLocaleString(),
-          'Driver': order.driver?.fullName || 'N/A',
-          'Driver ID': order.driver?.uid || 'N/A',
-          'Visa Type': order.visaType,
-          'Order Created': new Date(order.createdAt).toLocaleString(),
-          'PDF Available': order.pdfUrl ? 'Yes' : 'No',
-          'PDF Link': order.pdfUrl ? `=HYPERLINK("${getPublicUrl(order.pdfUrl)}", "Download Trip PDF")` : 'N/A'
-        }))
-      );
-
-      const documentsData = (filteredOrders || [])
-        .filter(order => order.pdfUrl)
-        .map(order => ({
-          'Document ID': order.tripNumber,
-          'Type': 'Operation Order',
-          'Generated Date': new Date(order.updatedAt || order.createdAt).toLocaleString(),
-          'Driver': order.driver?.fullName || 'N/A',
-          'Driver ID': order.driver?.uid || 'N/A',
-          'Driver Contact': order.driver?.phoneNumber || 'N/A',
-          'Status': 'Generated',
-          'Download PDF': `=HYPERLINK("${getPublicUrl(order.pdfUrl)}", "Download PDF")`,
-          'View Online': `=HYPERLINK("${getPublicUrl(order.pdfUrl)}", "View in Browser")`,
-          'Associated Trip': order.tripNumber,
-          'Route': `${order.fromCity} → ${order.toCity}`,
-          'Passenger Count': order.passengers?.length || 0,
-          'QR Code': order.qrCode ? `=HYPERLINK("${getPublicUrl(order.qrCode)}", "View QR Code")` : 'N/A'
-        }));
-
-      const dailyTripsData = (filteredOrders || []).reduce((acc: any, order) => {
-        const date = new Date(order.departureTime).toLocaleDateString();
-        if (!acc[date]) {
-          acc[date] = {
-            'Date': date,
-            'Total Trips': 0,
-            'Total Passengers': 0,
-            'Active Drivers': 0,
-            'Generated PDFs': 0,
-            'Routes': new Set(),
-            'Unique Drivers': new Set(),
-            'Completed Orders': 0,
-            'Pending Orders': 0,
-            'PDF Links': new Set()
-          };
-        }
-        acc[date]['Total Trips']++;
-        acc[date]['Total Passengers'] += order.passengers?.length || 0;
-        acc[date]['Generated PDFs'] += order.pdfUrl ? 1 : 0;
-        acc[date]['Routes'].add(`${order.fromCity} → ${order.toCity}`);
-        if (order.driver?.uid) acc[date]['Unique Drivers'].add(order.driver.uid);
-        if (order.status === 'completed') acc[date]['Completed Orders']++;
-        if (order.status === 'pending') acc[date]['Pending Orders']++;
-        if (order.pdfUrl) acc[date]['PDF Links'].add(`=HYPERLINK("${getPublicUrl(order.pdfUrl)}", "PDF ${order.tripNumber}")`);
-        return acc;
-      }, {});
-
-      const dailyTripsArray = Object.values(dailyTripsData).map((day: any) => ({
-        'Date': day.Date,
-        'Total Trips': day['Total Trips'],
-        'Total Passengers': day['Total Passengers'],
-        'Generated PDFs': day['Generated PDFs'],
-        'Routes': Array.from(day.Routes).join(', '),
-        'Active Drivers Count': day['Unique Drivers'].size,
-        'Completed Orders': day['Completed Orders'],
-        'Pending Orders': day['Pending Orders'],
-        'Completion Rate': `${((day['Completed Orders'] / day['Total Trips']) * 100).toFixed(1)}%`,
-        'PDF Documents': Array.from(day['PDF Links']).join(', ')
-      }));
-
-      const wb = utils.book_new();
-
-      const sheets = [
-        { name: "Daily Summary", data: dailyTripsArray },
-        { name: "Orders", data: ordersData },
-        { name: "Drivers", data: driversData },
-        { name: "Passengers", data: passengersData },
-        { name: "Documents", data: documentsData }
-      ];
-
-      sheets.forEach(sheet => {
-        const ws = utils.json_to_sheet(sheet.data);
-        utils.book_append_sheet(wb, ws, sheet.name);
-      });
-
-      const excelBuffer = write(wb, { bookType: 'xlsx', type: 'array' });
-      const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `admin-report-${new Date().toISOString().split('T')[0]}.xlsx`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      toast({
-        title: t('notifications.success'),
-        description: t('notifications.exportSuccess'),
-        variant: "default"
-      });
-    } catch (error) {
-      console.error('Error exporting data:', error);
-      toast({
-        title: t('admin.exportError'),
-        description: t('admin.exportErrorMessage'),
-        variant: "destructive"
-      });
-    }
-  };
-
-  const AddDriverForm = () => {
-    const form = useForm<InsertUser>({
-      resolver: zodResolver(insertUserSchema),
-      defaultValues: {
-        username: "",
-        password: "",
-        fullName: "",
-        idNumber: "",
-        licenseNumber: "",
-        role: "driver",
-        status: "pending",
-        isApproved: false
-      }
-    });
-
-    const onSubmit = async (data: InsertUser) => {
-      try {
-        await addDriver(data);
-        form.reset();
-      } catch (error: any) {
-        toast({
-          title: t('notifications.error'),
-          description: error.message || t('admin.formError'),
-          variant: "destructive"
-        });
-      }
-    };
-
-    return (
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <FormField
-            control={form.control}
-            name="username"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t('auth.username')} <span className="text-red-500">*</span></FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="password"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t('auth.password')} <span className="text-red-500">*</span></FormLabel>
-                <FormControl>
-                  <Input type="password" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="fullName"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t('auth.fullName')} <span className="text-red-500">*</span></FormLabel>
-                <FormControl>
-                  <Input {...field} value={field.value || ''} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="idNumber"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t('auth.idNumber')} <span className="text-red-500">*</span></FormLabel>
-                <FormControl>
-                  <Input {...field} value={field.value || ''} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="licenseNumber"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t('auth.licenseNumber')} <span className="text-red-500">*</span></FormLabel>
-                <FormControl>
-                  <Input {...field} value={field.value || ''} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <Button type="submit" className="w-full">
-            {t('admin.addDriver')}
-          </Button>
-        </form>
-      </Form>
-    );
-  };
-
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
           <HomeButton />
           <div className="flex items-center gap-4">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={exportToExcel}
-              className="flex items-center gap-2"
-            >
-              <Download className="h-4 w-4" />
-              {t('admin.exportData')}
-            </Button>
             <LanguageToggle />
             <button
               onClick={() => logoutMutation.mutate()}
@@ -676,7 +491,7 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        <Tabs defaultValue="pending" className="space-y-4">
+        <Tabs defaultValue="active" className="space-y-4">
           <TabsList className="grid w-full grid-cols-2 lg:grid-cols-5 gap-2">
             <TabsTrigger value="pending">
               {t('admin.pendingDrivers')}
@@ -719,17 +534,18 @@ export default function AdminDashboard() {
               <CardContent className="p-6">
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-xl font-semibold">{t('admin.activeDrivers')}</h2>
-                  <Dialog>
+                  <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                     <DialogTrigger asChild>
-                      <Button variant="outline">
+                      <Button>
+                        <UserIcon className="w-4 h-4 mr-2" />
                         {t('admin.addDriver')}
                       </Button>
                     </DialogTrigger>
                     <DialogContent>
                       <DialogHeader>
-                        <DialogTitle>{t('admin.formTitle')}</DialogTitle>
+                        <DialogTitle>{t('admin.addNewDriver')}</DialogTitle>
                       </DialogHeader>
-                      <AddDriverForm />
+                      <AddDriverForm onSuccess={handleAddDriverSuccess} />
                     </DialogContent>
                   </Dialog>
                 </div>
@@ -763,19 +579,6 @@ export default function AdminDashboard() {
               <CardContent className="p-6">
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-xl font-semibold">{t('admin.suspendedDrivers')}</h2>
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button variant="outline">
-                        {t('admin.addDriver')}
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>{t('admin.formTitle')}</DialogTitle>
-                      </DialogHeader>
-                      <AddDriverForm />
-                    </DialogContent>
-                  </Dialog>
                 </div>
                 <SearchAndFilter
                   type="drivers"
@@ -838,83 +641,35 @@ export default function AdminDashboard() {
                   <p className="text-muted-foreground text-center py-4">{t('admin.noDocuments')}</p>
                 ) : (
                   <div className="grid gap-6">
-                    {filteredDocuments.map((order) => (
-                      <Card key={order.id} className="hover:shadow-md transition-shadow">
+                    {filteredDocuments.map((doc) => (
+                      <Card key={doc.id} className="hover:shadow-md transition-shadow">
                         <CardContent className="p-6">
                           <div className="flex flex-col lg:flex-row justify-between gap-4">
                             <div className="space-y-2">
                               <div className="flex items-center gap-2">
                                 <FileText className="h-5 w-5 text-primary" />
                                 <h3 className="text-lg font-semibold">
-                                  {t('order.tripNumber')}: {order.tripNumber}
+                                  {t('order.tripNumber')}: {doc.tripNumber}
                                 </h3>
                               </div>
-                              <div className="text-sm text-muted-foreground space-y-1">
-                                <p className="flex items-center gap-2">
-                                  <Calendar className="h-4 w-4" />
-                                  {new Date(order.createdAt).toLocaleString()}
-                                </p>
-                                <p className="flex items-center gap-2">
-                                  <MapPin className="h-4 w-4" />
-                                  {order.fromCity} → {order.toCity}
-                                </p>
-                                <p className="flex items-center gap-2">
-                                  <Users className="h-4 w-4" />
-                                  {t('order.passengerCount')}: {order.passengers?.length || 0}
-                                </p>
-                                {order.driver && order.driver.fullName && (
-                                  <p className="flex items-center gap-2">
-                                    <UserIcon className="h-4 w-4" />
-                                    {t('order.issuedBy')}: {order.driver.fullName}
-                                    {order.driver.uid && ` (${order.driver.uid})`}
-                                  </p>
-                                )}
-                              </div>
+                              <p className="text-sm text-muted-foreground">
+                                {doc.driver?.fullName ? `${t('order.driver')}: ${doc.driver.fullName}` : ''}
+                              </p>
+                              <p className="text-sm text-muted-foreground">
+                                {t('order.fromCity')}: {doc.fromCity} → {doc.toCity}
+                              </p>
                             </div>
                             <div className="flex flex-col sm:flex-row gap-2">
-                              {order.pdfUrl && (
-                                <>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    asChild
-                                  >
-                                    <a
-                                      href={getPublicUrl(order.pdfUrl)}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="flex items-center gap-2"
-                                    >
-                                      <FileText className="h-4 w-4" />
-                                      {t('order.viewDocument')}
-                                    </a>
-                                  </Button>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => window.open(getPublicUrl(order.pdfUrl), '_blank')}
-                                  >
-                                    <Download className="h-4 w-4 mr-2" />
-                                    {t('order.download')}
-                                  </Button>
-                                </>
-                              )}
-                              {order.qrCode && (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  asChild
+                              {doc.pdfUrl && (
+                                <a
+                                  href={getPublicUrl(doc.pdfUrl)}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="flex items-center justify-center px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
                                 >
-                                  <a
-                                    href={getPublicUrl(order.qrCode)}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="flex items-center gap-2"
-                                  >
-                                    <QrCode className="h-4 w-4" />
-                                    {t('order.viewQr')}
-                                  </a>
-                                </Button>
+                                  <FileText className="h-4 w-4 mr-2" />
+                                  {t('order.downloadPdf')}
+                                </a>
                               )}
                             </div>
                           </div>
