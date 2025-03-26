@@ -53,7 +53,9 @@ const resources = {
         operationHistory: "Operation History",
         noOrders: "No orders found",
         uploadId: "Upload ID Document",
-        uploadLicense: "Upload License Document"
+        uploadLicense: "Upload License Document",
+        uploadProfileImage: "Upload Profile Image",
+        uniqueId: "UID"
       },
       vehicle: {
         manufacturer: "Vehicle Manufacturer",
@@ -182,7 +184,9 @@ const resources = {
         operationHistory: "سجل العمليات",
         noOrders: "لا توجد طلبات",
         uploadId: "رفع صورة الهوية",
-        uploadLicense: "رفع صورة الرخصة"
+        uploadLicense: "رفع صورة الرخصة",
+        uploadProfileImage: "رفع صورة الملف الشخصي",
+        uniqueId: "UID"
       },
       vehicle: {
         manufacturer: "الشركة المصنعة",
@@ -311,7 +315,9 @@ const resources = {
         operationHistory: "آپریشن کی تاریخ",
         noOrders: "کوئی آرڈر نہیں ملا",
         uploadId: "شناختی دستاویز اپلوڈ کریں",
-        uploadLicense: "لائسنس دستاویز اپلوڈ کریں"
+        uploadLicense: "لائسنس دستاویز اپلوڈ کریں",
+        uploadProfileImage: "پروفائل تصویر اپ لوڈ کریں",
+        uniqueId: "UID"
       },
       vehicle: {
         manufacturer: "گاڑی کی کمپنی",
