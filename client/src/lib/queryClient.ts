@@ -1,4 +1,5 @@
 import { QueryClient } from "@tanstack/react-query";
+import i18next from "i18next";
 
 export async function apiRequest(
   method: string,
@@ -23,10 +24,19 @@ export async function apiRequest(
   });
 
   if (!res.ok) {
-    const errorData = await res.json().catch(() => ({
-      message: res.statusText
-    }));
-    throw new Error(errorData.message || res.statusText);
+    let errorMessage = "An error occurred";
+    try {
+      const errorData = await res.json();
+      // If the error message is a translation key, translate it
+      if (errorData.message && errorData.message.includes('notifications.')) {
+        errorMessage = i18next.t(errorData.message);
+      } else {
+        errorMessage = errorData.message || res.statusText;
+      }
+    } catch {
+      errorMessage = res.statusText;
+    }
+    throw new Error(errorMessage);
   }
 
   return res;
