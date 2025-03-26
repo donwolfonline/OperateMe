@@ -136,7 +136,12 @@ const resources = {
         selectDriver: "Select Driver"
       },
       common: {
-        logout: "Logout"
+        logout: "Logout",
+        loading: "Loading..."
+      },
+      dashboard: {
+        welcome: "Welcome",
+        driverWelcomeMessage: "Ready for your next journey"
       }
     }
   },
@@ -267,7 +272,12 @@ const resources = {
         selectDriver: "اختر السائق"
       },
       common: {
-        logout: "تسجيل الخروج"
+        logout: "تسجيل الخروج",
+        loading: "جار التحميل..."
+      },
+      dashboard: {
+        welcome: "مرحباً",
+        driverWelcomeMessage: "جاهز لرحلتك القادمة"
       }
     }
   },
@@ -398,7 +408,12 @@ const resources = {
         selectDriver: "ڈرائیور منتخب کریں"
       },
       common: {
-        logout: "لاگ آؤٹ"
+        logout: "لاگ آؤٹ",
+        loading: "لوڈ ہو رہا ہے..."
+      },
+      dashboard: {
+        welcome: "خوش آمدید",
+        driverWelcomeMessage: "اپنے اگلے سفر کے لیے تیار"
       }
     }
   }
