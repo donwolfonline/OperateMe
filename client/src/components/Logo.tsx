@@ -12,17 +12,17 @@ export const Logo = ({ className = "", size = 'md' }: LogoProps) => {
 
   const sizes = {
     sm: {
-      wrapper: "gap-0",
+      wrapper: "gap-2",
       icon: "h-4 w-4",
       text: "text-sm"
     },
     md: {
-      wrapper: "gap-0",
+      wrapper: "gap-2",
       icon: "h-5 w-5",
       text: "text-base"
     },
     lg: {
-      wrapper: "gap-0",
+      wrapper: "gap-3",
       icon: "h-6 w-6",
       text: "text-lg"
     }
@@ -49,7 +49,7 @@ export const Logo = ({ className = "", size = 'md' }: LogoProps) => {
         <span className={`${sizes[size].text} font-bold text-primary whitespace-nowrap`}>
           {t('landing.brandFirst')}
         </span>
-        <span className={`${sizes[size].text} font-bold text-muted-foreground whitespace-nowrap ml-0.5`}>
+        <span className={`${sizes[size].text} font-bold text-muted-foreground whitespace-nowrap ml-1`}>
           {t('landing.brandSecond')}
         </span>
       </div>
