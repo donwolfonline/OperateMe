@@ -15,6 +15,7 @@ A comprehensive bilingual vehicle and driver management system designed to strea
 - 👤 Advanced Driver Management
 - 🚗 Vehicle Registration and Tracking
 - 📋 Operation Order Management
+- 🔎 Advanced Search and Filtering System
 - 📊 Comprehensive Data Export:
   - Daily updated Excel reports
   - Complete trip and passenger statistics
@@ -58,6 +59,32 @@ A comprehensive bilingual vehicle and driver management system designed to strea
   - Status filters for orders
   - Date-based filtering
 
+### Excel Export System
+- **Daily Trip Reports**
+  - Comprehensive daily statistics
+  - Trip counts and passenger totals
+  - Route summaries and completion rates
+  - Active driver tracking
+  - PDF generation statistics
+  - Clickable PDF and QR code links
+  - Real-time status updates
+
+- **Driver Information**
+  - Complete driver profiles
+  - Document verification status
+  - Performance metrics
+  - Document URLs and verification links
+  - Status tracking and history
+  - Profile completion tracking
+
+- **Operation Orders**
+  - Detailed trip information
+  - Vehicle assignments
+  - Passenger manifests
+  - PDF and QR code tracking
+  - Real-time status updates
+  - Clickable document links
+
 ## Tech Stack
 
 ### Frontend
@@ -76,26 +103,54 @@ A comprehensive bilingual vehicle and driver management system designed to strea
 - Multer for file uploads
 - PDF generation capabilities
 
-## Project Structure
+## Complete Project Structure
 
 ```
-├── client/                 # Frontend React application
-│   ├── src/
-│   │   ├── components/    # Reusable components
-│   │   │   ├── ui/       # shadcn UI components
-│   │   │   └── ...
-│   │   ├── hooks/        # Custom React hooks
-│   │   ├── lib/          # Utility functions
-│   │   └── pages/        # Page components
-├── server/                # Backend Express application
-│   ├── utils/            # Utility functions
-│   │   ├── pdf_templates/# PDF generation templates
-│   │   └── ...
-│   ├── routes.ts         # API routes
-│   ├── auth.ts           # Authentication logic
-│   └── storage.ts        # Database operations
-├── shared/               # Shared TypeScript types
-└── uploads/              # File upload directory
+├── client/                      # Frontend React application
+│   ├── public/                  # Static assets
+│   └── src/
+│       ├── components/          # Reusable components
+│       │   ├── ui/             # shadcn UI components
+│       │   ├── layout/         # Layout components
+│       │   ├── forms/          # Form components
+│       │   └── shared/         # Shared components
+│       ├── hooks/              # Custom React hooks
+│       │   ├── use-auth.ts     # Authentication hook
+│       │   ├── use-toast.ts    # Toast notifications
+│       │   └── use-i18n.ts     # Internationalization hook
+│       ├── lib/                # Utility functions
+│       │   ├── api.ts          # API client
+│       │   ├── i18n.ts         # i18n configuration
+│       │   └── validators.ts   # Form validators
+│       ├── pages/              # Page components
+│       │   ├── admin/          # Admin pages
+│       │   ├── driver/         # Driver pages
+│       │   └── shared/         # Shared pages
+│       └── styles/             # CSS styles
+├── server/                      # Backend Express application
+│   ├── utils/                  # Utility functions
+│   │   ├── pdf_templates/      # PDF generation templates
+│   │   ├── excel/             # Excel generation utilities
+│   │   └── validators/        # Input validation
+│   ├── middleware/            # Express middleware
+│   ├── routes/                # API routes
+│   ├── services/              # Business logic
+│   ├── config/                # Configuration files
+│   └── types/                 # TypeScript types
+├── shared/                    # Shared code between front/backend
+│   ├── constants/            # Shared constants
+│   ├── types/               # Shared TypeScript types
+│   └── validators/          # Shared validation rules
+├── docs/                     # Documentation
+│   ├── api/                 # API documentation
+│   ├── deployment/          # Deployment guides
+│   └── development/         # Development guides
+├── scripts/                 # Utility scripts
+├── uploads/                 # File upload directory
+├── .env.template           # Environment variables template
+├── package.json            # Project dependencies
+├── tsconfig.json           # TypeScript configuration
+└── README.md              # Project documentation
 ```
 
 ## Development Setup
@@ -113,7 +168,7 @@ git clone https://github.com/yourusername/OperateMe.git
 cd OperateMe
 ```
 
-2. Copy the environment template and configure your variables:
+2. Copy the environment template:
 ```bash
 cp .env.template .env
 ```
@@ -134,6 +189,23 @@ npm install
 npm run dev
 ```
 
+### Development Guidelines
+
+1. Code Style
+   - Follow TypeScript best practices
+   - Use ESLint and Prettier for code formatting
+   - Write meaningful commit messages
+
+2. Testing
+   - Write unit tests for new features
+   - Ensure existing tests pass before committing
+   - Add integration tests for critical paths
+
+3. Documentation
+   - Update README.md for new features
+   - Document API changes
+   - Keep deployment guides current
+
 ## Deployment
 
 ### Replit Deployment
@@ -153,6 +225,23 @@ For VPS deployment instructions, refer to the [VPS Deployment Guide](docs/vps-de
 3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
+
+### Contributing Guidelines
+
+1. Code Review Process
+   - All changes require review
+   - Address review comments promptly
+   - Keep changes focused and atomic
+
+2. Feature Requests
+   - Use issue templates
+   - Provide clear use cases
+   - Include acceptance criteria
+
+3. Bug Reports
+   - Include steps to reproduce
+   - Provide environment details
+   - Attach relevant logs
 
 ## License
 
