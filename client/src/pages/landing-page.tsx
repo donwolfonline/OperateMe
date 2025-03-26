@@ -4,10 +4,27 @@ import { Button } from "@/components/ui/button";
 import LanguageToggle from "@/components/LanguageToggle";
 import { motion } from "framer-motion";
 import { FaGooglePlay, FaAppStore } from "react-icons/fa";
+import { useEffect, useState } from "react";
 
 export default function LandingPage() {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.dir() === 'rtl';
+  const [textIndex, setTextIndex] = useState(0);
+
+  // Array of text phrases to cycle through
+  const phrases = [
+    t('landing.subtitle1'),
+    t('landing.subtitle2'),
+    t('landing.subtitle3'),
+  ];
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTextIndex((prev) => (prev + 1) % phrases.length);
+    }, 3000);
+
+    return () => clearInterval(timer);
+  }, [phrases.length]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-secondary">
@@ -49,9 +66,22 @@ export default function LandingPage() {
             <h1 className="text-3xl md:text-6xl font-bold mb-6 leading-tight md:leading-normal bg-gradient-to-r from-primary to-primary/70 text-transparent bg-clip-text">
               {t('landing.title')}
             </h1>
-            <p className="text-lg md:text-2xl text-muted-foreground max-w-3xl mx-auto">
-              {t('landing.subtitle')}
-            </p>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="h-16 md:h-20 flex items-center justify-center"
+            >
+              <motion.p
+                key={textIndex}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.5 }}
+                className="text-lg md:text-2xl text-muted-foreground max-w-3xl mx-auto"
+              >
+                {phrases[textIndex]}
+              </motion.p>
+            </motion.div>
           </motion.div>
 
           <motion.div

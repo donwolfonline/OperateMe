@@ -13,7 +13,9 @@ const resources = {
     translation: {
       landing: {
         title: "Road Bolt Transport",
-        subtitle: "Internal Vehicle and Driver Management Platform",
+        subtitle1: "Streamlined Vehicle Management",
+        subtitle2: "Real-time Driver Tracking",
+        subtitle3: "Comprehensive Fleet Operations",
         loginButton: "Driver Login",
         adminButton: "Admin Login",
         brandFirst: "ROAD",
@@ -180,7 +182,9 @@ const resources = {
     translation: {
       landing: {
         title: "صاعقة الطريق للنقل",
-        subtitle: "منصة إدارة المركبات والسائقين الداخلية",
+        subtitle1: "إدارة المركبات بكفاءة",
+        subtitle2: "تتبع السائقين في الوقت الفعلي",
+        subtitle3: "عمليات الأسطول الشاملة",
         loginButton: "تسجيل دخول السائق",
         adminButton: "دخول المشرف",
         brandFirst: "صاعقة",
@@ -347,7 +351,9 @@ const resources = {
     translation: {
       landing: {
         title: "روڈ بولٹ ٹرانسپورٹ",
-        subtitle: "داخلی گاڑیوں اور ڈرائیوروں کی انتظامی پلیٹ فارم",
+        subtitle1: "گاڑیوں کی منظم انتظام کاری",
+        subtitle2: "ڈرائیوروں کی براہ راست نگرانی",
+        subtitle3: "جامع فلیٹ آپریشنز",
         loginButton: "ڈرائیور لاگ ان",
         adminButton: "ایڈمن لاگ ان",
         brandFirst: "روڈ",
