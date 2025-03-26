@@ -171,6 +171,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             departureTime: new Date(req.body.departureTime).toISOString()
         });
 
+        // First create order without PDF
         const order = await storage.createOperationOrder(
             {
                 fromCity: orderData.fromCity,
@@ -190,24 +191,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         try {
             console.log('Starting PDF generation for order:', order.id);
+
+            // Ensure uploads directory exists
+            const uploadsDir = path.join(process.cwd(), 'uploads');
+            if (!fs.existsSync(uploadsDir)) {
+                fs.mkdirSync(uploadsDir, { recursive: true });
+            }
+
+            // Generate PDF
             const pdfFileName = await generateOrderPDF(order, req.user);
 
-            // Verify PDF was created
+            // Verify PDF was created and has content
             const pdfPath = path.join(process.cwd(), 'uploads', pdfFileName);
             if (!fs.existsSync(pdfPath)) {
-                throw new Error('PDF file was not created');
+                throw new Error(`PDF file not found at ${pdfPath}`);
+            }
+
+            const stats = fs.statSync(pdfPath);
+            if (stats.size === 0) {
+                throw new Error(`Generated PDF is empty: ${pdfPath}`);
             }
 
             // Update order with PDF URL
-            order.pdfUrl = pdfFileName;
-            await storage.updateOperationOrder(order);
+            const updatedOrder = {
+                ...order,
+                pdfUrl: pdfFileName
+            };
+            await storage.updateOperationOrder(updatedOrder);
             console.log('Updated order with PDF URL:', pdfFileName);
 
-            res.status(201).json(order);
+            res.status(201).json(updatedOrder);
         } catch (pdfError) {
             console.error('PDF generation error:', pdfError);
-            // Still return success but with empty PDF URL
-            res.status(201).json(order);
+            // Return the order even if PDF generation failed
+            res.status(201).json({
+                ...order,
+                pdfGenerationError: pdfError.message
+            });
         }
     } catch (error: any) {
         console.error('Operation order creation error:', error);
