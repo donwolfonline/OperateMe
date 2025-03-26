@@ -13,15 +13,25 @@ import { Card, CardContent } from "@/components/ui/card";
 import { FileText, Download, Calendar, MapPin, Users } from "lucide-react";
 import { OperationOrder as OperationOrderType } from "@shared/schema";
 import { Badge } from "@/components/ui/badge";
+import { LoadingSpinner } from '@/components/LoadingSpinner'; // Import the LoadingSpinner component
+
 
 function DriverDashboardContent() {
   const { t } = useTranslation();
   const { user, logoutMutation } = useAuth();
 
-  const { data: driverOrders } = useQuery<(OperationOrderType & { passengers: any[]; pdfUrl?: string })[]>({
+  const { data: driverOrders, isLoading: isOrdersLoading } = useQuery<(OperationOrderType & { passengers: any[]; pdfUrl?: string })[]>({
     queryKey: ["/api/driver/orders"],
     enabled: !!user && user.role === "driver",
   });
+
+  if (isOrdersLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <LoadingSpinner size="lg" text={t('common.loading')} />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">

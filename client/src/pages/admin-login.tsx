@@ -10,8 +10,8 @@ import { insertUserSchema } from "@shared/schema";
 import LanguageToggle from "@/components/LanguageToggle";
 import HomeButton from "@/components/HomeButton";
 import { Redirect } from "wouter";
-import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 
 function AdminLoginPage() {
   const { t } = useTranslation();
@@ -46,13 +46,12 @@ function AdminLoginPage() {
     }
   };
 
-  // Show loading state while auth is initializing
+  // Update the loading state display
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-4" />
-          <p className="text-sm text-muted-foreground">{t('common.loading')}</p>
+          <LoadingSpinner size="lg" text={t('common.loading')} />
         </div>
       </div>
     );
@@ -113,6 +112,7 @@ function AdminLoginPage() {
                     </FormItem>
                   )}
                 />
+                {/* Update loading state during login attempt */}
                 <Button 
                   type="submit" 
                   className="w-full"
@@ -120,8 +120,8 @@ function AdminLoginPage() {
                 >
                   {loginMutation.isPending ? (
                     <>
-                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                      {t('auth.loggingIn')}
+                      <LoadingSpinner size="sm" />
+                      <span className="ml-2">{t('auth.loggingIn')}</span>
                     </>
                   ) : (
                     t('auth.login')

@@ -10,11 +10,22 @@ import { insertUserSchema } from "@shared/schema";
 import LanguageToggle from "@/components/LanguageToggle";
 import HomeButton from "@/components/HomeButton";
 import { Redirect } from "wouter";
-import { Loader2 } from "lucide-react";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 
 export default function AuthPage() {
   const { t } = useTranslation();
-  const { user, loginMutation } = useAuth();
+  const { user, loginMutation, isLoading } = useAuth();
+
+  // Show loading state during initial auth check
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <LoadingSpinner size="lg" text={t('common.loading')} />
+        </div>
+      </div>
+    );
+  }
 
   // Check if we're on the admin login page by checking the full URL path
   const isAdmin = window.location.pathname.includes('/admin');
@@ -72,7 +83,7 @@ export default function AuthPage() {
                     <FormItem>
                       <FormLabel>{t('auth.username')}</FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        <Input disabled={loginMutation.isPending} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -85,7 +96,7 @@ export default function AuthPage() {
                     <FormItem>
                       <FormLabel>{t('auth.password')}</FormLabel>
                       <FormControl>
-                        <Input type="password" {...field} />
+                        <Input type="password" disabled={loginMutation.isPending} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -98,8 +109,8 @@ export default function AuthPage() {
                 >
                   {loginMutation.isPending ? (
                     <>
-                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                      {t('auth.loggingIn')}
+                      <LoadingSpinner size="sm" />
+                      <span className="ml-2">{t('auth.loggingIn')}</span>
                     </>
                   ) : (
                     t('auth.login')

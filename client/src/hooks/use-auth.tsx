@@ -8,6 +8,7 @@ import { insertUserSchema, User as SelectUser, InsertUser } from "@shared/schema
 import { apiRequest, queryClient } from "../lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 
 type AuthContextType = {
   user: SelectUser | null;
@@ -21,6 +22,10 @@ type AuthContextType = {
 type LoginData = Pick<InsertUser, "username" | "password"> & { role?: string };
 
 export const AuthContext = createContext<AuthContextType | null>(null);
+
+function AuthWrapper({ children }: { children: React.ReactNode }) {
+  return <>{children}</>;
+}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
@@ -88,6 +93,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
     },
   });
+
+  // Show loading spinner during initial auth check
+  if (isLoading) {
+    return (
+      <AuthWrapper>
+        <div className="flex items-center justify-center min-h-screen">
+          <LoadingSpinner size="lg" text={t('common.loading')} />
+        </div>
+      </AuthWrapper>
+    );
+  }
 
   return (
     <AuthContext.Provider
