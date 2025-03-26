@@ -1,7 +1,7 @@
 import { useAuth } from "@/hooks/use-auth";
-import { Loader2 } from "lucide-react";
 import { Redirect } from "wouter";
 import { useTranslation } from "react-i18next";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 
 type ProtectedRouteProps = {
   component: () => React.JSX.Element;
@@ -23,7 +23,7 @@ export function ProtectedRoute({
     return (
       <AuthWrapper>
         <div className="flex items-center justify-center min-h-screen">
-          <Loader2 className="h-8 w-8 animate-spin text-border" />
+          <LoadingSpinner size="lg" text={t('common.loading')} />
         </div>
       </AuthWrapper>
     );

@@ -145,7 +145,8 @@ const resources = {
         logout: "Logout",
         saving: "Saving...",
         error: "Error",
-        cancel: "Cancel"
+        cancel: "Cancel",
+        loading: "Loading..."
       },
       search: {
         placeholder: "Search...",
@@ -310,7 +311,8 @@ const resources = {
         logout: "تسجيل الخروج",
         saving: "جاري الحفظ...",
         error: "خطأ",
-        cancel: "إلغاء"
+        cancel: "إلغاء",
+        loading: "جار التحميل..."
       },
       search: {
         placeholder: "بحث...",
@@ -475,7 +477,8 @@ const resources = {
         logout: "لاگ آؤٹ",
         saving: "محفوظ کیا جا رہا ہے...",
         error: "خطا",
-        cancel: "منسوخ کریں"
+        cancel: "منسوخ کریں",
+        loading: "لوڈ ہو رہا ہے..."
       },
       search: {
         placeholder: "تلاش...",
