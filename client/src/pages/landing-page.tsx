@@ -52,12 +52,10 @@ export default function LandingPage() {
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
+              fill="currentColor"
               className="h-8 w-8 md:h-10 md:w-10 text-primary"
             >
-              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+              <path d="M12 2L2 8l10 6 10-6-10-6zM2 16l10 6 10-6-10-6-10 6z" />
             </svg>
             <div className={`flex items-center ${isRTL ? 'mr-2' : 'ml-2'} min-w-[150px] md:min-w-[180px]`}>
               <span className="text-lg md:text-xl font-bold text-primary whitespace-nowrap">{t('landing.brandFirst')}</span>
@@ -114,9 +112,9 @@ export default function LandingPage() {
               </Button>
             </Link>
             <Link href="/admin/login">
-              <Button 
-                size="lg" 
-                variant="outline" 
+              <Button
+                size="lg"
+                variant="outline"
                 className="w-full sm:w-auto min-w-[200px] text-lg"
               >
                 {t('landing.adminButton')}
