@@ -4,21 +4,38 @@ import logging
 from pathlib import Path
 import qrcode
 from io import BytesIO
-from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import A4
-from reportlab.lib.units import cm
+import base64
+from jinja2 import Template, FileSystemLoader, Environment
+from weasyprint import HTML, CSS
+from weasyprint.text.fonts import FontConfiguration
+import os
+import shutil
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def generate_qr_code(pdf_filename):
-    """Generate QR code for the PDF"""
+def get_replit_url():
+    """Get the correct Replit URL for the current environment"""
     try:
-        base_url = "http://localhost:5000"
-        pdf_url = f"{base_url}/uploads/{pdf_filename}"
-        logger.info(f"Generating QR code for URL: {pdf_url}")
+        if os.getenv('NODE_ENV') == 'production':
+            return "https://operit.replit.app"
+        replit_domain = os.getenv('REPLIT_DOMAIN')
+        repl_id = os.getenv('REPL_ID')
+        repl_slug = os.getenv('REPL_SLUG')
+        if replit_domain:
+            return f"https://{replit_domain}"
+        elif repl_slug and repl_id:
+            return f"https://{repl_slug}.id.repl.co"
+        return "http://localhost:5000"
+    except Exception as e:
+        logger.error(f"Error getting Replit URL: {str(e)}")
+        return "http://localhost:5000"
 
+def generate_qr_code(pdf_filename):
+    try:
+        base_url = get_replit_url()
+        pdf_url = f"{base_url}/uploads/{pdf_filename}"
         qr = qrcode.QRCode(
             version=1,
             error_correction=qrcode.constants.ERROR_CORRECT_H,
@@ -28,97 +45,89 @@ def generate_qr_code(pdf_filename):
         qr.add_data(pdf_url)
         qr.make(fit=True)
         qr_img = qr.make_image(fill_color="black", back_color="white")
-
-        qr_bytes = BytesIO()
-        qr_img.save(qr_bytes, format="PNG")
-        qr_bytes.seek(0)
-        return qr_bytes.getvalue()
+        buffer = BytesIO()
+        qr_img.save(buffer, format="PNG")
+        qr_base64 = base64.b64encode(buffer.getvalue()).decode()
+        return f"data:image/png;base64,{qr_base64}"
     except Exception as e:
         logger.error(f"Error generating QR code: {str(e)}")
         raise
 
-def generate_pdf(data_path, output_path):
-    """Generate PDF with ReportLab"""
+def setup_template_assets():
+    """Setup template assets including background image"""
     try:
-        logger.info(f"Starting PDF generation. Output path: {output_path}")
+        template_dir = Path(__file__).parent / 'pdf_templates'
 
+        # Copy background image to template directory if it doesn't exist
+        bg_image_source = Path(__file__).parent.parent.parent / 'attached_assets' / 'Screenshot 2025-03-26 at 8.03.07 AM.png'
+        bg_image_dest = template_dir / 'lightning_road_bg.png'
+
+        if bg_image_source.exists() and not bg_image_dest.exists():
+            shutil.copy(bg_image_source, bg_image_dest)
+            logger.info("Background image copied successfully")
+
+        return template_dir
+    except Exception as e:
+        logger.error(f"Error setting up template assets: {str(e)}")
+        raise
+
+def render_pdf(data, qr_code_base64, output_path):
+    """Generate PDF using the standard template"""
+    try:
+        template_dir = setup_template_assets()
+        env = Environment(loader=FileSystemLoader(template_dir))
+        template = env.get_template('transport_contract.html')
+
+        html_content = template.render(
+            date=data['date'],
+            main_passenger=data['main_passenger'],
+            from_city=data['from_city'],
+            to_city=data['to_city'],
+            driver_name=data['driver_name'],
+            driver_id=data['driver_id'],
+            license_number=data['license_number'],
+            trip_number=data['trip_number'],
+            visa_type=data['visa_type'],
+            passengers=data['passengers'],
+            qr_code=qr_code_base64
+        )
+
+        font_config = FontConfiguration()
+
+        # Create PDF with background image
+        HTML(string=html_content).write_pdf(
+            output_path,
+            font_config=font_config,
+            presentational_hints=True
+        )
+
+        logger.info("Generated transport contract successfully")
+    except Exception as e:
+        logger.error(f"Error in PDF generation: {str(e)}")
+        raise
+
+def generate_pdf(data_path, output_path):
+    try:
         # Load data
         with open(data_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
-        logger.info("Data loaded successfully")
 
         # Generate QR code
-        qr_code_bytes = generate_qr_code(Path(output_path).name)
-        logger.info("QR code generated")
+        pdf_filename = Path(output_path).name
+        qr_code_base64 = generate_qr_code(pdf_filename)
 
-        # Create PDF
-        c = canvas.Canvas(str(output_path), pagesize=A4)
-        width, height = A4
-        margin = 2 * cm
-
-        # Add QR code
-        c.drawImage(BytesIO(qr_code_bytes), margin, height - 3*cm, width=2*cm, height=2*cm)
-
-        # Add title
-        c.setFont("Helvetica-Bold", 18)
-        c.drawCentredString(width/2, height - 2*cm, "عقد نقل على الطرق البرية")
-
-        # Add content
-        c.setFont("Helvetica", 12)
-        y_position = height - 4*cm
-
-        # Trip information
-        c.drawString(margin, y_position, f"التاريخ: {data['date']}")
-        y_position -= 30
-        c.drawString(margin, y_position, f"من: {data['from_city']}")
-        y_position -= 30
-        c.drawString(margin, y_position, f"إلى: {data['to_city']}")
-        y_position -= 30
-        c.drawString(margin, y_position, f"نوع التأشيرة: {data['visa_type']}")
-        y_position -= 30
-        c.drawString(margin, y_position, f"رقم الرحلة: {data['trip_number']}")
-        y_position -= 40
-
-        # Driver information
-        c.setFont("Helvetica-Bold", 14)
-        c.drawString(margin, y_position, "معلومات السائق")
-        c.setFont("Helvetica", 12)
-        y_position -= 30
-
-        c.drawString(margin, y_position, f"اسم السائق: {data['driver_name']}")
-        y_position -= 20
-        c.drawString(margin, y_position, f"رقم الهوية: {data['driver_id']}")
-        y_position -= 20
-        c.drawString(margin, y_position, f"رقم الرخصة: {data['license_number']}")
-        y_position -= 40
-
-        # Passenger information
-        c.setFont("Helvetica-Bold", 14)
-        c.drawString(margin, y_position, "معلومات الركاب")
-        c.setFont("Helvetica", 12)
-        y_position -= 30
-
-        for i, passenger in enumerate(data['passengers'], 1):
-            c.drawString(margin, y_position, f"{i}. {passenger['name']}")
-            y_position -= 20
-            c.drawString(margin + cm, y_position, f"رقم الهوية: {passenger['id_number']}")
-            y_position -= 20
-            c.drawString(margin + cm, y_position, f"الجنسية: {passenger['nationality']}")
-            y_position -= 30
-
-        # Save the PDF
-        c.save()
-        logger.info(f"PDF saved at: {output_path}")
-
-        return Path(output_path).name
+        # Generate PDF
+        render_pdf(data, qr_code_base64, output_path)
+        logger.info(f"PDF generation completed successfully: {output_path}")
+        return pdf_filename
 
     except Exception as e:
-        logger.error(f"Error generating PDF: {str(e)}")
+        logger.error(f"Error in PDF generation process: {str(e)}")
         raise
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
-        print("Usage: python pdf_generator.py <data_path> <output_path>")
+        logger.error("Usage: python pdf_generator.py <data_path> <output_path>")
         sys.exit(1)
 
     try:
@@ -126,5 +135,5 @@ if __name__ == "__main__":
         output_path = sys.argv[2]
         generate_pdf(data_path, output_path)
     except Exception as e:
-        print(f"Error: {str(e)}")
+        logger.error(f"Main execution error: {str(e)}")
         sys.exit(1)

@@ -1,37 +1,64 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { setupAuth } from "./auth";
+import { setupAuth, hashPassword } from "./auth";
 import { storage } from "./storage";
 import multer from "multer";
 import path from "path";
-import { insertOperationOrderSchema } from "@shared/schema";
+import { insertVehicleSchema, insertOperationOrderSchema } from "@shared/schema";
 import { generateOrderPDF } from './utils/pdfGenerator';
 import express from "express";
 import fs from 'fs';
 
-// Configure uploads directory
+// Ensure uploads directory exists
 const uploadsDir = path.join(process.cwd(), 'uploads');
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
 // Configure multer for file uploads
-const upload = multer({
+const upload = multer({ 
   dest: uploadsDir,
   limits: {
     fileSize: 10 * 1024 * 1024, // 10MB limit
+  },
+  fileFilter: (_req, file, cb) => {
+    const allowedTypes = [
+      'image/jpeg',
+      'image/png',
+      'image/gif',
+      'image/webp',
+      'image/heic',
+      'image/heif',
+      'image/svg+xml',
+      'image/tiff',
+      'image/bmp',
+      'image/x-icon',
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'text/plain',
+      'application/rtf'
+    ];
+
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(null, false);
+    }
   }
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
   setupAuth(app);
 
-  // Configure static file serving for uploads with proper headers
+  // Configure static file serving for uploads
   app.use('/uploads', express.static(uploadsDir, {
-    setHeaders: (res, filePath) => {
-      if (filePath.endsWith('.pdf')) {
+    setHeaders: (res, path) => {
+      if (path.endsWith('.pdf')) {
         res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', 'inline');
+        res.setHeader('Content-Disposition', 'inline; filename="' + path.split('/').pop() + '"');
       }
     }
   }));
@@ -45,60 +72,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     next();
   });
 
-  // Operation orders routes
-  app.post("/api/operation-orders", async (req, res) => {
+  // Document upload route
+  app.post("/api/documents/upload", upload.single('document'), async (req, res) => {
     try {
       if (!req.user) return res.sendStatus(401);
-
-      const orderData = insertOperationOrderSchema.parse({
-        ...req.body,
-        departureTime: new Date(req.body.departureTime).toISOString()
-      });
-
-      // Create initial order
-      const order = await storage.createOperationOrder({
-        fromCity: orderData.fromCity,
-        toCity: orderData.toCity,
-        departureTime: new Date(orderData.departureTime),
-        visaType: orderData.visaType,
-        tripNumber: orderData.tripNumber,
-        driverId: req.user.id,
-        vehicleId: null,
-        qrCode: "",
-        pdfUrl: "",
-        status: "pending",
-        createdAt: new Date()
-      }, orderData.passengers);
-
-      try {
-        // Generate PDF
-        const pdfFileName = await generateOrderPDF(order, req.user);
-
-        // Update order with PDF URL
-        const updatedOrder = await storage.updateOperationOrder({
-          ...order,
-          pdfUrl: pdfFileName,
-          status: "active"
-        });
-
-        res.status(201).json(updatedOrder);
-      } catch (pdfError) {
-        console.error('PDF generation error:', pdfError);
-
-        // Update order to indicate error
-        const errorOrder = await storage.updateOperationOrder({
-          ...order,
-          status: "error",
-          pdfUrl: ""
-        });
-
-        res.status(201).json({
-          ...errorOrder,
-          error: 'PDF generation failed'
+      if (!req.file) {
+        return res.status(400).json({ 
+          message: "No file uploaded or file type not supported" 
         });
       }
+
+      const documentType = req.body.type;
+      const filePath = req.file.filename;
+
+      const user = await storage.getUser(req.user.id);
+      if (!user) return res.sendStatus(404);
+
+      if (documentType === 'id') {
+        user.idDocumentUrl = filePath;
+      } else if (documentType === 'license') {
+        user.licenseDocumentUrl = filePath;
+      } else if (documentType === 'profile') {
+        user.profileImageUrl = filePath;
+      }
+
+      await storage.updateUser(user);
+      res.json(user);
     } catch (error: any) {
-      console.error('Operation order creation error:', error);
       res.status(400).json({ message: error.message });
     }
   });
@@ -110,8 +110,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const files = req.files as Express.Multer.File[];
       if (!files || files.length === 0) {
-        return res.status(400).json({
-          message: "No files uploaded or file types not supported"
+        return res.status(400).json({ 
+          message: "No files uploaded or file types not supported" 
         });
       }
 
@@ -161,34 +161,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-
-  // Document upload route
-  app.post("/api/documents/upload", upload.single('document'), async (req, res) => {
+  // Operation orders routes
+  app.post("/api/operation-orders", async (req, res) => {
     try {
       if (!req.user) return res.sendStatus(401);
-      if (!req.file) {
-        return res.status(400).json({
-          message: "No file uploaded or file type not supported"
-        });
+
+      const orderData = insertOperationOrderSchema.parse({
+        ...req.body,
+        departureTime: new Date(req.body.departureTime).toISOString()
+      });
+
+      const order = await storage.createOperationOrder(
+        {
+          fromCity: orderData.fromCity,
+          toCity: orderData.toCity,
+          departureTime: new Date(orderData.departureTime),
+          visaType: orderData.visaType,
+          tripNumber: orderData.tripNumber,
+          driverId: req.user.id,
+          vehicleId: null,  // Set to null since it's optional now
+          qrCode: "",
+          pdfUrl: "",
+          status: "active",
+          createdAt: new Date()
+        },
+        orderData.passengers
+      );
+
+      try {
+        const pdfFileName = await generateOrderPDF(order, req.user);
+        order.pdfUrl = pdfFileName;
+        await storage.updateOperationOrder(order);
+        res.status(201).json(order);
+      } catch (pdfError) {
+        console.error('PDF generation error:', pdfError);
+        res.status(201).json(order);
       }
-
-      const documentType = req.body.type;
-      const filePath = req.file.filename;
-
-      const user = await storage.getUser(req.user.id);
-      if (!user) return res.sendStatus(404);
-
-      if (documentType === 'id') {
-        user.idDocumentUrl = filePath;
-      } else if (documentType === 'license') {
-        user.licenseDocumentUrl = filePath;
-      } else if (documentType === 'profile') {
-        user.profileImageUrl = filePath;
-      }
-
-      await storage.updateUser(user);
-      res.json(user);
     } catch (error: any) {
+      console.error('Operation order creation error:', error);
       res.status(400).json({ message: error.message });
     }
   });
@@ -263,8 +273,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const ordersWithDetails = await Promise.all(orders.map(async (order) => {
       const passengers = await storage.getPassengersByOrder(order.id);
       const driver = await storage.getUser(order.driverId);
-      return {
-        ...order,
+      return { 
+        ...order, 
         passengers,
         driver: {
           fullName: driver?.fullName,
@@ -339,7 +349,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.error('Login after registration failed:', err);
           return res.status(500).json({ message: "Failed to login after registration" });
         }
-        res.json(user);
+        res.status(201).json(user);
       });
     } catch (error: any) {
       console.error('Registration error:', error);

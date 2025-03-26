@@ -9,12 +9,12 @@
         }
 
         @page {
-            size: {{ template_config.size }};
-            margin: {{ template_config.margin }};
-            background-image: url('{{ template_config.background }}');
+            size: A4;
+            margin: 1.5cm;
+            background-image: url('lightning_road_bg.png');
             background-position: center;
             background-repeat: no-repeat;
-            background-size: {{ template_config.scale }};
+            background-size: contain;
         }
 
         body {
@@ -31,16 +31,15 @@
         .content-wrapper {
             position: relative;
             z-index: 2;
-            background: rgba(255, 255, 255, {{ template_config.opacity }});
+            background: rgba(255, 255, 255, 0.95);
             padding: 20px;
             border-radius: 8px;
-            margin: 10px;
         }
 
         .qr-code-container {
             position: absolute;
-            top: 20px;
-            left: 20px;
+            top: 0;
+            left: 0;
             width: 80px;
             height: 80px;
             z-index: 3;
@@ -61,7 +60,6 @@
             font-size: 18pt;
             font-weight: bold;
             margin-bottom: 20px;
-            color: #000;
         }
 
         .agreement {
@@ -72,16 +70,15 @@
         .info-box {
             border: 1px solid #000;
             margin-bottom: 15px;
-            background-color: rgba(255, 255, 255, 0.95);
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            background-color: rgba(255, 255, 255, 0.97);
         }
 
         .info-box-header {
             background-color: #f0f0f0;
-            padding: 8px 12px;
+            padding: 6px 12px;
             font-weight: bold;
             border-bottom: 1px solid #000;
-            font-size: 11pt;
+            font-size: 10pt;
         }
 
         .info-box-content {
@@ -89,18 +86,8 @@
         }
 
         .info-box-content p {
-            margin: 5px 0;
+            margin: 3px 0;
             font-size: 10pt;
-        }
-
-        .passenger-info {
-            margin-bottom: 10px;
-            padding: 5px 0;
-            border-bottom: 1px solid #eee;
-        }
-
-        .passenger-info:last-child {
-            border-bottom: none;
         }
     </style>
 </head>
@@ -115,12 +102,14 @@
 
             <div class="agreement">
                 <p>التاريخ: {{ date }}</p>
-                <p>تم ابرام هذا العقد بين المتعاقدين بناء على المادة (39) التاسعة و الثلاثون من اللائحة المنظمة لنشاط النقل المتخصص و تأجير و توجيه الحافلات و بناء على الفقرة (1) من المادة (39) و التي تنص على ان يجب على الناقل ابرام عقد نقل مع الاطراف المحددين في المادة (40) قبل تنفيذ عمليات النقل على الطرق البرية</p>
+                <p>تم ابرام هذا العقد بين المتعاقدين بناء على المادة (39) التاسعة و الثلاثون من اللائحة المنظمة لنشاط النقل المتخصص و تأجير و توجيه الحافلات و بناء على الفقرة (1) من المادة (39) و التي تنص على ان يجب على الناقل ابرام عقد نقل مع الاطراف المحددين في المادة (40) قبل تنفيذ عمليات النقل على الطرق البرية و بما يخالف احكام هذه الائحة التي تحددها هيئة النقل و بناء على ما سبق تم ابرام عقد النقل بين الاطراف الاتية :</p>
                 <p>الطرف الاول : شركة صاعقة الطريق للنقل البري (شخص واحد)</p>
                 <p>الطرف الثاني : {{ main_passenger }}</p>
                 <p>اتفق الطرفان على أن ينفذ الطرف اول عملية النقل للطرف الثاني مع مرافقيه و ذويهم من الموقع المحدد مسبقا مع الطرف الثاني و توصيلهم الى الجهه المحدده بالعقد ۔</p>
                 <p>النقل من : {{ from_city }}</p>
                 <p>الوصول الى : {{ to_city }}</p>
+                <p>في حالة الغاء التعاقد الى سبب شخصى او أسباب أخرى تتعلق في الحجوزات او الانظمة تكون سياسة إلالغاء و الاستبدال حسب نظام وزارة التجارة السعودى في حالة الحجز و تم الإلغاء قبل موعد الرحله بأكثر من 24 ساعه يتم استرداد المبلغ كامل .</p>
+                <p>وفي حالة طلب المبلغ كامل الطرف الثاني الحجز من خلال الموقع الالكتروني لشركة يعتبر هذا الحجز و موافقته على الشروط و الحكام بالموقع الالكتروني هو موافقة على هذا العقد لتنفيذ عملية النقل المتفق عليها مع الطرف الاول بواسطة حافلات الشركة المرخصه و المتوافقه مع الاشتراطات المقررة من هيئة النقل ۔</p>
             </div>
 
             <div class="info-box">
@@ -147,11 +136,10 @@
                 <div class="info-box-header">معلومات الركاب / Passenger Information</div>
                 <div class="info-box-content">
                     {% for passenger in passengers %}
-                    <div class="passenger-info">
-                        <p>{{ loop.index }}. {{ passenger.name }}</p>
-                        <p>رقم الهوية / ID: {{ passenger.id_number }}</p>
-                        <p>الجنسية / Nationality: {{ passenger.nationality }}</p>
-                    </div>
+                    <p>{{ loop.index }}. {{ passenger.name }}</p>
+                    <p>رقم الهوية / ID: {{ passenger.id_number }}</p>
+                    <p>الجنسية / Nationality: {{ passenger.nationality }}</p>
+                    {% if not loop.last %}<br>{% endif %}
                     {% endfor %}
                 </div>
             </div>
