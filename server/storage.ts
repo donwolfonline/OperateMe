@@ -103,7 +103,7 @@ export class DatabaseStorage implements IStorage {
     const [user] = await db.insert(users).values({
       ...insertUser,
       role: insertUser.role || 'driver',
-      status: insertUser.status || 'active',
+      status: insertUser.status || 'pending', // Changed default from 'active' to 'pending'
       isApproved: insertUser.isApproved || false,
       uid: generateUID(insertUser.role || 'driver', Date.now()),
       createdAt: new Date()
