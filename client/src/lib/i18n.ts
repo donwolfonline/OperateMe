@@ -40,7 +40,9 @@ const resources = {
         driverDeleted: "Driver deleted successfully",
         invalidCredentials: "Account not found or invalid credentials",
         success: "Success",
-        pendingApproval: "Your account is pending approval. You'll be able to create orders once approved."
+        pendingApproval: "Your account is pending approval. You'll be able to create orders once approved.",
+        orderSuccess: "Success",
+        orderCreated: "Operation order created successfully"
       },
       search: {
         placeholder: "Search..."
@@ -77,9 +79,12 @@ const resources = {
         tripNumber: "Trip Number",
         passengers: "Passengers",
         addPassenger: "Add Passenger",
+        removePassenger: "Remove Passenger",
         passengerName: "Passenger Name",
         passengerIdNumber: "ID Number",
-        nationality: "Nationality"
+        nationality: "Nationality",
+        create: "Create Order",
+        generatingPdf: "Generating PDF document..."
       },
       auth: {
         driverLogin: "Driver Login",
@@ -137,7 +142,8 @@ const resources = {
       },
       common: {
         logout: "Logout",
-        loading: "Loading..."
+        loading: "Loading...",
+        saving: "Saving..."
       },
       dashboard: {
         welcome: "Welcome",
@@ -176,7 +182,9 @@ const resources = {
         driverDeleted: "تم حذف السائق بنجاح",
         invalidCredentials: "الحساب غير موجود أو بيانات الاعتماد غير صحيحة",
         success: "نجاح",
-        pendingApproval: "حسابك قيد الموافقة. ستتمكن من إنشاء الطلبات بمجرد الموافقة عليه."
+        pendingApproval: "حسابك قيد الموافقة. ستتمكن من إنشاء الطلبات بمجرد الموافقة عليه.",
+        orderSuccess: "نجاح",
+        orderCreated: "تم إنشاء أمر التشغيل بنجاح"
       },
       search: {
         placeholder: "بحث..."
@@ -213,9 +221,12 @@ const resources = {
         tripNumber: "رقم الرحلة",
         passengers: "الركاب",
         addPassenger: "إضافة راكب",
+        removePassenger: "حذف راكب",
         passengerName: "اسم الراكب",
         passengerIdNumber: "رقم الهوية",
-        nationality: "الجنسية"
+        nationality: "الجنسية",
+        create: "إنشاء أمر",
+        generatingPdf: "جاري إنشاء ملف PDF..."
       },
       auth: {
         driverLogin: "تسجيل دخول السائق",
@@ -273,7 +284,8 @@ const resources = {
       },
       common: {
         logout: "تسجيل الخروج",
-        loading: "جار التحميل..."
+        loading: "جار التحميل...",
+        saving: "جاري الحفظ..."
       },
       dashboard: {
         welcome: "مرحباً",
@@ -312,7 +324,9 @@ const resources = {
         driverDeleted: "ڈرائیور کامیابی سے حذف کر دیا گیا",
         invalidCredentials: "اکاؤنٹ نہیں ملا یا غلط کریڈنشلز",
         success: "کامیابی",
-        pendingApproval: "آپ کا اکاؤنٹ منظوری کے انتظار میں ہے۔ منظوری کے بعد آپ آرڈر بنا سکیں گے۔"
+        pendingApproval: "آپ کا اکاؤنٹ منظوری کے انتظار میں ہے۔ منظوری کے بعد آپ آرڈر بنا سکیں گے۔",
+        orderSuccess: "کامیابی",
+        orderCreated: "آپریشن آرڈر کامیابی سے بنایا گیا"
       },
       search: {
         placeholder: "تلاش..."
@@ -349,9 +363,12 @@ const resources = {
         tripNumber: "سفر نمبر",
         passengers: "مسافر",
         addPassenger: "مسافر شامل کریں",
+        removePassenger: "مسافر ہٹائیں",
         passengerName: "مسافر کا نام",
         passengerIdNumber: "شناختی نمبر",
-        nationality: "قومیت"
+        nationality: "قومیت",
+        create: "آرڈر بنائیں",
+        generatingPdf: "PDF دستاویز تیار کی جا رہی ہے..."
       },
       auth: {
         driverLogin: "ڈرائیور لاگ ان",
@@ -409,7 +426,8 @@ const resources = {
       },
       common: {
         logout: "لاگ آؤٹ",
-        loading: "لوڈ ہو رہا ہے..."
+        loading: "لوڈ ہو رہا ہے...",
+        saving: "محفوظ کیا جا رہا ہے..."
       },
       dashboard: {
         welcome: "خوش آمدید",
