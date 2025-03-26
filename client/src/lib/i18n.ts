@@ -13,7 +13,7 @@ const resources = {
     translation: {
       landing: {
         title: "Road Bolt Transport",
-        subtitle: "Professional Transportation Services",
+        subtitle: "Internal Vehicle and Driver Management Platform",
         loginButton: "Driver Login",
         adminButton: "Admin Login",
         brandFirst: "ROAD",
@@ -178,7 +178,7 @@ const resources = {
     translation: {
       landing: {
         title: "صاعقة الطريق للنقل",
-        subtitle: "خدمات نقل احترافية",
+        subtitle: "منصة إدارة المركبات والسائقين الداخلية",
         loginButton: "تسجيل دخول السائق",
         adminButton: "دخول المشرف",
         brandFirst: "صاعقة",
@@ -343,7 +343,7 @@ const resources = {
     translation: {
       landing: {
         title: "روڈ بولٹ ٹرانسپورٹ",
-        subtitle: "پیشہ ورانہ ٹرانسپورٹ سروسز",
+        subtitle: "داخلی گاڑیوں اور ڈرائیوروں کی انتظامی پلیٹ فارم",
         loginButton: "ڈرائیور لاگ ان",
         adminButton: "ایڈمن لاگ ان",
         brandFirst: "روڈ",
