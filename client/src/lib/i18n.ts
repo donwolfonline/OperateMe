@@ -14,7 +14,7 @@ const resources = {
       landing: {
         title: "Road Bolt Transport",
         subtitle1: "Streamlined Vehicle Management",
-        subtitle2: "Real-time Driver Tracking",
+        subtitle2: "Smart Fleet Coordination",
         subtitle3: "Comprehensive Fleet Operations",
         loginButton: "Driver Login",
         adminButton: "Admin Login",
@@ -115,7 +115,9 @@ const resources = {
         route: "Route",
         driver: "Driver",
         passengerCount: "Passenger Count",
-        issuedBy: "Issued By"
+        issuedBy: "Issued By",
+        viewDocument: "View Document",
+        downloadDocument: "Download Document"
       },
       admin: {
         dashboard: "Admin Dashboard",
@@ -188,7 +190,7 @@ const resources = {
       landing: {
         title: "صاعقة الطريق للنقل",
         subtitle1: "إدارة المركبات بكفاءة",
-        subtitle2: "تتبع السائقين في الوقت الفعلي",
+        subtitle2: "تنسيق الأسطول الذكي",
         subtitle3: "عمليات الأسطول الشاملة",
         loginButton: "تسجيل دخول السائق",
         adminButton: "دخول المشرف",
@@ -289,7 +291,9 @@ const resources = {
         route: "المسار",
         driver: "السائق",
         passengerCount: "عدد الركاب",
-        issuedBy: "صادر من قبل"
+        issuedBy: "صادر من قبل",
+        viewDocument: "عرض المستند",
+        downloadDocument: "تحميل المستند"
       },
       admin: {
         dashboard: "لوحة تحكم المشرف",
@@ -362,7 +366,7 @@ const resources = {
       landing: {
         title: "روڈ بولٹ ٹرانسپورٹ",
         subtitle1: "گاڑیوں کی منظم انتظام کاری",
-        subtitle2: "ڈرائیوروں کی براہ راست نگرانی",
+        subtitle2: "ہوشمند فلیٹ کوآرڈینیشن",
         subtitle3: "جامع فلیٹ آپریشنز",
         loginButton: "ڈرائیور لاگ ان",
         adminButton: "ایڈمن لاگ ان",
@@ -463,7 +467,9 @@ const resources = {
         route: "روٹ",
         driver: "ڈرائیور",
         passengerCount: "مسافروں کی تعداد",
-        issuedBy: "جاری کردہ از"
+        issuedBy: "جاری کردہ از",
+        viewDocument: "دستاویز دیکھیں",
+        downloadDocument: "دستاویز ڈاؤن لوڈ کریں"
       },
       admin: {
         dashboard: "ایڈمن ڈیش بورڈ",
