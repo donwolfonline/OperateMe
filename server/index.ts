@@ -9,8 +9,14 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Serve uploaded files
-app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+// Serve uploaded files with proper MIME types
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads'), {
+  setHeaders: (res, path) => {
+    if (path.endsWith('.pdf')) {
+      res.set('Content-Type', 'application/pdf');
+    }
+  }
+}));
 
 // Request logging middleware
 app.use((req, res, next) => {

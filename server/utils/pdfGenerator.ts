@@ -28,11 +28,15 @@ const getBaseUrl = () => {
 
 export async function generateOrderPDF(order: OperationOrder, driver: User): Promise<string> {
   try {
+    console.log('Starting PDF generation for order:', order.id);
+
     // Get passengers for this order
     const passengers = await storage.getPassengersByOrder(order.id);
+    console.log('Found passengers:', passengers.length);
 
     // Get vehicle information for this order
     const vehicle = await storage.getVehicleByOrder(order.id);
+    console.log('Vehicle information:', vehicle);
 
     // Format date
     const dateStr = new Date(order.departureTime).toLocaleString('ar-SA', {
@@ -63,10 +67,12 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
 
     const pdfFileName = `order_${order.id}_${Date.now()}.pdf`;
     const pdfPath = path.join(process.cwd(), 'uploads', pdfFileName);
+    console.log('PDF will be generated at:', pdfPath);
 
     // Write data to temporary JSON file
     const tempDataPath = path.join(process.cwd(), 'uploads', `temp_${Date.now()}.json`);
     await promisify(fs.writeFile)(tempDataPath, JSON.stringify(data));
+    console.log('Temporary data file created at:', tempDataPath);
 
     // Run Python script
     await new Promise((resolve, reject) => {
@@ -81,12 +87,26 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
         }
       });
 
+      pythonProcess.stdout.on('data', (data) => {
+        console.log('Python script output:', data.toString());
+      });
+
+      pythonProcess.stderr.on('data', (data) => {
+        console.error('Python script error:', data.toString());
+      });
+
       pythonProcess.on('close', (code) => {
         // Clean up temp file
         fs.unlink(tempDataPath, () => {});
 
         if (code === 0) {
-          resolve(null);
+          // Verify the PDF was created
+          if (fs.existsSync(pdfPath)) {
+            console.log('PDF generated successfully at:', pdfPath);
+            resolve(null);
+          } else {
+            reject(new Error('PDF file was not created'));
+          }
         } else {
           reject(new Error(`Python process exited with code ${code}`));
         }

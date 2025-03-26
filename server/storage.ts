@@ -47,6 +47,7 @@ export interface IStorage {
   getPassengersByOrder(orderId: number): Promise<Passenger[]>;
   getAllOperationOrders(): Promise<OperationOrder[]>;
   updateDriver(id: number, updates: { status: string; isApproved: boolean }): Promise<User | undefined>;
+  getVehicleByOrder(orderId: number): Promise<Vehicle | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -249,6 +250,13 @@ export class DatabaseStorage implements IStorage {
       .where(and(eq(users.id, id), eq(users.role, "driver")))
       .returning();
     return updatedUser;
+  }
+  async getVehicleByOrder(orderId: number): Promise<Vehicle | undefined> {
+    const [order] = await db.select().from(operationOrders).where(eq(operationOrders.id, orderId));
+    if (!order || !order.vehicleId) return undefined;
+
+    const [vehicle] = await db.select().from(vehicles).where(eq(vehicles.id, order.vehicleId));
+    return vehicle;
   }
 }
 
