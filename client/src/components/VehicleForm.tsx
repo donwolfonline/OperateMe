@@ -111,7 +111,8 @@ export default function VehicleForm() {
 
       toast({
         title: t('notifications.success'),
-        description: t('vehicle.saveSuccess'),
+        description: t('vehicle.registrationSuccess'),
+        variant: "default",
       });
 
       form.reset();
@@ -123,7 +124,7 @@ export default function VehicleForm() {
     } catch (error: any) {
       toast({
         title: t('notifications.error'),
-        description: error.message || t('vehicle.saveError'),
+        description: error.message || t('vehicle.registrationError'),
         variant: "destructive",
       });
     } finally {
@@ -150,7 +151,7 @@ export default function VehicleForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>{t('vehicle.manufacturer')}</FormLabel>
-                  <Select 
+                  <Select
                     onValueChange={handleManufacturerChange}
                     value={selectedManufacturer}
                   >
@@ -189,7 +190,7 @@ export default function VehicleForm() {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {selectedManufacturer && 
+                      {selectedManufacturer &&
                         vehicleManufacturers[selectedManufacturer as keyof typeof vehicleManufacturers].models.map((model) => (
                           <SelectItem key={model.value} value={model.value}>
                             {model.label}
@@ -234,8 +235,8 @@ export default function VehicleForm() {
             <FormItem>
               <FormLabel>{t('vehicle.photos')}</FormLabel>
               <FormControl>
-                <Input 
-                  type="file" 
+                <Input
+                  type="file"
                   accept="image/*"
                   multiple
                   onChange={(e) => handleFileChange(e.target.files)}
@@ -245,7 +246,7 @@ export default function VehicleForm() {
               {photoPreview.length > 0 && (
                 <div className="grid grid-cols-2 gap-2 mt-2">
                   {photoPreview.map((url, index) => (
-                    <img 
+                    <img
                       key={index}
                       src={url}
                       alt={`Preview ${index + 1}`}
@@ -256,7 +257,7 @@ export default function VehicleForm() {
               )}
             </FormItem>
 
-            <Button 
+            <Button
               type="submit"
               disabled={isSubmitting}
               className="w-full"

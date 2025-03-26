@@ -75,7 +75,12 @@ const resources = {
         manufacturer: "Vehicle Manufacturer",
         selectManufacturer: "Select Vehicle Manufacturer",
         selectModel: "Select Vehicle Model",
-        photoRequired: "Please upload vehicle photos"
+        photoRequired: "Please upload vehicle photos",
+        registrationSuccess: "Vehicle registered successfully",
+        registrationError: "Error registering vehicle",
+        uploading: "Uploading photos...",
+        photoSizeError: "Photo size exceeds maximum limit",
+        photoTypeError: "Invalid photo format. Please use JPG, PNG or WEBP"
       },
       order: {
         fromCity: "From City",
@@ -233,8 +238,12 @@ const resources = {
         manufacturer: "نوع المركبة",
         selectManufacturer: "اختر نوع المركبة",
         selectModel: "اختر موديل المركبة",
-        photoRequired: "الرجاء تحميل صور المركبة"
-
+        photoRequired: "الرجاء تحميل صور المركبة",
+        registrationSuccess: "تم تسجيل المركبة بنجاح",
+        registrationError: "خطأ في تسجيل المركبة",
+        uploading: "جاري تحميل الصور...",
+        photoSizeError: "حجم الصورة يتجاوز الحد الأقصى",
+        photoTypeError: "صيغة الصورة غير صالحة. الرجاء استخدام JPG أو PNG أو WEBP"
       },
       order: {
         fromCity: "مدينة الانطلاق",
@@ -373,7 +382,7 @@ const resources = {
         newOrder: "نیا آپریشن آرڈر",
         uploadId: "شناختی دستاویز اپلوڈ کریں",
         uploadLicense: "لائسنس دستاویز اپلوڈ کریں",
-        uploadProfileImage: "پروفائل تصویر اپلوڈ کریں",
+        uploadProfileImage: "پروفائل تصویر اپ لوڈ کریں",
         uniqueId: "منفرد شناخت"
       },
       vehicle: {
@@ -388,7 +397,16 @@ const resources = {
         noAdditional: "مزید گاڑیاں رجسٹر نہیں کی جا سکتیں",
         selectType: "گاڑی کی قسم منتخب کریں",
         modelPlaceholder: "گاڑی کا ماڈل درج کریں",
-        plateNumberPlaceholder: "پلیٹ نمبر درج کریں"
+        plateNumberPlaceholder: "پلیٹ نمبر درج کریں",
+        manufacturer: "گاڑی کی کمپنی",
+        selectManufacturer: "گاڑی کی کمپنی منتخب کریں",
+        selectModel: "گاڑی کا ماڈل منتخب کریں",
+        photoRequired: "براہ کرم گاڑی کی تصاویر اپ لوڈ کریں",
+        registrationSuccess: "گاڑی کامیابی سے رجسٹر ہو گئی",
+        registrationError: "گاڑی کی رجسٹریشن میں خطا",
+        uploading: "تصاویر اپ لوڈ کی جا رہی ہیں...",
+        photoSizeError: "تصویر کا سائز زیادہ ہے",
+        photoTypeError: "غلط تصویر فارمیٹ۔ براہ کرم JPG، PNG یا WEBP استعمال کریں"
       },
       order: {
         fromCity: "کس شہر سے",
