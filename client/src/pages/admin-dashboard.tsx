@@ -4,6 +4,13 @@ import { useAuth } from "@/hooks/use-auth";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { apiRequest } from "@/lib/queryClient";
 import { User, OperationOrder, InsertUser, insertUserSchema } from "@shared/schema";
 import LanguageToggle from "@/components/LanguageToggle";
@@ -59,7 +66,6 @@ const AddDriverForm = ({ onSuccess }: { onSuccess: () => void }) => {
         isApproved: true
       });
 
-      // Invalidate queries to refresh the UI
       await queryClient.invalidateQueries({ queryKey: ["/api/admin/active-drivers"] });
 
       form.reset();
@@ -162,6 +168,7 @@ export default function AdminDashboard() {
   const [activeFilters, setActiveFilters] = useState({});
   const { toast } = useToast();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("active");
   const queryClient = useQueryClient();
 
   const { data: pendingDrivers } = useQuery<User[]>({
@@ -213,21 +220,18 @@ export default function AdminDashboard() {
   const removeDriver = async (driverId: number) => {
     if (window.confirm(t('admin.removeConfirm'))) {
       try {
-        // First toast - Loading state
         toast({
           title: t('notifications.deletingDriver'),
           description: t('notifications.pleaseWait'),
           variant: "default"
         });
 
-        // Attempt to delete the driver
         const response = await apiRequest("DELETE", `/api/admin/drivers/${driverId}`);
 
         if (!response.ok) {
           throw new Error(t('admin.removeDriverError'));
         }
 
-        // Invalidate all related queries to refresh the UI
         await Promise.all([
           queryClient.invalidateQueries({ queryKey: ["/api/admin/active-drivers"] }),
           queryClient.invalidateQueries({ queryKey: ["/api/admin/suspended-drivers"] }),
@@ -235,7 +239,6 @@ export default function AdminDashboard() {
           queryClient.invalidateQueries({ queryKey: ["/api/admin/all-orders"] })
         ]);
 
-        // Show success message
         toast({
           title: t('notifications.success'),
           description: t('notifications.driverDeleted'),
@@ -553,6 +556,10 @@ export default function AdminDashboard() {
   );
 
 
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
@@ -569,8 +576,45 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        <Tabs defaultValue="active" className="space-y-4">
-          <TabsList className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2">
+        {/* Mobile Navigation */}
+        <div className="block lg:hidden mb-4">
+          <Select value={activeTab} onValueChange={handleTabChange}>
+            <SelectTrigger className="w-full">
+              <SelectValue>
+                {activeTab === "pending" && (
+                  <div className="flex items-center">
+                    {t("admin.pendingDrivers")}
+                    {pendingDrivers?.length ? (
+                      <Badge variant="destructive" className="ml-2">{pendingDrivers.length}</Badge>
+                    ) : null}
+                  </div>
+                )}
+                {activeTab === "active" && t("admin.activeDrivers")}
+                {activeTab === "suspended" && t("admin.suspendedDrivers")}
+                {activeTab === "orders" && t("admin.orders")}
+                {activeTab === "documents" && t("admin.documents")}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="pending">
+                <div className="flex items-center">
+                  {t("admin.pendingDrivers")}
+                  {pendingDrivers?.length ? (
+                    <Badge variant="destructive" className="ml-2">{pendingDrivers.length}</Badge>
+                  ) : null}
+                </div>
+              </SelectItem>
+              <SelectItem value="active">{t("admin.activeDrivers")}</SelectItem>
+              <SelectItem value="suspended">{t("admin.suspendedDrivers")}</SelectItem>
+              <SelectItem value="orders">{t("admin.orders")}</SelectItem>
+              <SelectItem value="documents">{t("admin.documents")}</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Desktop Navigation */}
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-4">
+          <TabsList className="hidden lg:grid grid-cols-5 gap-2">
             <TabsTrigger value="pending" className="w-full">
               <div className="flex items-center justify-between w-full">
                 <span>{t("admin.pendingDrivers")}</span>
