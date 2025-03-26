@@ -11,6 +11,16 @@ document.dir = savedDirection;
 const resources = {
   en: {
     translation: {
+      landing: {
+        title: "Road Bolt Transport",
+        subtitle1: "Streamlined Vehicle Management",
+        subtitle2: "Smart Fleet Coordination",
+        subtitle3: "Comprehensive Fleet Operations",
+        loginButton: "Driver Login",
+        adminButton: "Admin Login",
+        brandFirst: "ROAD",
+        brandSecond: "BOLT"
+      },
       notifications: {
         title: "Notifications",
         clearAll: "Clear all",
@@ -31,7 +41,22 @@ const resources = {
         invalidCredentials: "Account not found or invalid credentials",
         success: "Success"
       },
+      auth: {
+        driverLogin: "Driver Login",
+        adminLogin: "Admin Login",
+        registerAsDriver: "Register as a Driver",
+        login: "Login",
+        loggingIn: "Logging in...",
+        register: "Register",
+        username: "Username",
+        password: "Password",
+        fullName: "Full Name",
+        idNumber: "ID Number",
+        licenseNumber: "License Number",
+        uniqueId: "Unique Identifier"
+      },
       admin: {
+        dashboard: "Admin Dashboard",
         removeDriverSuccess: "Driver has been successfully removed",
         removeDriverError: "Failed to remove driver",
         removeConfirm: "Are you sure you want to remove this driver?",
@@ -44,6 +69,7 @@ const resources = {
         activeDrivers: "Active Drivers",
         suspendedDrivers: "Suspended Drivers",
         allOrders: "All Orders",
+        orders: "Orders",
         documents: "Documents",
         noDrivers: "No drivers found",
         noActiveDrivers: "No active drivers found",
@@ -54,11 +80,38 @@ const resources = {
         suspend: "Suspend",
         activate: "Activate",
         removeDriver: "Remove Driver"
+      },
+      filter: {
+        registrationDate: "Registration Date",
+        today: "Today",
+        thisWeek: "This Week",
+        thisMonth: "This Month",
+        status: "Status",
+        active: "Active",
+        completed: "Completed",
+        cancelled: "Cancelled",
+        selectDate: "Select date",
+        documentType: "Document Type",
+        clearAll: "Clear all filters",
+        selectDriver: "Select Driver"
+      },
+      common: {
+        logout: "Logout"
       }
     }
   },
   ar: {
     translation: {
+      landing: {
+        title: "صاعقة الطريق للنقل",
+        subtitle1: "إدارة المركبات بكفاءة",
+        subtitle2: "تنسيق الأسطول الذكي",
+        subtitle3: "عمليات الأسطول الشاملة",
+        loginButton: "تسجيل دخول السائق",
+        adminButton: "دخول المشرف",
+        brandFirst: "صاعقة",
+        brandSecond: "الطريق"
+      },
       notifications: {
         title: "الإشعارات",
         clearAll: "مسح الكل",
@@ -79,7 +132,22 @@ const resources = {
         invalidCredentials: "الحساب غير موجود أو بيانات الاعتماد غير صحيحة",
         success: "نجاح"
       },
+      auth: {
+        driverLogin: "تسجيل دخول السائق",
+        adminLogin: "دخول المشرف",
+        registerAsDriver: "تسجيل سائق جديد",
+        login: "تسجيل الدخول",
+        loggingIn: "جاري تسجيل الدخول...",
+        register: "تسجيل جديد",
+        username: "اسم المستخدم",
+        password: "كلمة المرور",
+        fullName: "الاسم الكامل",
+        idNumber: "رقم الهوية",
+        licenseNumber: "رقم الرخصة",
+        uniqueId: "المعرف الفريد"
+      },
       admin: {
+        dashboard: "لوحة تحكم المشرف",
         removeDriverSuccess: "تم إزالة السائق بنجاح",
         removeDriverError: "فشل في إزالة السائق",
         removeConfirm: "هل أنت متأكد أنك تريد إزالة هذا السائق؟",
@@ -92,6 +160,7 @@ const resources = {
         activeDrivers: "السائقون النشطون",
         suspendedDrivers: "السائقون الموقوفون",
         allOrders: "جميع الطلبات",
+        orders: "الطلبات",
         documents: "المستندات",
         noDrivers: "لم يتم العثور على سائقين",
         noActiveDrivers: "لا يوجد سائقين نشطين",
@@ -102,11 +171,38 @@ const resources = {
         suspend: "إيقاف",
         activate: "تفعيل",
         removeDriver: "إزالة السائق"
+      },
+      filter: {
+        registrationDate: "تاريخ التسجيل",
+        today: "اليوم",
+        thisWeek: "هذا الأسبوع",
+        thisMonth: "هذا الشهر",
+        status: "الحالة",
+        active: "نشط",
+        completed: "مكتمل",
+        cancelled: "ملغي",
+        selectDate: "اختر التاريخ",
+        documentType: "نوع المستند",
+        clearAll: "مسح جميع عوامل التصفية",
+        selectDriver: "اختر السائق"
+      },
+      common: {
+        logout: "تسجيل الخروج"
       }
     }
   },
   ur: {
     translation: {
+      landing: {
+        title: "روڈ بولٹ ٹرانسپورٹ",
+        subtitle1: "گاڑیوں کی منظم انتظام کاری",
+        subtitle2: "ہوشمند فلیٹ کوآرڈینیشن",
+        subtitle3: "جامع فلیٹ آپریشنز",
+        loginButton: "ڈرائیور لاگ ان",
+        adminButton: "ایڈمن لاگ ان",
+        brandFirst: "روڈ",
+        brandSecond: "بولٹ"
+      },
       notifications: {
         title: "اطلاعات",
         clearAll: "سب صاف کریں",
@@ -127,7 +223,22 @@ const resources = {
         invalidCredentials: "اکاؤنٹ نہیں ملا یا غلط کریڈنشلز",
         success: "کامیابی"
       },
+      auth: {
+        driverLogin: "ڈرائیور لاگ ان",
+        adminLogin: "ایڈمن لاگ ان",
+        registerAsDriver: "بطور ڈرائیور رجسٹر کریں",
+        login: "لاگ ان",
+        loggingIn: "لاگ ان ہو رہا ہے...",
+        register: "رجسٹر",
+        username: "صارف نام",
+        password: "پاس ورڈ",
+        fullName: "پورا نام",
+        idNumber: "شناختی نمبر",
+        licenseNumber: "لائسنس نمبر",
+        uniqueId: "منفرد شناخت"
+      },
       admin: {
+        dashboard: "ایڈمن ڈیش بورڈ",
         removeDriverSuccess: "ڈرائیور کامیابی سے ہٹا دیا گیا",
         removeDriverError: "ڈرائیور کو ہٹانے میں ناکامی",
         removeConfirm: "کیا آپ واقعی اس ڈرائیور کو ہٹانا چاہتے ہیں؟",
@@ -140,6 +251,7 @@ const resources = {
         activeDrivers: "فعال ڈرائیورز",
         suspendedDrivers: "معطل ڈرائیورز",
         allOrders: "تمام آرڈرز",
+        orders: "آرڈرز",
         documents: "دستاویزات",
         noDrivers: "کوئی ڈرائیور نہیں ملا",
         noActiveDrivers: "کوئی فعال ڈرائیور نہیں ملا",
@@ -150,6 +262,23 @@ const resources = {
         suspend: "معطل کریں",
         activate: "فعال کریں",
         removeDriver: "ڈرائیور کو ہٹائیں"
+      },
+      filter: {
+        registrationDate: "رجسٹریشن کی تاریخ",
+        today: "آج",
+        thisWeek: "اس ہفتے",
+        thisMonth: "اس مہینے",
+        status: "حالت",
+        active: "فعال",
+        completed: "مکمل",
+        cancelled: "منسوخ",
+        selectDate: "تاریخ منتخب کریں",
+        documentType: "دستاویز کی قسم",
+        clearAll: "تمام فلٹرز صاف کریں",
+        selectDriver: "ڈرائیور منتخب کریں"
+      },
+      common: {
+        logout: "لاگ آؤٹ"
       }
     }
   }
