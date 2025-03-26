@@ -24,7 +24,7 @@ def get_replit_url():
             return base_url
 
         # For development, try different options
-        replit_domain = os.getenv('REPLIT_DOMAIN')  # Primary domain
+        replit_domain = os.getenv('REPLIT_DOMAIN')
         repl_id = os.getenv('REPL_ID')
         repl_slug = os.getenv('REPL_SLUG')
 
@@ -68,6 +68,35 @@ def generate_qr_code(pdf_filename):
         logger.error(f"Error generating QR code: {str(e)}")
         raise
 
+def select_template(vehicle_type, vehicle_model):
+    """Select the appropriate template based on vehicle type and model"""
+    vehicle_type = (vehicle_type or '').lower()
+    vehicle_model = (vehicle_model or '').lower()
+
+    logger.info(f"Selecting template for vehicle type: {vehicle_type}, model: {vehicle_model}")
+
+    # Explicit check for Hyundai Staria
+    if vehicle_type == 'hyundai' and vehicle_model == 'staria':
+        template_name = 'hyundai_contract.html'
+        logger.info("Selected Hyundai Staria template")
+    else:
+        template_name = 'gmc_contract.html'
+        logger.info("Selected GMC/Chevrolet template")
+
+    return template_name
+
+def verify_template_content(template_name, html_content):
+    """Verify the template content matches the expected company name"""
+    expected_company = None
+    if template_name == 'hyundai_contract.html':
+        expected_company = "شركة صاعقة الطريق للنقل البري"
+        if expected_company not in html_content:
+            logger.error("Hyundai template does not contain correct company name!")
+    else:
+        expected_company = "شركة النجمة الفارهة للنقل البري"
+        if expected_company not in html_content:
+            logger.error("GMC template does not contain correct company name!")
+
 def generate_pdf(data_path, output_path):
     """Generate PDF with proper Arabic text rendering using WeasyPrint"""
     try:
@@ -88,14 +117,10 @@ def generate_pdf(data_path, output_path):
         template_dir = Path(__file__).parent / 'pdf_templates'
         env = Environment(loader=FileSystemLoader(template_dir))
 
-        # Select template based on vehicle type
-        vehicle_type = data.get('vehicle_type', '').lower()
-        if vehicle_type == 'hyundai' and data.get('vehicle_model', '').lower() == 'staria':
-            template_name = 'hyundai_contract.html'
-        else:
-            template_name = 'gmc_contract.html'
-
+        # Select template based on vehicle type and model
+        template_name = select_template(data.get('vehicle_type'), data.get('vehicle_model'))
         logger.info(f"Using template: {template_name}")
+
         template = env.get_template(template_name)
 
         # Render template
@@ -112,6 +137,9 @@ def generate_pdf(data_path, output_path):
             passengers=data['passengers'],
             qr_code=qr_code_base64
         )
+
+        # Verify template content
+        verify_template_content(template_name, html_content)
 
         # Configure fonts
         font_config = FontConfiguration()
