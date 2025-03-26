@@ -24,7 +24,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { insertUserSchema } from "@shared/schema";
-import { CompanyMappingWizard } from "@/components/CompanyMappingWizard";
 import {QrCode} from "lucide-react"; // Added import
 
 // Add this function near the top of the file, after imports
@@ -647,7 +646,7 @@ export default function AdminDashboard() {
         </div>
 
         <Tabs defaultValue="pending" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-6 gap-2">
+          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-5 gap-2">
             <TabsTrigger value="pending">
               {t('admin.pendingDrivers')}
               {pendingDrivers?.length ? (
@@ -658,7 +657,6 @@ export default function AdminDashboard() {
             <TabsTrigger value="suspended">{t('admin.suspendedDrivers')}</TabsTrigger>
             <TabsTrigger value="orders">{t('admin.orders')}</TabsTrigger>
             <TabsTrigger value="documents">{t('admin.documents')}</TabsTrigger>
-            <TabsTrigger value="company-mappings">{t('admin.companyMappings')}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="pending">
@@ -894,14 +892,6 @@ export default function AdminDashboard() {
                     ))}
                   </div>
                 )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="company-mappings">
-            <Card>
-              <CardContent className="p-6">
-                <CompanyMappingWizard />
               </CardContent>
             </Card>
           </TabsContent>
