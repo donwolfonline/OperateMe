@@ -16,6 +16,17 @@
     "deletingDriver": "جاري حذف السائق",
     "pleaseWait": "يرجى الانتظار...",
     "driverDeleted": "تم حذف السائق بنجاح",
-    "invalidCredentials": "الحساب غير موجود أو بيانات الاعتماد غير صحيحة"
+    "invalidCredentials": "الحساب غير موجود أو بيانات الاعتماد غير صحيحة",
+    "success": "نجاح",
+    "adminActions": {
+      "deletingDriver": "جاري إزالة السائق من النظام...",
+      "driverDeleted": "تم إزالة السائق بنجاح",
+      "pleaseWait": "يرجى الانتظار ريثما نعالج طلبك..."
+    }
+  },
+  "admin": {
+    "removeDriverSuccess": "تم إزالة السائق بنجاح",
+    "removeDriverError": "فشل في إزالة السائق",
+    "removeConfirm": "هل أنت متأكد أنك تريد إزالة هذا السائق؟"
   }
 }

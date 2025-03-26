@@ -214,11 +214,9 @@ export default function AdminDashboard() {
     if (window.confirm(t('admin.removeConfirm'))) {
       try {
         // Show loading toast while deleting
-        const deletingMessage = t('notifications.deletingDriver');
-        const pleaseWaitMessage = t('notifications.pleaseWait');
         toast({
-          title: deletingMessage,
-          description: pleaseWaitMessage,
+          title: t('notifications.adminActions.deletingDriver'),
+          description: t('notifications.adminActions.pleaseWait'),
           variant: "default"
         });
 
@@ -226,7 +224,7 @@ export default function AdminDashboard() {
         const response = await apiRequest("DELETE", `/api/admin/drivers/${driverId}`);
 
         if (!response.ok) {
-          throw new Error(t('admin.deleteDriverFailed'));
+          throw new Error(t('admin.removeDriverError'));
         }
 
         // Invalidate all related queries to refresh the UI
@@ -238,11 +236,9 @@ export default function AdminDashboard() {
         ]);
 
         // Show success message
-        const successMessage = t('notifications.success');
-        const deletedMessage = t('notifications.driverDeleted');
         toast({
-          title: successMessage,
-          description: deletedMessage,
+          title: t('notifications.success'),
+          description: t('notifications.adminActions.driverDeleted'),
           variant: "default"
         });
       } catch (error: any) {
