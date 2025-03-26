@@ -15,6 +15,7 @@
     "sessionExpiredMessage": "انتهت جلستك. يرجى تسجيل الدخول مرة أخرى.",
     "deletingDriver": "جاري حذف السائق",
     "pleaseWait": "يرجى الانتظار...",
-    "driverDeleted": "تم حذف السائق بنجاح"
+    "driverDeleted": "تم حذف السائق بنجاح",
+    "invalidCredentials": "الحساب غير موجود أو بيانات الاعتماد غير صحيحة"
   }
 }

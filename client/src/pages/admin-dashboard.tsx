@@ -215,8 +215,8 @@ export default function AdminDashboard() {
       try {
         // Show loading state
         toast({
-          title: t('admin.deletingDriver'),
-          description: t('admin.pleaseWait'),
+          title: t('notifications.deletingDriver'),
+          description: t('notifications.pleaseWait'),
           variant: "default"
         });
 
@@ -235,13 +235,10 @@ export default function AdminDashboard() {
           queryClient.invalidateQueries({ queryKey: ["/api/admin/all-orders"] })
         ]);
 
-        // Wait a moment for the invalidation to complete
-        await new Promise(resolve => setTimeout(resolve, 100));
-
         // Show success message
         toast({
           title: t('notifications.success'),
-          description: t('admin.removeDriverSuccess'),
+          description: t('notifications.driverDeleted'),
           variant: "default"
         });
       } catch (error: any) {

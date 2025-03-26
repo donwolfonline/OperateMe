@@ -15,6 +15,7 @@
     "sessionExpiredMessage": "Your session has expired. Please log in again.",
     "deletingDriver": "Deleting Driver",
     "pleaseWait": "Please wait...",
-    "driverDeleted": "Driver deleted successfully"
+    "driverDeleted": "Driver deleted successfully",
+    "invalidCredentials": "Account not found or invalid credentials"
   }
 }

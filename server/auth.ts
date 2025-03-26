@@ -56,7 +56,7 @@ export function setupAuth(app: Express) {
       try {
         const user = await storage.getUserByUsername(username);
         if (!user || !(await comparePasswords(password, user.password))) {
-          return done(null, false, { message: 'Invalid credentials' });
+          return done(null, false, { message: 'notifications.invalidCredentials' });
         }
         return done(null, user);
       } catch (error) {
@@ -94,7 +94,7 @@ export function setupAuth(app: Express) {
     passport.authenticate("local", (err, user, info) => {
       if (err) return next(err);
       if (!user) {
-        return res.status(401).json({ message: info?.message || 'Authentication failed' });
+        return res.status(401).json({ message: info?.message || 'notifications.invalidCredentials' });
       }
       req.logIn(user, (err) => {
         if (err) return next(err);
