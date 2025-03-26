@@ -254,9 +254,9 @@ export default function AdminDashboard() {
 
   const renderDriverCard = (driver: User, actions: React.ReactNode) => (
     <div key={driver.id} className="flex flex-col space-y-4 p-4 border rounded-lg bg-card">
-      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <Avatar className="h-16 w-16">
+      <div className="flex flex-col gap-4">
+        <div className="flex items-start gap-4">
+          <Avatar className="h-16 w-16 shrink-0">
             {driver.profileImageUrl ? (
               <AvatarImage src={`/uploads/${driver.profileImageUrl}`} alt={driver.fullName || ''} />
             ) : (
@@ -265,12 +265,12 @@ export default function AdminDashboard() {
               </AvatarFallback>
             )}
           </Avatar>
-          <div className="space-y-2">
-            <div className="flex items-center space-x-2">
-              <UserIcon className="h-5 w-5 text-primary" />
-              <p className="font-medium">{driver.fullName}</p>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <UserIcon className="h-5 w-5 text-primary shrink-0" />
+              <p className="font-medium truncate">{driver.fullName}</p>
             </div>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground mt-1">
               UID: {driver.uid}
             </p>
             <p className="text-sm text-muted-foreground">
@@ -281,11 +281,13 @@ export default function AdminDashboard() {
             </p>
           </div>
         </div>
+
         <div className="flex flex-wrap gap-2">
           {actions}
           <Button
             variant="destructive"
             size="sm"
+            className="w-full sm:w-auto"
             onClick={() => removeDriver(driver.id)}
           >
             {t('admin.removeDriver')}
@@ -301,9 +303,9 @@ export default function AdminDashboard() {
               href={getPublicUrl(driver.idDocumentUrl)}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center text-sm text-primary hover:underline bg-muted px-3 py-2 rounded-md"
+              className="flex items-center text-sm text-primary hover:underline bg-muted px-3 py-2 rounded-md w-full sm:w-auto justify-center sm:justify-start"
             >
-              <FileCheck className="h-4 w-4 mr-1" />
+              <FileCheck className="h-4 w-4 mr-1 shrink-0" />
               View ID Document
             </a>
           )}
@@ -312,9 +314,9 @@ export default function AdminDashboard() {
               href={getPublicUrl(driver.licenseDocumentUrl)}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center text-sm text-primary hover:underline bg-muted px-3 py-2 rounded-md"
+              className="flex items-center text-sm text-primary hover:underline bg-muted px-3 py-2 rounded-md w-full sm:w-auto justify-center sm:justify-start"
             >
-              <FileCheck className="h-4 w-4 mr-1" />
+              <FileCheck className="h-4 w-4 mr-1 shrink-0" />
               View License Document
             </a>
           )}
@@ -505,9 +507,10 @@ export default function AdminDashboard() {
     filterDocuments(allOrders), [allOrders, searchTerm, activeFilters]);
 
   const renderExportButtons = () => (
-    <div className="flex gap-2">
+    <div className="flex flex-wrap gap-2 w-full sm:w-auto">
       <Button
         variant="outline"
+        className="w-full sm:w-auto"
         onClick={() => {
           const exportData = activeDrivers?.map(driver => ({
             fullName: driver.fullName,
@@ -531,9 +534,10 @@ export default function AdminDashboard() {
         <Download className="w-4 h-4 mr-2" />
         {t("admin.exportDrivers")}
       </Button>
+
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogTrigger asChild>
-          <Button>
+          <Button className="w-full sm:w-auto">
             <UserIcon className="w-4 h-4 mr-2" />
             {t("admin.addDriver")}
           </Button>
