@@ -570,17 +570,19 @@ export default function AdminDashboard() {
         </div>
 
         <Tabs defaultValue="active" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-5 gap-2">
-            <TabsTrigger value="pending">
-              {t("admin.pendingDrivers")}
-              {pendingDrivers?.length ? (
-                <Badge variant="destructive" className="ml-2">{pendingDrivers.length}</Badge>
-              ) : null}
+          <TabsList className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2">
+            <TabsTrigger value="pending" className="w-full">
+              <div className="flex items-center justify-between w-full">
+                <span>{t("admin.pendingDrivers")}</span>
+                {pendingDrivers?.length ? (
+                  <Badge variant="destructive" className="ml-2">{pendingDrivers.length}</Badge>
+                ) : null}
+              </div>
             </TabsTrigger>
-            <TabsTrigger value="active">{t("admin.activeDrivers")}</TabsTrigger>
-            <TabsTrigger value="suspended">{t("admin.suspendedDrivers")}</TabsTrigger>
-            <TabsTrigger value="orders">{t("admin.orders")}</TabsTrigger>
-            <TabsTrigger value="documents">{t("admin.documents")}</TabsTrigger>
+            <TabsTrigger value="active" className="w-full">{t("admin.activeDrivers")}</TabsTrigger>
+            <TabsTrigger value="suspended" className="w-full">{t("admin.suspendedDrivers")}</TabsTrigger>
+            <TabsTrigger value="orders" className="w-full">{t("admin.orders")}</TabsTrigger>
+            <TabsTrigger value="documents" className="w-full">{t("admin.documents")}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="pending">
