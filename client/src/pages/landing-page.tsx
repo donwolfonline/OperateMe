@@ -46,10 +46,10 @@ export default function LandingPage() {
             transition={{ duration: 0.7 }}
             className="text-center mb-16"
           >
-            <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-primary to-primary/70 text-transparent bg-clip-text">
+            <h1 className="text-3xl md:text-6xl font-bold mb-6 leading-tight md:leading-normal bg-gradient-to-r from-primary to-primary/70 text-transparent bg-clip-text">
               {t('landing.title')}
             </h1>
-            <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto">
+            <p className="text-lg md:text-2xl text-muted-foreground max-w-3xl mx-auto">
               {t('landing.subtitle')}
             </p>
           </motion.div>
