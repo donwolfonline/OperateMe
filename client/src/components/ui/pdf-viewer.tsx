@@ -35,10 +35,13 @@ export function PDFViewer({ url, className = '' }: PDFViewerProps) {
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         )}
-        
+
         <Document
           file={`/uploads/${url}`}
           onLoadSuccess={onDocumentLoadSuccess}
+          onLoadError={(error) => {
+            console.error('Error loading PDF:', error);
+          }}
           loading={
             <div className="flex items-center justify-center p-8">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -50,6 +53,9 @@ export function PDFViewer({ url, className = '' }: PDFViewerProps) {
             width={600}
             renderTextLayer={false}
             renderAnnotationLayer={false}
+            onLoadError={(error) => {
+              console.error('Error loading page:', error);
+            }}
           />
         </Document>
       </div>
@@ -65,11 +71,11 @@ export function PDFViewer({ url, className = '' }: PDFViewerProps) {
             <ChevronLeft className="h-4 w-4" />
             Previous
           </Button>
-          
+
           <div className="text-sm">
             Page {pageNumber} of {numPages}
           </div>
-          
+
           <Button
             variant="outline"
             size="sm"
