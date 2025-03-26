@@ -17,10 +17,12 @@ export function PDFViewer({ url, className = '' }: PDFViewerProps) {
   const [numPages, setNumPages] = useState<number>(0);
   const [pageNumber, setPageNumber] = useState<number>(1);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   function onDocumentLoadSuccess({ numPages }: { numPages: number }) {
     setNumPages(numPages);
     setLoading(false);
+    setError(null);
   }
 
   function changePage(offset: number) {
@@ -41,6 +43,8 @@ export function PDFViewer({ url, className = '' }: PDFViewerProps) {
           onLoadSuccess={onDocumentLoadSuccess}
           onLoadError={(error) => {
             console.error('Error loading PDF:', error);
+            setError('Failed to load PDF');
+            setLoading(false);
           }}
           loading={
             <div className="flex items-center justify-center p-8">
@@ -48,19 +52,24 @@ export function PDFViewer({ url, className = '' }: PDFViewerProps) {
             </div>
           }
         >
-          <Page 
-            pageNumber={pageNumber} 
-            width={600}
-            renderTextLayer={false}
-            renderAnnotationLayer={false}
-            onLoadError={(error) => {
-              console.error('Error loading page:', error);
-            }}
-          />
+          {error ? (
+            <div className="p-4 text-center text-red-600">{error}</div>
+          ) : (
+            <Page 
+              pageNumber={pageNumber} 
+              width={600}
+              renderTextLayer={false}
+              renderAnnotationLayer={false}
+              onLoadError={(error) => {
+                console.error('Error loading page:', error);
+                setError('Failed to load PDF page');
+              }}
+            />
+          )}
         </Document>
       </div>
 
-      {numPages > 1 && (
+      {numPages > 1 && !error && (
         <div className="flex items-center gap-4 mt-4">
           <Button
             variant="outline"

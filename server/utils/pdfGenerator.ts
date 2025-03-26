@@ -9,10 +9,6 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
     try {
         console.log('Starting PDF generation for order:', order.id);
 
-        // Get vehicle information
-        const vehicle = await storage.getVehicleByOrder(order.id);
-        console.log('Raw vehicle information:', vehicle);
-
         // Get passengers for this order
         const passengers = await storage.getPassengersByOrder(order.id);
 
@@ -38,9 +34,7 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
                 name: p.name,
                 id_number: p.idNumber,
                 nationality: p.nationality
-            })),
-            vehicle_type: vehicle?.type || '',
-            vehicle_model: vehicle?.model || ''
+            }))
         };
 
         // Ensure uploads directory exists
@@ -59,30 +53,20 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
         await promisify(fs.writeFile)(tempDataPath, JSON.stringify(data, null, 2));
         console.log('Temporary data file written to:', tempDataPath);
 
-        // Run Python script with detailed error handling
+        // Run Python script
         await new Promise((resolve, reject) => {
             console.log('Spawning Python process...');
             const pythonProcess = spawn('python', [
                 path.join(process.cwd(), 'server/utils/pdf_generator.py'),
                 tempDataPath,
                 pdfPath
-            ], {
-                env: {
-                    ...process.env,
-                    PYTHONPATH: process.cwd()
-                }
-            });
-
-            let stdoutData = '';
-            let stderrData = '';
+            ]);
 
             pythonProcess.stdout.on('data', (data) => {
-                stdoutData += data.toString();
                 console.log('Python script output:', data.toString());
             });
 
             pythonProcess.stderr.on('data', (data) => {
-                stderrData += data.toString();
                 console.error('Python script error:', data.toString());
             });
 
@@ -93,25 +77,9 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
                 });
 
                 if (code === 0) {
-                    // Verify the PDF exists and is not empty
-                    try {
-                        const stats = fs.statSync(pdfPath);
-                        if (stats.size > 0) {
-                            console.log('PDF generated successfully at:', pdfPath);
-                            resolve(null);
-                        } else {
-                            reject(new Error('Generated PDF file is empty'));
-                        }
-                    } catch (error) {
-                        reject(new Error('PDF file was not created properly'));
-                    }
+                    resolve(null);
                 } else {
-                    console.error('Python process failed:', {
-                        code,
-                        stdout: stdoutData,
-                        stderr: stderrData
-                    });
-                    reject(new Error(`Python process exited with code ${code}. Error: ${stderrData}`));
+                    reject(new Error(`Python process exited with code ${code}`));
                 }
             });
 
@@ -121,8 +89,10 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
             });
         });
 
-        // Final verification - Redundant, removed.  The check inside the promise is sufficient.
-        
+        // Verify the PDF exists
+        if (!fs.existsSync(pdfPath)) {
+            throw new Error(`PDF file not found at ${pdfPath}`);
+        }
 
         console.log('PDF generation completed successfully');
         return pdfFileName;

@@ -29,7 +29,6 @@ def generate_qr_code(pdf_filename):
         qr.make(fit=True)
         qr_img = qr.make_image(fill_color="black", back_color="white")
 
-        # Save QR code to bytes
         qr_bytes = BytesIO()
         qr_img.save(qr_bytes, format="PNG")
         qr_bytes.seek(0)
@@ -39,7 +38,7 @@ def generate_qr_code(pdf_filename):
         raise
 
 def generate_pdf(data_path, output_path):
-    """Main PDF generation function"""
+    """Generate PDF with ReportLab"""
     try:
         logger.info(f"Starting PDF generation. Output path: {output_path}")
 
@@ -55,9 +54,9 @@ def generate_pdf(data_path, output_path):
         # Create PDF
         c = canvas.Canvas(str(output_path), pagesize=A4)
         width, height = A4
+        margin = 2 * cm
 
         # Add QR code
-        margin = 2 * cm
         c.drawImage(BytesIO(qr_code_bytes), margin, height - 3*cm, width=2*cm, height=2*cm)
 
         # Add title
@@ -68,7 +67,7 @@ def generate_pdf(data_path, output_path):
         c.setFont("Helvetica", 12)
         y_position = height - 4*cm
 
-        # Basic information
+        # Trip information
         c.drawString(margin, y_position, f"التاريخ: {data['date']}")
         y_position -= 30
         c.drawString(margin, y_position, f"من: {data['from_city']}")
@@ -109,7 +108,7 @@ def generate_pdf(data_path, output_path):
 
         # Save the PDF
         c.save()
-        logger.info(f"PDF saved successfully at: {output_path}")
+        logger.info(f"PDF saved at: {output_path}")
 
         # Verify file exists and has content
         output_file = Path(output_path)
@@ -119,7 +118,7 @@ def generate_pdf(data_path, output_path):
         if output_file.stat().st_size == 0:
             raise ValueError(f"Generated PDF is empty at {output_path}")
 
-        logger.info(f"PDF generation completed successfully")
+        logger.info("PDF generation completed successfully")
         return output_file.name
 
     except Exception as e:

@@ -9,15 +9,9 @@ import { generateOrderPDF } from './utils/pdfGenerator';
 import express from "express";
 import fs from 'fs';
 
-// Ensure uploads directory exists
-const uploadsDir = path.join(process.cwd(), 'uploads');
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
-}
-
 // Configure multer for file uploads
-const upload = multer({ 
-  dest: uploadsDir,
+const upload = multer({
+  dest: path.join(process.cwd(), 'uploads'),
   limits: {
     fileSize: 10 * 1024 * 1024, // 10MB limit
   }
@@ -27,7 +21,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   setupAuth(app);
 
   // Configure static file serving for uploads
-  app.use('/uploads', express.static(uploadsDir, {
+  app.use('/uploads', express.static(path.join(process.cwd(), 'uploads'), {
     setHeaders: (res, filePath) => {
       if (filePath.endsWith('.pdf')) {
         res.setHeader('Content-Type', 'application/pdf');
@@ -55,8 +49,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         departureTime: new Date(req.body.departureTime).toISOString()
       });
 
-      console.log('Creating new order with data:', {
-        ...orderData,
+      // Ensure uploads directory exists
+      const uploadsDir = path.join(process.cwd(), 'uploads');
+      if (!fs.existsSync(uploadsDir)) {
+        fs.mkdirSync(uploadsDir, { recursive: true });
+      }
+
+      console.log('Creating new order:', {
+        fromCity: orderData.fromCity,
+        toCity: orderData.toCity,
         passengers: orderData.passengers.length
       });
 
@@ -84,7 +85,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         // Verify PDF exists and has content
         const pdfPath = path.join(uploadsDir, pdfFileName);
-
         if (!fs.existsSync(pdfPath)) {
           throw new Error(`PDF file not found at ${pdfPath}`);
         }
@@ -94,9 +94,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           throw new Error(`Generated PDF is empty: ${pdfPath}`);
         }
 
-        console.log('PDF file verified:', {
+        console.log('PDF verified:', {
           path: pdfPath,
-          size: stats.size
+          size: stats.size,
+          exists: fs.existsSync(pdfPath)
         });
 
         // Update order with PDF URL
@@ -106,18 +107,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
           status: "active"
         });
 
-        console.log('Order updated successfully:', {
+        console.log('Order updated with PDF:', {
           id: updatedOrder.id,
-          pdfUrl: updatedOrder.pdfUrl
+          pdfUrl: updatedOrder.pdfUrl,
+          status: updatedOrder.status
         });
 
-        // Return the updated order
         res.status(201).json(updatedOrder);
 
       } catch (pdfError) {
         console.error('PDF generation failed:', pdfError);
 
-        // Update order to error state
         const errorOrder = await storage.updateOperationOrder({
           ...order,
           status: "error",
@@ -127,7 +127,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.status(201).json({
           ...errorOrder,
           error: 'PDF generation failed',
-          details: (pdfError as Error).message
+          details: pdfError.message
         });
       }
     } catch (error: any) {
@@ -143,8 +143,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const files = req.files as Express.Multer.File[];
       if (!files || files.length === 0) {
-        return res.status(400).json({ 
-          message: "No files uploaded or file types not supported" 
+        return res.status(400).json({
+          message: "No files uploaded or file types not supported"
         });
       }
 
@@ -200,8 +200,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       if (!req.user) return res.sendStatus(401);
       if (!req.file) {
-        return res.status(400).json({ 
-          message: "No file uploaded or file type not supported" 
+        return res.status(400).json({
+          message: "No file uploaded or file type not supported"
         });
       }
 
@@ -296,8 +296,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const ordersWithDetails = await Promise.all(orders.map(async (order) => {
       const passengers = await storage.getPassengersByOrder(order.id);
       const driver = await storage.getUser(order.driverId);
-      return { 
-        ...order, 
+      return {
+        ...order,
         passengers,
         driver: {
           fullName: driver?.fullName,
