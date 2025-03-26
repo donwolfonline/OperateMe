@@ -84,7 +84,11 @@ const resources = {
         passengerIdNumber: "ID Number",
         nationality: "Nationality",
         create: "Create Order",
-        generatingPdf: "Generating PDF document..."
+        generatingPdf: "Generating PDF document...",
+        documentReady: "Document Ready",
+        viewDocument: "View Document",
+        download: "Download",
+        downloadPdf: "Download PDF"
       },
       auth: {
         driverLogin: "Driver Login",
@@ -226,7 +230,11 @@ const resources = {
         passengerIdNumber: "رقم الهوية",
         nationality: "الجنسية",
         create: "إنشاء أمر",
-        generatingPdf: "جاري إنشاء ملف PDF..."
+        generatingPdf: "جاري إنشاء ملف PDF...",
+        documentReady: "المستند جاهز",
+        viewDocument: "عرض المستند",
+        download: "تحميل",
+        downloadPdf: "تحميل PDF"
       },
       auth: {
         driverLogin: "تسجيل دخول السائق",
@@ -368,7 +376,11 @@ const resources = {
         passengerIdNumber: "شناختی نمبر",
         nationality: "قومیت",
         create: "آرڈر بنائیں",
-        generatingPdf: "PDF دستاویز تیار کی جا رہی ہے..."
+        generatingPdf: "PDF دستاویز تیار کی جا رہی ہے...",
+        documentReady: "دستاویز تیار ہے",
+        viewDocument: "دستاویز دیکھیں",
+        download: "ڈاؤن لوڈ کریں",
+        downloadPdf: "PDF ڈاؤن لوڈ کریں"
       },
       auth: {
         driverLogin: "ڈرائیور لاگ ان",
