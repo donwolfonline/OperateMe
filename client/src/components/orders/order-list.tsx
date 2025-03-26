@@ -1,15 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Eye, AlertCircle } from 'lucide-react';
+import { Eye } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { PDFViewer } from '@/components/ui/pdf-viewer';
 import { format } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useToast } from '@/hooks/use-toast';
 
 export function OrderList() {
-  const { toast } = useToast();
   const { data: orders = [], isLoading } = useQuery({
     queryKey: ['/api/driver/orders'],
     refetchInterval: 5000, // Refetch every 5 seconds to check PDF status
@@ -48,17 +46,10 @@ export function OrderList() {
               </p>
               <p className="text-sm">Trip Number: {order.tripNumber}</p>
 
-              {/* PDF Status Indicators */}
-              {order.status === 'pending' && (
-                <p className="text-sm text-yellow-600 flex items-center gap-2">
-                  <Skeleton className="h-4 w-4 rounded-full" />
+              {/* Show PDF status */}
+              {!order.pdfUrl && (
+                <p className="text-sm text-yellow-600">
                   PDF is being generated...
-                </p>
-              )}
-              {order.status === 'error' && (
-                <p className="text-sm text-red-600 flex items-center gap-2">
-                  <AlertCircle className="h-4 w-4" />
-                  Error generating PDF
                 </p>
               )}
             </div>

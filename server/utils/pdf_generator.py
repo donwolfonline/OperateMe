@@ -9,7 +9,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import cm
 
 # Configure logging
-logging.basicConfig(level=logging.DEBUG)  # Changed to DEBUG for more detailed logs
+logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 def generate_qr_code(pdf_filename):
@@ -33,7 +33,6 @@ def generate_qr_code(pdf_filename):
         qr_bytes = BytesIO()
         qr_img.save(qr_bytes, format="PNG")
         qr_bytes.seek(0)
-        logger.debug("QR code generated successfully")
         return qr_bytes.getvalue()
     except Exception as e:
         logger.error(f"Error generating QR code: {str(e)}")
@@ -54,61 +53,51 @@ def generate_pdf(data_path, output_path):
         logger.debug("QR code generated")
 
         # Create PDF
-        logger.debug(f"Creating PDF at: {output_path}")
         c = canvas.Canvas(str(output_path), pagesize=A4)
         width, height = A4
 
-        # Set margins
-        margin = 2 * cm
-
         # Add QR code
+        margin = 2 * cm
         c.drawImage(BytesIO(qr_code_bytes), margin, height - 3*cm, width=2*cm, height=2*cm)
-        logger.debug("Added QR code to PDF")
 
         # Add title
         c.setFont("Helvetica-Bold", 18)
         c.drawCentredString(width/2, height - 2*cm, "عقد نقل على الطرق البرية")
 
-        # Set up content area
+        # Add content
         c.setFont("Helvetica", 12)
         y_position = height - 4*cm
 
-        # Add basic information
-        basic_info = [
-            f"التاريخ: {data['date']}",
-            f"من: {data['from_city']}",
-            f"إلى: {data['to_city']}",
-            f"نوع التأشيرة: {data['visa_type']}",
-            f"رقم الرحلة: {data['trip_number']}"
-        ]
+        # Basic information
+        c.drawString(margin, y_position, f"التاريخ: {data['date']}")
+        y_position -= 30
+        c.drawString(margin, y_position, f"من: {data['from_city']}")
+        y_position -= 30
+        c.drawString(margin, y_position, f"إلى: {data['to_city']}")
+        y_position -= 30
+        c.drawString(margin, y_position, f"نوع التأشيرة: {data['visa_type']}")
+        y_position -= 30
+        c.drawString(margin, y_position, f"رقم الرحلة: {data['trip_number']}")
+        y_position -= 40
 
-        for info in basic_info:
-            c.drawString(margin, y_position, info)
-            y_position -= 20
-
-        # Add driver information
-        y_position -= 20
+        # Driver information
         c.setFont("Helvetica-Bold", 14)
         c.drawString(margin, y_position, "معلومات السائق")
         c.setFont("Helvetica", 12)
+        y_position -= 30
+
+        c.drawString(margin, y_position, f"اسم السائق: {data['driver_name']}")
         y_position -= 20
-
-        driver_info = [
-            f"اسم السائق: {data['driver_name']}",
-            f"رقم الهوية: {data['driver_id']}",
-            f"رقم الرخصة: {data['license_number']}"
-        ]
-
-        for info in driver_info:
-            c.drawString(margin, y_position, info)
-            y_position -= 20
-
-        # Add passenger information
+        c.drawString(margin, y_position, f"رقم الهوية: {data['driver_id']}")
         y_position -= 20
+        c.drawString(margin, y_position, f"رقم الرخصة: {data['license_number']}")
+        y_position -= 40
+
+        # Passenger information
         c.setFont("Helvetica-Bold", 14)
         c.drawString(margin, y_position, "معلومات الركاب")
         c.setFont("Helvetica", 12)
-        y_position -= 20
+        y_position -= 30
 
         for i, passenger in enumerate(data['passengers'], 1):
             c.drawString(margin, y_position, f"{i}. {passenger['name']}")
@@ -127,15 +116,14 @@ def generate_pdf(data_path, output_path):
         if not output_file.exists():
             raise FileNotFoundError(f"PDF file not found at {output_path}")
 
-        file_size = output_file.stat().st_size
-        if file_size == 0:
+        if output_file.stat().st_size == 0:
             raise ValueError(f"Generated PDF is empty at {output_path}")
 
-        logger.info(f"PDF generation completed. File size: {file_size} bytes")
+        logger.info(f"PDF generation completed successfully")
         return output_file.name
 
     except Exception as e:
-        logger.error(f"Error in PDF generation process: {str(e)}")
+        logger.error(f"Error generating PDF: {str(e)}")
         raise
 
 if __name__ == "__main__":
