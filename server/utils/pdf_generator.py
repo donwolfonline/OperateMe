@@ -9,14 +9,15 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import cm
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)  # Changed to DEBUG for more detailed logs
 logger = logging.getLogger(__name__)
 
 def generate_qr_code(pdf_filename):
     """Generate QR code for the PDF"""
     try:
-        base_url = "http://localhost:5000"  # Default to local development
+        base_url = "http://localhost:5000"
         pdf_url = f"{base_url}/uploads/{pdf_filename}"
+        logger.debug(f"Generating QR code for URL: {pdf_url}")
 
         qr = qrcode.QRCode(
             version=1,
@@ -31,6 +32,8 @@ def generate_qr_code(pdf_filename):
         # Save QR code to bytes
         qr_bytes = BytesIO()
         qr_img.save(qr_bytes, format="PNG")
+        qr_bytes.seek(0)
+        logger.debug("QR code generated successfully")
         return qr_bytes.getvalue()
     except Exception as e:
         logger.error(f"Error generating QR code: {str(e)}")
@@ -39,17 +42,20 @@ def generate_qr_code(pdf_filename):
 def generate_pdf(data_path, output_path):
     """Main PDF generation function"""
     try:
+        logger.info(f"Starting PDF generation. Output path: {output_path}")
+
         # Load data
         with open(data_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
-        logger.info("Data loaded successfully")
+        logger.debug("Data loaded successfully")
 
         # Generate QR code
         qr_code_bytes = generate_qr_code(Path(output_path).name)
-        logger.info("QR code generated successfully")
+        logger.debug("QR code generated")
 
         # Create PDF
-        c = canvas.Canvas(output_path, pagesize=A4)
+        logger.debug(f"Creating PDF at: {output_path}")
+        c = canvas.Canvas(str(output_path), pagesize=A4)
         width, height = A4
 
         # Set margins
@@ -57,6 +63,7 @@ def generate_pdf(data_path, output_path):
 
         # Add QR code
         c.drawImage(BytesIO(qr_code_bytes), margin, height - 3*cm, width=2*cm, height=2*cm)
+        logger.debug("Added QR code to PDF")
 
         # Add title
         c.setFont("Helvetica-Bold", 18)
@@ -72,7 +79,7 @@ def generate_pdf(data_path, output_path):
             f"من: {data['from_city']}",
             f"إلى: {data['to_city']}",
             f"نوع التأشيرة: {data['visa_type']}",
-            f"رقم الرحلة: {data['trip_number']}",
+            f"رقم الرحلة: {data['trip_number']}"
         ]
 
         for info in basic_info:
@@ -113,16 +120,19 @@ def generate_pdf(data_path, output_path):
 
         # Save the PDF
         c.save()
-        logger.info(f"PDF generated successfully at {output_path}")
+        logger.info(f"PDF saved successfully at: {output_path}")
 
         # Verify file exists and has content
-        if not Path(output_path).exists():
+        output_file = Path(output_path)
+        if not output_file.exists():
             raise FileNotFoundError(f"PDF file not found at {output_path}")
 
-        if Path(output_path).stat().st_size == 0:
+        file_size = output_file.stat().st_size
+        if file_size == 0:
             raise ValueError(f"Generated PDF is empty at {output_path}")
 
-        return Path(output_path).name
+        logger.info(f"PDF generation completed. File size: {file_size} bytes")
+        return output_file.name
 
     except Exception as e:
         logger.error(f"Error in PDF generation process: {str(e)}")

@@ -1,10 +1,10 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { setupAuth, hashPassword } from "./auth";
+import { setupAuth } from "./auth";
 import { storage } from "./storage";
 import multer from "multer";
 import path from "path";
-import { insertVehicleSchema, insertOperationOrderSchema } from "@shared/schema";
+import { insertOperationOrderSchema } from "@shared/schema";
 import { generateOrderPDF } from './utils/pdfGenerator';
 import express from "express";
 import fs from 'fs';
@@ -20,40 +20,13 @@ const upload = multer({
   dest: uploadsDir,
   limits: {
     fileSize: 10 * 1024 * 1024, // 10MB limit
-  },
-  fileFilter: (_req, file, cb) => {
-    const allowedTypes = [
-      'image/jpeg',
-      'image/png',
-      'image/gif',
-      'image/webp',
-      'image/heic',
-      'image/heif',
-      'image/svg+xml',
-      'image/tiff',
-      'image/bmp',
-      'image/x-icon',
-      'application/pdf',
-      'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      'application/vnd.ms-excel',
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      'text/plain',
-      'application/rtf'
-    ];
-
-    if (allowedTypes.includes(file.mimetype)) {
-      cb(null, true);
-    } else {
-      cb(null, false);
-    }
   }
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
   setupAuth(app);
 
-  // Configure static file serving for uploads with proper MIME types
+  // Configure static file serving for uploads
   app.use('/uploads', express.static(uploadsDir, {
     setHeaders: (res, filePath) => {
       if (filePath.endsWith('.pdf')) {
@@ -72,33 +45,93 @@ export async function registerRoutes(app: Express): Promise<Server> {
     next();
   });
 
-  // Document upload route
-  app.post("/api/documents/upload", upload.single('document'), async (req, res) => {
+  // Operation orders routes
+  app.post("/api/operation-orders", async (req, res) => {
     try {
       if (!req.user) return res.sendStatus(401);
-      if (!req.file) {
-        return res.status(400).json({ 
-          message: "No file uploaded or file type not supported" 
+
+      const orderData = insertOperationOrderSchema.parse({
+        ...req.body,
+        departureTime: new Date(req.body.departureTime).toISOString()
+      });
+
+      console.log('Creating new order with data:', {
+        ...orderData,
+        passengers: orderData.passengers.length
+      });
+
+      // Create initial order
+      const order = await storage.createOperationOrder({
+        fromCity: orderData.fromCity,
+        toCity: orderData.toCity,
+        departureTime: new Date(orderData.departureTime),
+        visaType: orderData.visaType,
+        tripNumber: orderData.tripNumber,
+        driverId: req.user.id,
+        vehicleId: null,
+        qrCode: "",
+        pdfUrl: "",
+        status: "pending",
+        createdAt: new Date()
+      }, orderData.passengers);
+
+      try {
+        console.log('Starting PDF generation for order:', order.id);
+
+        // Generate PDF
+        const pdfFileName = await generateOrderPDF(order, req.user);
+        console.log('PDF generation completed:', pdfFileName);
+
+        // Verify PDF exists and has content
+        const pdfPath = path.join(uploadsDir, pdfFileName);
+
+        if (!fs.existsSync(pdfPath)) {
+          throw new Error(`PDF file not found at ${pdfPath}`);
+        }
+
+        const stats = fs.statSync(pdfPath);
+        if (stats.size === 0) {
+          throw new Error(`Generated PDF is empty: ${pdfPath}`);
+        }
+
+        console.log('PDF file verified:', {
+          path: pdfPath,
+          size: stats.size
+        });
+
+        // Update order with PDF URL
+        const updatedOrder = await storage.updateOperationOrder({
+          ...order,
+          pdfUrl: pdfFileName,
+          status: "active"
+        });
+
+        console.log('Order updated successfully:', {
+          id: updatedOrder.id,
+          pdfUrl: updatedOrder.pdfUrl
+        });
+
+        // Return the updated order
+        res.status(201).json(updatedOrder);
+
+      } catch (pdfError) {
+        console.error('PDF generation failed:', pdfError);
+
+        // Update order to error state
+        const errorOrder = await storage.updateOperationOrder({
+          ...order,
+          status: "error",
+          pdfUrl: ""
+        });
+
+        res.status(201).json({
+          ...errorOrder,
+          error: 'PDF generation failed',
+          details: (pdfError as Error).message
         });
       }
-
-      const documentType = req.body.type;
-      const filePath = req.file.filename;
-
-      const user = await storage.getUser(req.user.id);
-      if (!user) return res.sendStatus(404);
-
-      if (documentType === 'id') {
-        user.idDocumentUrl = filePath;
-      } else if (documentType === 'license') {
-        user.licenseDocumentUrl = filePath;
-      } else if (documentType === 'profile') {
-        user.profileImageUrl = filePath;
-      }
-
-      await storage.updateUser(user);
-      res.json(user);
     } catch (error: any) {
+      console.error('Operation order creation error:', error);
       res.status(400).json({ message: error.message });
     }
   });
@@ -161,72 +194,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Operation orders routes
-  app.post("/api/operation-orders", async (req, res) => {
+
+  // Document upload route
+  app.post("/api/documents/upload", upload.single('document'), async (req, res) => {
     try {
       if (!req.user) return res.sendStatus(401);
-
-      const orderData = insertOperationOrderSchema.parse({
-        ...req.body,
-        departureTime: new Date(req.body.departureTime).toISOString()
-      });
-
-      // Create initial order
-      const order = await storage.createOperationOrder({
-        fromCity: orderData.fromCity,
-        toCity: orderData.toCity,
-        departureTime: new Date(orderData.departureTime),
-        visaType: orderData.visaType,
-        tripNumber: orderData.tripNumber,
-        driverId: req.user.id,
-        vehicleId: null,
-        qrCode: "",
-        pdfUrl: "",
-        status: "pending",
-        createdAt: new Date()
-      }, orderData.passengers);
-
-      try {
-        // Generate PDF
-        console.log('Starting PDF generation for order:', order.id);
-        const pdfFileName = await generateOrderPDF(order, req.user);
-
-        // Verify PDF exists
-        const pdfPath = path.join(process.cwd(), 'uploads', pdfFileName);
-        if (!fs.existsSync(pdfPath)) {
-          throw new Error('PDF file not found after generation');
-        }
-
-        // Update order with PDF URL
-        const updatedOrder = await storage.updateOperationOrder({
-          ...order,
-          pdfUrl: pdfFileName,
-          status: "active"
-        });
-
-        console.log('Order updated with PDF URL:', {
-          orderId: updatedOrder.id,
-          pdfUrl: updatedOrder.pdfUrl
-        });
-
-        res.status(201).json(updatedOrder);
-      } catch (pdfError) {
-        console.error('PDF generation failed:', pdfError);
-
-        // Update order to error state
-        const errorOrder = await storage.updateOperationOrder({
-          ...order,
-          status: "error",
-          pdfUrl: ""
-        });
-
-        res.status(201).json({
-          ...errorOrder,
-          error: 'PDF generation failed'
+      if (!req.file) {
+        return res.status(400).json({ 
+          message: "No file uploaded or file type not supported" 
         });
       }
+
+      const documentType = req.body.type;
+      const filePath = req.file.filename;
+
+      const user = await storage.getUser(req.user.id);
+      if (!user) return res.sendStatus(404);
+
+      if (documentType === 'id') {
+        user.idDocumentUrl = filePath;
+      } else if (documentType === 'license') {
+        user.licenseDocumentUrl = filePath;
+      } else if (documentType === 'profile') {
+        user.profileImageUrl = filePath;
+      }
+
+      await storage.updateUser(user);
+      res.json(user);
     } catch (error: any) {
-      console.error('Operation order creation error:', error);
       res.status(400).json({ message: error.message });
     }
   });
@@ -377,7 +372,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.error('Login after registration failed:', err);
           return res.status(500).json({ message: "Failed to login after registration" });
         }
-        res.status(201).json(user);
+        res.json(user);
       });
     } catch (error: any) {
       console.error('Registration error:', error);
