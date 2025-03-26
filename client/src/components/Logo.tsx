@@ -12,18 +12,18 @@ export const Logo = ({ className = "", size = 'md' }: LogoProps) => {
 
   const sizes = {
     sm: {
-      wrapper: "gap-0.5",
-      icon: "h-5 w-5",
+      wrapper: "gap-0",
+      icon: "h-4 w-4",
       text: "text-sm"
     },
     md: {
-      wrapper: "gap-1",
-      icon: "h-6 w-6",
+      wrapper: "gap-0",
+      icon: "h-5 w-5",
       text: "text-base"
     },
     lg: {
-      wrapper: "gap-1.5",
-      icon: "h-8 w-8",
+      wrapper: "gap-0",
+      icon: "h-6 w-6",
       text: "text-lg"
     }
   };
@@ -45,11 +45,11 @@ export const Logo = ({ className = "", size = 'md' }: LogoProps) => {
       >
         <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
       </svg>
-      <div className={`flex items-center ${isRTL ? 'mr-0.5' : 'ml-0.5'}`}>
+      <div className={`flex items-center`}>
         <span className={`${sizes[size].text} font-bold text-primary whitespace-nowrap`}>
           {t('landing.brandFirst')}
         </span>
-        <span className={`${sizes[size].text} font-bold text-muted-foreground whitespace-nowrap ${isRTL ? 'mr-0.5' : 'ml-0.5'}`}>
+        <span className={`${sizes[size].text} font-bold text-muted-foreground whitespace-nowrap ml-0.5`}>
           {t('landing.brandSecond')}
         </span>
       </div>
