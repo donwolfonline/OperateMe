@@ -567,7 +567,16 @@ export default function AdminDashboard() {
                     <Button
                       variant="outline"
                       onClick={() => {
-                        const ws = utils.json_to_sheet(activeDrivers || []);
+                        const exportData = activeDrivers?.map(driver => ({
+                          fullName: driver.fullName,
+                          username: driver.username,
+                          idNumber: driver.idNumber,
+                          licenseNumber: driver.licenseNumber,
+                          status: driver.status,
+                          createdAt: new Date(driver.createdAt).toLocaleString()
+                        }));
+
+                        const ws = utils.json_to_sheet(exportData || []);
                         const wb = utils.book_new();
                         utils.book_append_sheet(wb, ws, "Drivers");
                         const wbOut = write(wb, { bookType: 'xlsx', type: 'buffer' });
