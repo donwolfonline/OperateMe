@@ -213,20 +213,39 @@ export default function AdminDashboard() {
   const removeDriver = async (driverId: number) => {
     if (window.confirm(t('admin.removeConfirm'))) {
       try {
-        await apiRequest("DELETE", `/api/admin/drivers/${driverId}`);
+        // Show loading state
+        toast({
+          title: t('admin.deletingDriver'),
+          description: t('admin.pleaseWait'),
+          variant: "default"
+        });
 
-        // Invalidate all relevant queries
-        queryClient.invalidateQueries({ queryKey: ["/api/admin/active-drivers"] });
-        queryClient.invalidateQueries({ queryKey: ["/api/admin/suspended-drivers"] });
-        queryClient.invalidateQueries({ queryKey: ["/api/admin/pending-drivers"] });
-        queryClient.invalidateQueries({ queryKey: ["/api/admin/all-orders"] });
+        // Attempt to delete the driver
+        const response = await apiRequest("DELETE", `/api/admin/drivers/${driverId}`);
 
+        if (!response.ok) {
+          throw new Error(t('admin.deleteDriverFailed'));
+        }
+
+        // Invalidate all related queries to refresh the UI
+        await Promise.all([
+          queryClient.invalidateQueries({ queryKey: ["/api/admin/active-drivers"] }),
+          queryClient.invalidateQueries({ queryKey: ["/api/admin/suspended-drivers"] }),
+          queryClient.invalidateQueries({ queryKey: ["/api/admin/pending-drivers"] }),
+          queryClient.invalidateQueries({ queryKey: ["/api/admin/all-orders"] })
+        ]);
+
+        // Wait a moment for the invalidation to complete
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        // Show success message
         toast({
           title: t('notifications.success'),
           description: t('admin.removeDriverSuccess'),
           variant: "default"
         });
       } catch (error: any) {
+        console.error('Error deleting driver:', error);
         toast({
           title: t('notifications.error'),
           description: error.message || t('admin.removeDriverError'),

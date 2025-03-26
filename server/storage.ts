@@ -50,7 +50,7 @@ export interface IStorage {
   getAllOperationOrders(): Promise<OperationOrder[]>;
   updateDriver(id: number, updates: { status: string; isApproved: boolean }): Promise<User | undefined>;
   getVehicleByOrder(orderId: number): Promise<Vehicle | undefined>;
-  deleteDriver(id: number): Promise<void>;
+  deleteDriver(id: number): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -246,27 +246,48 @@ export class DatabaseStorage implements IStorage {
     return vehicle;
   }
 
-  async deleteDriver(id: number): Promise<void> {
+  async deleteDriver(id: number): Promise<boolean> {
     try {
-      // Get driver's orders first to cascade delete passengers
-      const orders = await this.getOperationOrdersByDriver(id);
+      // Start a transaction
+      return await db.transaction(async (tx) => {
+        // Get driver's orders first to cascade delete passengers
+        const orders = await tx
+          .select()
+          .from(operationOrders)
+          .where(eq(operationOrders.driverId, id));
 
-      // Delete all passengers from driver's orders
-      for (const order of orders) {
-        await db.delete(passengers).where(eq(passengers.orderId, order.id));
-      }
+        // Delete all passengers from driver's orders
+        for (const order of orders) {
+          await tx
+            .delete(passengers)
+            .where(eq(passengers.orderId, order.id));
+        }
 
-      // Delete all orders associated with the driver
-      await db.delete(operationOrders).where(eq(operationOrders.driverId, id));
+        // Delete all orders associated with the driver
+        await tx
+          .delete(operationOrders)
+          .where(eq(operationOrders.driverId, id));
 
-      // Delete all vehicles associated with the driver
-      await db.delete(vehicles).where(eq(vehicles.driverId, id));
+        // Delete all vehicles associated with the driver
+        await tx
+          .delete(vehicles)
+          .where(eq(vehicles.driverId, id));
 
-      // Finally delete the driver user record
-      await db.delete(users).where(and(
-        eq(users.id, id),
-        eq(users.role, "driver")
-      ));
+        // Finally delete the driver user record
+        const [deletedUser] = await tx
+          .delete(users)
+          .where(and(
+            eq(users.id, id),
+            eq(users.role, "driver")
+          ))
+          .returning();
+
+        if (!deletedUser) {
+          throw new Error('No driver found with the specified ID');
+        }
+
+        return true;
+      });
     } catch (error) {
       console.error('Error deleting driver:', error);
       throw new Error('Failed to delete driver and associated data');

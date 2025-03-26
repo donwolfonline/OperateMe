@@ -358,6 +358,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
 
+  // Add this route handler for driver deletion
+  app.delete("/api/admin/drivers/:id", async (req, res) => {
+    if (!req.user || req.user.role !== "admin") return res.sendStatus(403);
+    try {
+      // Log the deletion attempt
+      console.log('Attempting to delete driver:', req.params.id);
+
+      // Try to delete the driver
+      const success = await storage.deleteDriver(parseInt(req.params.id));
+
+      if (success) {
+        console.log('Driver deleted successfully:', req.params.id);
+        res.sendStatus(200);
+      } else {
+        console.log('Driver deletion failed:', req.params.id);
+        res.status(404).json({ message: "Driver not found or could not be deleted" });
+      }
+    } catch (error: any) {
+      console.error('Error deleting driver:', error);
+      res.status(400).json({ message: error.message || "Failed to delete driver" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
