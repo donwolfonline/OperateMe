@@ -1,30 +1,43 @@
+import * as React from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import LanguageToggle from "@/components/LanguageToggle";
 import { motion } from "framer-motion";
 import { FaGooglePlay, FaAppStore } from "react-icons/fa";
-import { useEffect, useState } from "react";
+import { Car, MapPin, LayoutDashboard } from "lucide-react";
 
 export default function LandingPage() {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.dir() === 'rtl';
-  const [textIndex, setTextIndex] = useState(0);
+  const [iconIndex, setIconIndex] = React.useState(0);
 
-  // Array of text phrases to cycle through
-  const phrases = [
-    t('landing.subtitle1'),
-    t('landing.subtitle2'),
-    t('landing.subtitle3'),
-  ];
+  // Array of icons and their animations
+  const icons = React.useMemo(() => [
+    {
+      Icon: Car,
+      color: "text-primary",
+      title: t('landing.subtitle1')
+    },
+    {
+      Icon: MapPin,
+      color: "text-primary",
+      title: t('landing.subtitle2')
+    },
+    {
+      Icon: LayoutDashboard,
+      color: "text-primary",
+      title: t('landing.subtitle3')
+    }
+  ], [t]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     const timer = setInterval(() => {
-      setTextIndex((prev) => (prev + 1) % phrases.length);
+      setIconIndex((prev) => (prev + 1) % icons.length);
     }, 3000);
 
     return () => clearInterval(timer);
-  }, [phrases.length]);
+  }, [icons.length]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-secondary">
@@ -69,18 +82,23 @@ export default function LandingPage() {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="h-16 md:h-20 flex items-center justify-center"
+              className="h-32 md:h-40 flex items-center justify-center"
             >
-              <motion.p
-                key={textIndex}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
+              <motion.div
+                key={iconIndex}
+                initial={{ scale: 0.5, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.5, opacity: 0 }}
                 transition={{ duration: 0.5 }}
-                className="text-lg md:text-2xl text-muted-foreground max-w-3xl mx-auto"
+                className="text-center"
               >
-                {phrases[textIndex]}
-              </motion.p>
+                {React.createElement(icons[iconIndex].Icon, {
+                  className: `h-16 w-16 md:h-20 md:w-20 mx-auto mb-4 ${icons[iconIndex].color}`
+                })}
+                <p className="text-lg md:text-2xl text-muted-foreground">
+                  {icons[iconIndex].title}
+                </p>
+              </motion.div>
             </motion.div>
           </motion.div>
 
