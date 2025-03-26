@@ -213,7 +213,7 @@ export default function AdminDashboard() {
   const removeDriver = async (driverId: number) => {
     if (window.confirm(t('admin.removeConfirm'))) {
       try {
-        // Show loading state
+        // Show loading toast while deleting
         toast({
           title: t('notifications.deletingDriver'),
           description: t('notifications.pleaseWait'),
