@@ -12,27 +12,33 @@ import DriverDashboard from "@/pages/driver-dashboard";
 import AdminDashboard from "@/pages/admin-dashboard";
 import { ProtectedRoute } from "./lib/protected-route";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { NavigationLoadingProvider } from "@/hooks/use-navigation-loading";
+import { RouteTransition } from "@/components/RouteTransition";
 
 function App() {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          <Switch>
-            <Route path="/" component={LandingPage} />
-            <Route path="/auth" component={DriverLoginPage} />
-            <Route path="/admin/login" component={AdminLoginPage} />
-            <Route path="/register" component={RegisterPage} />
-            <Route path="/driver">
-              <ProtectedRoute component={DriverDashboard} requiredRole="driver" />
-            </Route>
-            <Route path="/admin/dashboard">
-              <ProtectedRoute component={AdminDashboard} requiredRole="admin" />
-            </Route>
-            <Route>
-              <NotFound />
-            </Route>
-          </Switch>
+          <NavigationLoadingProvider>
+            <RouteTransition>
+              <Switch>
+                <Route path="/" component={LandingPage} />
+                <Route path="/auth" component={DriverLoginPage} />
+                <Route path="/admin/login" component={AdminLoginPage} />
+                <Route path="/register" component={RegisterPage} />
+                <Route path="/driver">
+                  <ProtectedRoute component={DriverDashboard} requiredRole="driver" />
+                </Route>
+                <Route path="/admin/dashboard">
+                  <ProtectedRoute component={AdminDashboard} requiredRole="admin" />
+                </Route>
+                <Route>
+                  <NotFound />
+                </Route>
+              </Switch>
+            </RouteTransition>
+          </NavigationLoadingProvider>
           <Toaster />
         </AuthProvider>
       </QueryClientProvider>
