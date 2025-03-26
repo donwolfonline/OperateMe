@@ -38,7 +38,17 @@ const resources = {
         title: "Road Lightning Transport",
         subtitle: "Professional Transportation Services",
         loginButton: "Driver Login",
-        adminButton: "Admin Login"
+        adminButton: "Admin Login",
+        features: {
+          reliability: "Reliable Service",
+          reliabilityDesc: "Dependable transportation solutions you can count on, every time",
+          coverage: "Wide Coverage",
+          coverageDesc: "Extensive network covering all major cities and airports",
+          speed: "Fast Delivery",
+          speedDesc: "Efficient and timely transportation services",
+          safety: "Safety First",
+          safetyDesc: "Your safety is our top priority with professional drivers"
+        }
       },
       auth: {
         driverLogin: "Driver Login",
@@ -201,7 +211,17 @@ const resources = {
         title: "صاعقة الطريق للنقل",
         subtitle: "خدمات نقل احترافية",
         loginButton: "تسجيل دخول السائق",
-        adminButton: "دخول المشرف"
+        adminButton: "دخول المشرف",
+        features: {
+          reliability: "خدمة موثوقة",
+          reliabilityDesc: "حلول نقل يمكنك الاعتماد عليها في كل مرة",
+          coverage: "تغطية واسعة",
+          coverageDesc: "شبكة واسعة تغطي جميع المدن والمطارات الرئيسية",
+          speed: "توصيل سريع",
+          speedDesc: "خدمات نقل فعالة وفي الوقت المناسب",
+          safety: "السلامة أولاً",
+          safetyDesc: "سلامتك هي أولويتنا القصوى مع سائقين محترفين"
+        }
       },
       auth: {
         driverLogin: "تسجيل دخول السائق",
@@ -364,7 +384,17 @@ const resources = {
         title: "روڈ لائٹننگ ٹرانسپورٹ",
         subtitle: "پیشہ ورانہ ٹرانسپورٹ سروسز",
         loginButton: "ڈرائیور لاگ ان",
-        adminButton: "ایڈمن لاگ ان"
+        adminButton: "ایڈمن لاگ ان",
+        features: {
+          reliability: "قابل اعتماد خدمت",
+          reliabilityDesc: "قابل بھروسہ ٹرانسپورٹ حل جن پر آپ ہر بار اعتماد کر سکتے ہیں",
+          coverage: "وسیع کوریج",
+          coverageDesc: "تمام بڑے شہروں اور ہوائی اڈوں کو کور کرنے والا وسیع نیٹ ورک",
+          speed: "تیز ترسیل",
+          speedDesc: "موثر اور بروقت ٹرانسپورٹ خدمات",
+          safety: "سلامتی پہلے",
+          safetyDesc: "پیشہ ور ڈرائیوروں کے ساتھ آپ کی حفاظت ہماری اولین ترجیح ہے"
+        }
       },
       auth: {
         driverLogin: "ڈرائیور لاگ ان",
