@@ -8,6 +8,11 @@ A comprehensive bilingual vehicle and driver management system designed to strea
   - Full translation support for all cities and airports
   - Includes major Saudi cities and international airports
   - Bidirectional text support (RTL/LTR)
+- 🎨 Enhanced User Experience:
+  - Elegant page transitions with Framer Motion
+  - Personalized dashboard welcome animations
+  - Smart landing page animations
+  - Responsive and interactive UI elements
 - 🔐 Secure Role-based Authentication
 - 📱 Mobile-responsive Design
 - 📄 Dynamic Document Management
@@ -30,6 +35,7 @@ A comprehensive bilingual vehicle and driver management system designed to strea
 - Document upload capability (ID, license, profile picture)
 - Status tracking (pending, active, suspended)
 - Advanced search and filtering by name, date, and status
+- Personalized welcome animations
 
 ### Vehicle Management
 - Vehicle registration with detailed information
@@ -152,6 +158,21 @@ A comprehensive bilingual vehicle and driver management system designed to strea
 ├── tsconfig.json           # TypeScript configuration
 └── README.md              # Project documentation
 ```
+
+## Recent Updates
+
+### UI/UX Enhancements
+- Added personalized welcome animations for both admin and driver dashboards
+- Implemented smooth page transitions using Framer Motion
+- Updated landing page with interactive feature animations
+- Enhanced logo presentation across all dashboard interfaces
+- Improved multilingual support for document management interfaces
+
+### Performance Improvements
+- Optimized page loading animations
+- Enhanced dashboard rendering performance
+- Improved navigation transitions
+
 
 ## Development Setup
 
