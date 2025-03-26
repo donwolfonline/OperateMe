@@ -183,7 +183,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 vehicleId: null,
                 qrCode: "",
                 pdfUrl: "",
-                status: "active",
+                status: "pending",  // Start with pending status
                 createdAt: new Date()
             },
             orderData.passengers
@@ -202,7 +202,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const pdfFileName = await generateOrderPDF(order, req.user);
 
             // Verify PDF was created and has content
-            const pdfPath = path.join(process.cwd(), 'uploads', pdfFileName);
+            const pdfPath = path.join(uploadsDir, pdfFileName);
+            console.log('Checking PDF at path:', pdfPath);
+
             if (!fs.existsSync(pdfPath)) {
                 throw new Error(`PDF file not found at ${pdfPath}`);
             }
@@ -212,20 +214,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 throw new Error(`Generated PDF is empty: ${pdfPath}`);
             }
 
-            // Update order with PDF URL
-            const updatedOrder = {
-                ...order,
-                pdfUrl: pdfFileName
-            };
-            await storage.updateOperationOrder(updatedOrder);
-            console.log('Updated order with PDF URL:', pdfFileName);
+            console.log('PDF file verified, size:', stats.size);
 
+            // Update order with PDF URL and status
+            const updatedOrder = await storage.updateOperationOrder({
+                ...order,
+                pdfUrl: pdfFileName,
+                status: "active"
+            });
+
+            console.log('Order updated with PDF:', updatedOrder);
             res.status(201).json(updatedOrder);
         } catch (pdfError) {
             console.error('PDF generation error:', pdfError);
-            // Return the order even if PDF generation failed
-            res.status(201).json({
+            // Update order to indicate error
+            const failedOrder = await storage.updateOperationOrder({
                 ...order,
+                status: "error",
+                pdfUrl: ""
+            });
+            res.status(201).json({
+                ...failedOrder,
                 pdfGenerationError: pdfError.message
             });
         }
