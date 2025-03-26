@@ -57,14 +57,18 @@ def setup_template_assets():
     """Setup template assets including background image"""
     try:
         template_dir = Path(__file__).parent / 'pdf_templates'
+        template_dir.mkdir(parents=True, exist_ok=True)
 
-        # Copy background image to template directory if it doesn't exist
+        # Copy background image to template directory
         bg_image_source = Path(__file__).parent.parent.parent / 'attached_assets' / 'Screenshot 2025-03-26 at 8.03.07 AM.png'
         bg_image_dest = template_dir / 'lightning_road_bg.png'
 
-        if bg_image_source.exists() and not bg_image_dest.exists():
+        if bg_image_source.exists():
             shutil.copy(bg_image_source, bg_image_dest)
-            logger.info("Background image copied successfully")
+            logger.info(f"Background image copied successfully to {bg_image_dest}")
+        else:
+            logger.error(f"Background image not found at {bg_image_source}")
+            raise FileNotFoundError(f"Background image not found at {bg_image_source}")
 
         return template_dir
     except Exception as e:
@@ -93,15 +97,36 @@ def render_pdf(data, qr_code_base64, output_path):
         )
 
         font_config = FontConfiguration()
+        css_string = CSS(string='''
+            @page {
+                size: A4;
+                margin: 1.5cm;
+                @bottom-right {
+                    content: counter(page);
+                }
+            }
+            body {
+                font-family: 'Arial', sans-serif;
+                background-image: url('lightning_road_bg.png');
+                background-position: center;
+                background-repeat: no-repeat;
+                background-size: contain;
+                background-attachment: fixed;
+            }
+        ''')
 
-        # Create PDF with background image
-        HTML(string=html_content).write_pdf(
+        # Create PDF with background image and custom CSS
+        HTML(
+            string=html_content,
+            base_url=str(template_dir)
+        ).write_pdf(
             output_path,
             font_config=font_config,
+            stylesheets=[css_string],
             presentational_hints=True
         )
 
-        logger.info("Generated transport contract successfully")
+        logger.info(f"Generated transport contract successfully at {output_path}")
     except Exception as e:
         logger.error(f"Error in PDF generation: {str(e)}")
         raise
