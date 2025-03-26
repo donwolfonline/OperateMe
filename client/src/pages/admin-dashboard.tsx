@@ -64,8 +64,17 @@ export default function AdminDashboard() {
 
   const addDriver = async (data: InsertUser) => {
     try {
-      await apiRequest("POST", "/api/admin/drivers", data);
-      // Invalidate all relevant queries to refresh the UI
+      // Add logging to debug
+      console.log('Adding driver with data:', data);
+
+      const response = await apiRequest("POST", "/api/register", {
+        ...data,
+        role: "driver",
+        status: "active", // Change default status to active
+        isApproved: true // Set as approved by default when admin creates
+      });
+
+      // Invalidate queries to refresh the UI
       queryClient.invalidateQueries({ queryKey: ["/api/admin/pending-drivers"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/active-drivers"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/suspended-drivers"] });
@@ -75,6 +84,8 @@ export default function AdminDashboard() {
         description: t('admin.addDriverSuccess'),
         variant: "default"
       });
+
+      return response;
     } catch (error: any) {
       console.error('Error adding driver:', error);
       toast({
@@ -82,6 +93,7 @@ export default function AdminDashboard() {
         description: error.message || t('admin.addDriverError'),
         variant: "destructive"
       });
+      throw error;
     }
   };
 

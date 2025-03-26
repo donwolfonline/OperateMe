@@ -307,7 +307,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/register", async (req, res) => {
-    // existing registration logic 
+    try {
+      // Check for existing user
+      const existingUser = await storage.getUserByUsername(req.body.username);
+      if (existingUser) {
+        return res.status(400).json({ message: "Username already exists" });
+      }
+
+      // Log the registration attempt
+      console.log('Registering new user:', {
+        ...req.body,
+        password: '[REDACTED]'
+      });
+
+      const user = await storage.createUser({
+        ...req.body,
+        password: await hashPassword(req.body.password),
+        createdAt: new Date()
+      });
+
+      // Log success
+      console.log('User created successfully:', {
+        id: user.id,
+        username: user.username,
+        role: user.role,
+        status: user.status
+      });
+
+      res.status(201).json(user);
+    } catch (error: any) {
+      console.error('Registration error:', error);
+      res.status(400).json({ message: error.message || "Failed to create user" });
+    }
   });
 
   // Add DELETE route for driver deletion
