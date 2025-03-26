@@ -214,9 +214,11 @@ export default function AdminDashboard() {
     if (window.confirm(t('admin.removeConfirm'))) {
       try {
         // Show loading toast while deleting
+        const deletingMessage = t('notifications.deletingDriver');
+        const pleaseWaitMessage = t('notifications.pleaseWait');
         toast({
-          title: t('notifications.deletingDriver'),
-          description: t('notifications.pleaseWait'),
+          title: deletingMessage,
+          description: pleaseWaitMessage,
           variant: "default"
         });
 
@@ -236,9 +238,11 @@ export default function AdminDashboard() {
         ]);
 
         // Show success message
+        const successMessage = t('notifications.success');
+        const deletedMessage = t('notifications.driverDeleted');
         toast({
-          title: t('notifications.success'),
-          description: t('notifications.driverDeleted'),
+          title: successMessage,
+          description: deletedMessage,
           variant: "default"
         });
       } catch (error: any) {
