@@ -12,18 +12,18 @@ export const Logo = ({ className = "", size = 'md' }: LogoProps) => {
 
   const sizes = {
     sm: {
-      wrapper: "gap-1",
-      icon: "h-6 w-6",
+      wrapper: "gap-0.5",
+      icon: "h-5 w-5",
       text: "text-sm"
     },
     md: {
-      wrapper: "gap-2",
-      icon: "h-8 w-8",
+      wrapper: "gap-1",
+      icon: "h-6 w-6",
       text: "text-base"
     },
     lg: {
-      wrapper: "gap-3",
-      icon: "h-10 w-10",
+      wrapper: "gap-1.5",
+      icon: "h-8 w-8",
       text: "text-lg"
     }
   };
@@ -41,15 +41,15 @@ export const Logo = ({ className = "", size = 'md' }: LogoProps) => {
         fill="none"
         stroke="currentColor"
         strokeWidth="2"
-        className={`${sizes[size].icon} text-primary`}
+        className={`${sizes[size].icon} text-primary shrink-0`}
       >
         <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
       </svg>
-      <div className={`flex items-center ${isRTL ? 'mr-1' : 'ml-1'}`}>
+      <div className={`flex items-center ${isRTL ? 'mr-0.5' : 'ml-0.5'}`}>
         <span className={`${sizes[size].text} font-bold text-primary whitespace-nowrap`}>
           {t('landing.brandFirst')}
         </span>
-        <span className={`${sizes[size].text} font-bold text-muted-foreground whitespace-nowrap ${isRTL ? 'mr-1' : 'ml-1'}`}>
+        <span className={`${sizes[size].text} font-bold text-muted-foreground whitespace-nowrap ${isRTL ? 'mr-0.5' : 'ml-0.5'}`}>
           {t('landing.brandSecond')}
         </span>
       </div>
