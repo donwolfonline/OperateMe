@@ -213,7 +213,9 @@ export default function AdminDashboard() {
   const removeDriver = async (driverId: number) => {
     if (window.confirm(t('admin.removeConfirm'))) {
       try {
-        // Show loading toast while deleting
+        const { t } = useTranslation();
+
+        // First toast - Loading state
         toast({
           title: t('notifications.deletingDriver'),
           description: t('notifications.pleaseWait'),
@@ -237,7 +239,7 @@ export default function AdminDashboard() {
 
         // Show success message
         toast({
-          title: t('notifications.success'),
+          title: "Success",  // Using direct string instead of translation key
           description: t('notifications.driverDeleted'),
           variant: "default"
         });

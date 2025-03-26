@@ -13,9 +13,9 @@
     "vehicle_registered": "Vehicle Registered",
     "sessionExpired": "Session Expired",
     "sessionExpiredMessage": "Your session has expired. Please log in again.",
-    "deletingDriver": "Removing driver from system...",
-    "pleaseWait": "Please wait while we process your request...",
-    "driverDeleted": "Driver has been successfully removed",
+    "deletingDriver": "Removing driver...",
+    "pleaseWait": "Please wait...",
+    "driverDeleted": "Driver has been removed successfully",
     "invalidCredentials": "Account not found or invalid credentials",
     "success": "Success"
   },

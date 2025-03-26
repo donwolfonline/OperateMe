@@ -13,9 +13,9 @@
     "vehicle_registered": "تسجيل مركبة جديدة",
     "sessionExpired": "انتهت الجلسة",
     "sessionExpiredMessage": "انتهت جلستك. يرجى تسجيل الدخول مرة أخرى.",
-    "deletingDriver": "جاري إزالة السائق من النظام...",
-    "pleaseWait": "يرجى الانتظار ريثما نعالج طلبك...",
-    "driverDeleted": "تم إزالة السائق بنجاح",
+    "deletingDriver": "جاري حذف السائق...",
+    "pleaseWait": "يرجى الانتظار...",
+    "driverDeleted": "تم حذف السائق بنجاح",
     "invalidCredentials": "الحساب غير موجود أو بيانات الاعتماد غير صحيحة",
     "success": "نجاح"
   },
