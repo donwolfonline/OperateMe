@@ -1,5 +1,11 @@
 {pkgs}: {
   deps = [
+    pkgs.xcbuild
+    pkgs.swig
+    pkgs.mupdf
+    pkgs.libjpeg_turbo
+    pkgs.jbig2dec
+    pkgs.gumbo
     pkgs.postgresql
     pkgs.pango
     pkgs.harfbuzz
