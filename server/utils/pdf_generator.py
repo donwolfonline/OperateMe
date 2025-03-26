@@ -54,53 +54,59 @@ def generate_qr_code(pdf_filename):
 
 def generate_hyundai_staria_pdf(env, data, qr_code_base64, output_path):
     """Generate PDF specifically for Hyundai Staria vehicles"""
-    template = env.get_template('hyundai_contract.html')
-    html_content = template.render(
-        date=data['date'],
-        main_passenger=data['main_passenger'],
-        from_city=data['from_city'],
-        to_city=data['to_city'],
-        driver_name=data['driver_name'],
-        driver_id=data['driver_id'],
-        license_number=data['license_number'],
-        trip_number=data['trip_number'],
-        visa_type=data['visa_type'],
-        passengers=data['passengers'],
-        qr_code=qr_code_base64
-    )
+    try:
+        template = env.get_template('hyundai_staria_contract.html')
+        html_content = template.render(
+            date=data['date'],
+            main_passenger=data['main_passenger'],
+            from_city=data['from_city'],
+            to_city=data['to_city'],
+            driver_name=data['driver_name'],
+            driver_id=data['driver_id'],
+            license_number=data['license_number'],
+            trip_number=data['trip_number'],
+            visa_type=data['visa_type'],
+            passengers=data['passengers'],
+            qr_code=qr_code_base64
+        )
 
-    # Verify correct company name is present
-    if "شركة صاعقة الطريق للنقل البري" not in html_content:
-        raise ValueError("Hyundai template missing correct company name")
+        if "شركة صاعقة الطريق للنقل البري" not in html_content:
+            raise ValueError("Hyundai template verification failed - incorrect company name")
 
-    font_config = FontConfiguration()
-    HTML(string=html_content).write_pdf(output_path, font_config=font_config)
-    logger.info("Generated Hyundai Staria contract PDF")
+        font_config = FontConfiguration()
+        HTML(string=html_content).write_pdf(output_path, font_config=font_config)
+        logger.info("Successfully generated Hyundai Staria contract PDF")
+    except Exception as e:
+        logger.error(f"Error generating Hyundai PDF: {str(e)}")
+        raise
 
 def generate_gmc_chevrolet_pdf(env, data, qr_code_base64, output_path):
     """Generate PDF specifically for GMC/Chevrolet vehicles"""
-    template = env.get_template('gmc_contract.html')
-    html_content = template.render(
-        date=data['date'],
-        main_passenger=data['main_passenger'],
-        from_city=data['from_city'],
-        to_city=data['to_city'],
-        driver_name=data['driver_name'],
-        driver_id=data['driver_id'],
-        license_number=data['license_number'],
-        trip_number=data['trip_number'],
-        visa_type=data['visa_type'],
-        passengers=data['passengers'],
-        qr_code=qr_code_base64
-    )
+    try:
+        template = env.get_template('gmc_chevrolet_contract.html')
+        html_content = template.render(
+            date=data['date'],
+            main_passenger=data['main_passenger'],
+            from_city=data['from_city'],
+            to_city=data['to_city'],
+            driver_name=data['driver_name'],
+            driver_id=data['driver_id'],
+            license_number=data['license_number'],
+            trip_number=data['trip_number'],
+            visa_type=data['visa_type'],
+            passengers=data['passengers'],
+            qr_code=qr_code_base64
+        )
 
-    # Verify correct company name is present
-    if "شركة النجمة الفارهة للنقل البري" not in html_content:
-        raise ValueError("GMC template missing correct company name")
+        if "شركة النجمة الفارهة للنقل البري" not in html_content:
+            raise ValueError("GMC template verification failed - incorrect company name")
 
-    font_config = FontConfiguration()
-    HTML(string=html_content).write_pdf(output_path, font_config=font_config)
-    logger.info("Generated GMC/Chevrolet contract PDF")
+        font_config = FontConfiguration()
+        HTML(string=html_content).write_pdf(output_path, font_config=font_config)
+        logger.info("Successfully generated GMC/Chevrolet contract PDF")
+    except Exception as e:
+        logger.error(f"Error generating GMC PDF: {str(e)}")
+        raise
 
 def generate_pdf(data_path, output_path):
     try:
@@ -108,11 +114,11 @@ def generate_pdf(data_path, output_path):
         with open(data_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
 
-        # Get vehicle info
+        # Get vehicle info and convert to lowercase for comparison
         vehicle_type = (data.get('vehicle_type') or '').lower().strip()
         vehicle_model = (data.get('vehicle_model') or '').lower().strip()
 
-        logger.info(f"Generating PDF for vehicle type: {vehicle_type}, model: {vehicle_model}")
+        logger.info(f"Processing PDF generation for vehicle: type={vehicle_type}, model={vehicle_model}")
 
         # Generate QR code
         pdf_filename = Path(output_path).name
@@ -130,11 +136,10 @@ def generate_pdf(data_path, output_path):
             logger.info("Using GMC/Chevrolet contract generator")
             generate_gmc_chevrolet_pdf(env, data, qr_code_base64, output_path)
 
-        logger.info(f"PDF generated successfully at: {output_path}")
         return pdf_filename
 
     except Exception as e:
-        logger.error(f"Error generating PDF: {str(e)}")
+        logger.error(f"Error in PDF generation: {str(e)}")
         raise
 
 if __name__ == "__main__":
