@@ -9,23 +9,40 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { insertUserSchema } from "@shared/schema";
 import LanguageToggle from "@/components/LanguageToggle";
 import HomeButton from "@/components/HomeButton";
+import { Redirect } from "wouter";
+import { Loader2 } from "lucide-react";
 
 export default function RegisterPage() {
   const { t } = useTranslation();
   const { user, registerMutation } = useAuth();
 
-  if (user) {
-    window.location.href = "/driver";
-    return null;
-  }
-
   const registerForm = useForm({
-    resolver: zodResolver(insertUserSchema)
+    resolver: zodResolver(insertUserSchema),
+    defaultValues: {
+      username: "",
+      password: "",
+      fullName: "",
+      idNumber: "",
+      licenseNumber: "",
+      role: "driver",
+      status: "pending",
+      isApproved: false
+    }
   });
 
   const onRegister = async (data: any) => {
-    await registerMutation.mutateAsync(data);
+    try {
+      await registerMutation.mutateAsync(data);
+    } catch (error) {
+      // Error handling is done in useAuth hook
+      console.error('Registration error:', error);
+    }
   };
+
+  // If already authenticated, redirect to appropriate dashboard
+  if (user) {
+    return <Redirect to="/driver" />;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-secondary p-4">
@@ -113,7 +130,14 @@ export default function RegisterPage() {
                   className="w-full"
                   disabled={registerMutation.isPending}
                 >
-                  {t('auth.register')}
+                  {registerMutation.isPending ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      {t('auth.registering')}
+                    </>
+                  ) : (
+                    t('auth.register')
+                  )}
                 </Button>
               </form>
             </Form>

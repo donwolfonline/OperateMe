@@ -9,6 +9,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { insertUserSchema } from "@shared/schema";
 import LanguageToggle from "@/components/LanguageToggle";
 import HomeButton from "@/components/HomeButton";
+import { Redirect } from "wouter";
+import { Loader2 } from "lucide-react";
 
 export default function AuthPage() {
   const { t } = useTranslation();
@@ -17,27 +19,35 @@ export default function AuthPage() {
   // Check if we're on the admin login page by checking the full URL path
   const isAdmin = window.location.pathname.includes('/admin');
 
-  if (user) {
-    const redirectPath = user.role === "admin" ? "/admin" : "/driver";
-    window.location.href = redirectPath;
-    return null;
-  }
-
   const loginForm = useForm({
     resolver: zodResolver(
       insertUserSchema.pick({ 
         username: true, 
         password: true 
       })
-    )
+    ),
+    defaultValues: {
+      username: "",
+      password: ""
+    }
   });
 
   const onLogin = async (data: any) => {
-    await loginMutation.mutateAsync({
-      ...data,
-      role: isAdmin ? "admin" : "driver"
-    });
+    try {
+      await loginMutation.mutateAsync({
+        ...data,
+        role: isAdmin ? "admin" : "driver"
+      });
+    } catch (error) {
+      // Error handling is done in useAuth hook
+      console.error('Login error:', error);
+    }
   };
+
+  // If already authenticated, redirect to appropriate dashboard
+  if (user) {
+    return <Redirect to={user.role === "admin" ? "/admin/dashboard" : "/driver"} />;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-secondary p-4">
@@ -86,7 +96,14 @@ export default function AuthPage() {
                   className="w-full"
                   disabled={loginMutation.isPending}
                 >
-                  {t('auth.login')}
+                  {loginMutation.isPending ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      {t('auth.loggingIn')}
+                    </>
+                  ) : (
+                    t('auth.login')
+                  )}
                 </Button>
 
                 {/* Only show register button for driver login */}
@@ -94,9 +111,11 @@ export default function AuthPage() {
                   <div className="text-center mt-4">
                     <Button 
                       variant="link" 
-                      onClick={() => window.location.href = "/register"}
+                      asChild
                     >
-                      {t('auth.registerAsDriver')}
+                      <a href="/register">
+                        {t('auth.registerAsDriver')}
+                      </a>
                     </Button>
                   </div>
                 )}
