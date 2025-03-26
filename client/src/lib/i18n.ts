@@ -71,7 +71,11 @@ const resources = {
         noAdditional: "No additional vehicles can be registered",
         selectType: "Select Vehicle Type",
         modelPlaceholder: "Enter vehicle model",
-        plateNumberPlaceholder: "Enter plate number"
+        plateNumberPlaceholder: "Enter plate number",
+        manufacturer: "Vehicle Manufacturer",
+        selectManufacturer: "Select Vehicle Manufacturer",
+        selectModel: "Select Vehicle Model",
+        photoRequired: "Please upload vehicle photos"
       },
       order: {
         fromCity: "From City",
@@ -148,6 +152,11 @@ const resources = {
         registrationDocument: "Registration Document",
         clearAll: "Clear all filters",
         selectDriver: "Select Driver"
+      },
+      cities: {
+        jeddahAirport: "Jeddah Airport",
+        taifAirport: "Taif Airport",
+        medinaAirport: "Medina Airport",
       }
     }
   },
@@ -220,7 +229,12 @@ const resources = {
         noAdditional: "لا يمكن تسجيل مركبات إضافية",
         selectType: "اختر نوع المركبة",
         modelPlaceholder: "أدخل موديل المركبة",
-        plateNumberPlaceholder: "أدخل رقم اللوحة"
+        plateNumberPlaceholder: "أدخل رقم اللوحة",
+        manufacturer: "نوع المركبة",
+        selectManufacturer: "اختر نوع المركبة",
+        selectModel: "اختر موديل المركبة",
+        photoRequired: "الرجاء تحميل صور المركبة"
+
       },
       order: {
         fromCity: "مدينة الانطلاق",
