@@ -21,19 +21,6 @@ function generateUID(role: string, id: number): string {
   return `${prefix}-${id}${timestamp}${randomSuffix}`.toUpperCase();
 }
 
-// Company Mapping Type -  Assuming this is defined elsewhere, but needs to be added for compilation.  Replace with your actual type.
-interface CompanyMapping {
-  id: number;
-  companyId: number;
-  isActive: boolean;
-  createdAt: Date;
-}
-
-interface InsertCompanyMapping {
-  companyId: number;
-  isActive: boolean;
-}
-
 export interface IStorage {
   sessionStore: session.Store;
   getUser(id: number): Promise<User | undefined>;
@@ -61,10 +48,6 @@ export interface IStorage {
   getAllOperationOrders(): Promise<OperationOrder[]>;
   updateDriver(id: number, updates: { status: string; isApproved: boolean }): Promise<User | undefined>;
   getVehicleByOrder(orderId: number): Promise<Vehicle | undefined>;
-  // Company mapping methods
-  getCompanyMappings(): Promise<CompanyMapping[]>;
-  createCompanyMapping(mapping: InsertCompanyMapping): Promise<CompanyMapping>;
-  toggleCompanyMapping(id: number): Promise<CompanyMapping | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -274,38 +257,6 @@ export class DatabaseStorage implements IStorage {
 
     const [vehicle] = await db.select().from(vehicles).where(eq(vehicles.id, order.vehicleId));
     return vehicle;
-  }
-
-  async getCompanyMappings(): Promise<CompanyMapping[]> {
-    return db.select().from(companyMappings);
-  }
-
-  async createCompanyMapping(mapping: InsertCompanyMapping): Promise<CompanyMapping> {
-    const [newMapping] = await db
-      .insert(companyMappings)
-      .values({
-        ...mapping,
-        createdAt: new Date()
-      })
-      .returning();
-    return newMapping;
-  }
-
-  async toggleCompanyMapping(id: number): Promise<CompanyMapping | undefined> {
-    const [mapping] = await db
-      .select()
-      .from(companyMappings)
-      .where(eq(companyMappings.id, id));
-
-    if (!mapping) return undefined;
-
-    const [updatedMapping] = await db
-      .update(companyMappings)
-      .set({ isActive: !mapping.isActive })
-      .where(eq(companyMappings.id, id))
-      .returning();
-
-    return updatedMapping;
   }
 }
 

@@ -70,9 +70,14 @@ def render_hyundai_staria_pdf(env, data, qr_code_base64, output_path):
             qr_code=qr_code_base64
         )
 
-        # Verify company name
-        if "شركة صاعقة الطريق للنقل البري" not in html_content:
+        # Add more detailed logging
+        logger.info("Checking company name in rendered HTML...")
+        expected_company = "شركة صاعقة الطريق للنقل البري (شخص واحد)"
+        if expected_company not in html_content:
+            logger.error(f"Company name verification failed. Expected: {expected_company}")
             raise ValueError("Hyundai Staria template verification failed - missing required company name")
+        else:
+            logger.info("Company name verification passed")
 
         font_config = FontConfiguration()
         HTML(string=html_content).write_pdf(output_path, font_config=font_config)
@@ -128,6 +133,7 @@ def generate_pdf(data_path, output_path):
 
         # Setup Jinja2 environment
         template_dir = Path(__file__).parent / 'pdf_templates'
+        logger.info(f"Loading templates from: {template_dir}")
         env = Environment(loader=FileSystemLoader(template_dir))
 
         # Use specific template based on vehicle type
