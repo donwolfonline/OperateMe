@@ -451,6 +451,32 @@ const resources = {
       dashboard: {
         welcome: "خوش آمدید",
         driverWelcomeMessage: "اپنے اگلے سفر کے لیے تیار"
+      },
+      admin: {
+        dashboard: "ایڈمن ڈیش بورڈ",
+        removeDriverSuccess: "ڈرائیور کامیابی سے ہٹا دیا گیا",
+        removeDriverError: "ڈرائیور کو ہٹانے میں ناکامی",
+        removeConfirm: "کیا آپ واقعی اس ڈرائیور کو ہٹانا چاہتے ہیں؟",
+        addDriver: "ڈرائیور شامل کریں",
+        addNewDriver: "نیا ڈرائیور شامل کریں",
+        exportDrivers: "ڈرائیورز کی فہرست برآمد کریں",
+        exportOrders: "آرڈرز کی فہرست برآمد کریں",
+        exportData: "ڈیٹا برآمد کریں",
+        pendingDrivers: "زیر التواء ڈرائیورز",
+        activeDrivers: "فعال ڈرائیورز",
+        suspendedDrivers: "معطل ڈرائیورز",
+        allOrders: "تمام آرڈرز",
+        orders: "آرڈرز",
+        documents: "دستاویزات",
+        noDrivers: "کوئی ڈرائیور نہیں ملا",
+        noActiveDrivers: "کوئی فعال ڈرائیور نہیں ملا",
+        noSuspendedDrivers: "کوئی معطل ڈرائیور نہیں ملا",
+        noOrders: "کوئی آرڈر نہیں ملا",
+        noDocuments: "کوئی دستاویز نہیں ملی",
+        approve: "منظور کریں",
+        suspend: "معطل کریں",
+        activate: "فعال کریں",
+        removeDriver: "ڈرائیور کو ہٹائیں"
       }
     }
   }
