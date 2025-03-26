@@ -23,8 +23,24 @@
     "removeDriverSuccess": "تم إزالة السائق بنجاح",
     "removeDriverError": "فشل في إزالة السائق",
     "removeConfirm": "هل أنت متأكد أنك تريد إزالة هذا السائق؟",
-    "exportDrivers": "تصدير السائقين",
-    "exportOrders": "تصدير الطلبات",
-    "exportData": "تصدير البيانات"
+    "addDriver": "إضافة سائق",
+    "addNewDriver": "إضافة سائق جديد",
+    "exportDrivers": "تصدير قائمة السائقين",
+    "exportOrders": "تصدير قائمة الطلبات",
+    "exportData": "تصدير البيانات",
+    "pendingDrivers": "السائقون المعلقون",
+    "activeDrivers": "السائقون النشطون",
+    "suspendedDrivers": "السائقون الموقوفون",
+    "allOrders": "جميع الطلبات",
+    "documents": "المستندات",
+    "noDrivers": "لم يتم العثور على سائقين",
+    "noActiveDrivers": "لا يوجد سائقين نشطين",
+    "noSuspendedDrivers": "لا يوجد سائقين موقوفين",
+    "noOrders": "لا توجد طلبات",
+    "noDocuments": "لا توجد مستندات",
+    "approve": "موافقة",
+    "suspend": "إيقاف",
+    "activate": "تفعيل",
+    "removeDriver": "إزالة السائق"
   }
 }

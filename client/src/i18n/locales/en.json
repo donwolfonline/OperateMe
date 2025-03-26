@@ -15,7 +15,7 @@
     "sessionExpiredMessage": "Your session has expired. Please log in again.",
     "deletingDriver": "Removing driver...",
     "pleaseWait": "Please wait...",
-    "driverDeleted": "Driver has been removed successfully",
+    "driverDeleted": "Driver deleted successfully",
     "invalidCredentials": "Account not found or invalid credentials",
     "success": "Success"
   },
@@ -23,8 +23,24 @@
     "removeDriverSuccess": "Driver has been successfully removed",
     "removeDriverError": "Failed to remove driver",
     "removeConfirm": "Are you sure you want to remove this driver?",
-    "exportDrivers": "Export Drivers",
-    "exportOrders": "Export Orders",
-    "exportData": "Export Data"
+    "addDriver": "Add Driver",
+    "addNewDriver": "Add New Driver",
+    "exportDrivers": "Export Drivers List",
+    "exportOrders": "Export Orders List",
+    "exportData": "Export Data",
+    "pendingDrivers": "Pending Drivers",
+    "activeDrivers": "Active Drivers",
+    "suspendedDrivers": "Suspended Drivers",
+    "allOrders": "All Orders",
+    "documents": "Documents",
+    "noDrivers": "No drivers found",
+    "noActiveDrivers": "No active drivers found",
+    "noSuspendedDrivers": "No suspended drivers found",
+    "noOrders": "No orders found",
+    "noDocuments": "No documents found",
+    "approve": "Approve",
+    "suspend": "Suspend",
+    "activate": "Activate",
+    "removeDriver": "Remove Driver"
   }
 }
