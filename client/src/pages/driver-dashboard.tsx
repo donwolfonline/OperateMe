@@ -7,7 +7,6 @@ import DriverProfile from "@/components/DriverProfile";
 import VehicleForm from "@/components/VehicleForm";
 import OperationOrder from "@/components/OperationOrder";
 import LanguageToggle from "@/components/LanguageToggle";
-import HomeButton from "@/components/HomeButton";
 import { Redirect } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { FileText, Download, Calendar, MapPin, Users } from "lucide-react";
@@ -16,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { useState, useEffect } from "react";
 import { WelcomeAnimation } from "@/components/WelcomeAnimation";
+import { Logo } from "@/components/Logo"; // Fixed import to use named import
 
 
 function DriverDashboardContent() {
@@ -57,7 +57,7 @@ function DriverDashboardContent() {
       <div className="min-h-screen bg-background">
         <div className="container mx-auto px-4 py-8">
           <div className="flex justify-between items-center mb-8">
-            <HomeButton />
+            <Logo size="md" />
             <div className="flex gap-4">
               <LanguageToggle />
               <button

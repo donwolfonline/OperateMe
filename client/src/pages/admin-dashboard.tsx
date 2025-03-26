@@ -7,7 +7,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { apiRequest } from "@/lib/queryClient";
 import { User, OperationOrder, InsertUser, insertUserSchema } from "@shared/schema";
 import LanguageToggle from "@/components/LanguageToggle";
-import HomeButton from "@/components/HomeButton";
 import { Badge } from "@/components/ui/badge";
 import { FileText, User as UserIcon, Car, FileCheck, Download, Calendar, MapPin, Users } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -23,6 +22,7 @@ import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { Logo } from "@/components/Logo";
 
 const getPublicUrl = (path: string) => {
   const baseUrl = process.env.NODE_ENV === 'production'
@@ -479,7 +479,7 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
-          <HomeButton />
+          <Logo size="md" />
           <div className="flex items-center gap-4">
             <LanguageToggle />
             <button
