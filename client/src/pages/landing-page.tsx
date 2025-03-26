@@ -6,7 +6,8 @@ import { motion } from "framer-motion";
 import { FaGooglePlay, FaAppStore } from "react-icons/fa";
 
 export default function LandingPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.dir() === 'rtl';
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-secondary">
@@ -28,9 +29,11 @@ export default function LandingPage() {
             >
               <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
             </svg>
-            <div className="flex items-center">
-              <span className="text-xl md:text-2xl font-bold text-primary">{t('landing.brandFirst')}</span>
-              <span className="mx-1 md:mx-2 text-xl md:text-2xl font-bold text-muted-foreground">{t('landing.brandSecond')}</span>
+            <div className={`flex items-center ${isRTL ? 'mr-2' : 'ml-2'} min-w-[150px] md:min-w-[180px]`}>
+              <span className="text-lg md:text-xl font-bold text-primary whitespace-nowrap">{t('landing.brandFirst')}</span>
+              <span className={`${isRTL ? 'mr-1 md:mr-2' : 'ml-1 md:ml-2'} text-lg md:text-xl font-bold text-muted-foreground whitespace-nowrap`}>
+                {t('landing.brandSecond')}
+              </span>
             </div>
           </motion.div>
           <LanguageToggle />
