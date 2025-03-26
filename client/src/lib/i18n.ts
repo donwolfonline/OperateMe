@@ -42,7 +42,9 @@ const resources = {
         success: "Success",
         pendingApproval: "Your account is pending approval. You'll be able to create orders once approved.",
         orderSuccess: "Success",
-        orderCreated: "Operation order created successfully"
+        orderCreated: "Operation order created successfully",
+        accountSuspended: "Account Suspended",
+        suspensionMessage: "Your account has been suspended. Please contact administration for more information."
       },
       search: {
         placeholder: "Search..."
@@ -193,7 +195,9 @@ const resources = {
         success: "نجاح",
         pendingApproval: "حسابك قيد الموافقة. ستتمكن من إنشاء الطلبات بمجرد الموافقة عليه.",
         orderSuccess: "نجاح",
-        orderCreated: "تم إنشاء أمر التشغيل بنجاح"
+        orderCreated: "تم إنشاء أمر التشغيل بنجاح",
+        accountSuspended: "الحساب موقوف",
+        suspensionMessage: "تم إيقاف حسابك. يرجى الاتصال بالإدارة لمزيد من المعلومات."
       },
       search: {
         placeholder: "بحث..."
@@ -344,7 +348,9 @@ const resources = {
         success: "کامیابی",
         pendingApproval: "آپ کا اکاؤنٹ منظوری کے انتظار میں ہے۔ منظوری کے بعد آپ آرڈر بنا سکیں گے۔",
         orderSuccess: "کامیابی",
-        orderCreated: "آپریشن آرڈر کامیابی سے بنایا گیا"
+        orderCreated: "آپریشن آرڈر کامیابی سے بنایا گیا",
+        accountSuspended: "اکاؤنٹ معطل ہے",
+        suspensionMessage: "آپ کا اکاؤنٹ معطل کر دیا گیا ہے۔ مزید معلومات کے لیے انتظامیہ سے رابطہ کریں۔"
       },
       search: {
         placeholder: "تلاش..."
