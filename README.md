@@ -31,10 +31,10 @@ A comprehensive bilingual vehicle and driver management system designed to strea
 ## Key Features
 
 ### Driver Management
-- Driver registration and profile management
-- Document upload capability (ID, license, profile picture)
-- Status tracking (pending, active, suspended)
-- Advanced search and filtering by name, date, and status
+- Driver registration with proper status workflow (pending → active)
+- Profile management with document upload capability
+- Status tracking (pending, active, suspended) with admin approval
+- Advanced search and filtering
 - Personalized welcome animations
 
 ### Vehicle Management
@@ -165,13 +165,14 @@ A comprehensive bilingual vehicle and driver management system designed to strea
 - Added personalized welcome animations for both admin and driver dashboards
 - Implemented smooth page transitions using Framer Motion
 - Updated landing page with interactive feature animations
-- Enhanced logo presentation across all dashboard interfaces
+- Enhanced logo presentation and sizing across all interfaces
 - Improved multilingual support for document management interfaces
 
-### Performance Improvements
-- Optimized page loading animations
+### System Improvements
+- Fixed driver registration workflow to properly handle pending status
 - Enhanced dashboard rendering performance
 - Improved navigation transitions
+- Optimized page loading animations
 
 
 ## Development Setup
