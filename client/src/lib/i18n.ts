@@ -39,7 +39,45 @@ const resources = {
         pleaseWait: "Please wait...",
         driverDeleted: "Driver deleted successfully",
         invalidCredentials: "Account not found or invalid credentials",
-        success: "Success"
+        success: "Success",
+        pendingApproval: "Your account is pending approval. You'll be able to create orders once approved."
+      },
+      search: {
+        placeholder: "Search..."
+      },
+      driver: {
+        profile: "Driver Profile",
+        vehicles: "My Vehicles",
+        orders: "Operation Orders",
+        history: "History",
+        operationHistory: "Operation History",
+        noOrders: "No orders found",
+        uploadId: "Upload ID Document",
+        uploadLicense: "Upload License Document"
+      },
+      vehicle: {
+        manufacturer: "Vehicle Manufacturer",
+        selectManufacturer: "Select Manufacturer",
+        model: "Vehicle Model",
+        selectModel: "Select Model",
+        year: "Manufacturing Year",
+        plateNumber: "Plate Number",
+        plateNumberPlaceholder: "Enter plate number",
+        photos: "Vehicle Photos",
+        save: "Save Vehicle"
+      },
+      order: {
+        fromCity: "From City",
+        toCity: "To City",
+        selectCity: "Select City",
+        departureTime: "Departure Time",
+        visaType: "Visa Type",
+        tripNumber: "Trip Number",
+        passengers: "Passengers",
+        addPassenger: "Add Passenger",
+        passengerName: "Passenger Name",
+        passengerIdNumber: "ID Number",
+        nationality: "Nationality"
       },
       auth: {
         driverLogin: "Driver Login",
@@ -130,7 +168,45 @@ const resources = {
         pleaseWait: "يرجى الانتظار...",
         driverDeleted: "تم حذف السائق بنجاح",
         invalidCredentials: "الحساب غير موجود أو بيانات الاعتماد غير صحيحة",
-        success: "نجاح"
+        success: "نجاح",
+        pendingApproval: "حسابك قيد الموافقة. ستتمكن من إنشاء الطلبات بمجرد الموافقة عليه."
+      },
+      search: {
+        placeholder: "بحث..."
+      },
+      driver: {
+        profile: "ملف السائق",
+        vehicles: "مركباتي",
+        orders: "أوامر التشغيل",
+        history: "السجل",
+        operationHistory: "سجل العمليات",
+        noOrders: "لا توجد طلبات",
+        uploadId: "رفع صورة الهوية",
+        uploadLicense: "رفع صورة الرخصة"
+      },
+      vehicle: {
+        manufacturer: "الشركة المصنعة",
+        selectManufacturer: "اختر الشركة المصنعة",
+        model: "موديل المركبة",
+        selectModel: "اختر الموديل",
+        year: "سنة التصنيع",
+        plateNumber: "رقم اللوحة",
+        plateNumberPlaceholder: "أدخل رقم اللوحة",
+        photos: "صور المركبة",
+        save: "حفظ المركبة"
+      },
+      order: {
+        fromCity: "مدينة الانطلاق",
+        toCity: "مدينة الوصول",
+        selectCity: "اختر المدينة",
+        departureTime: "وقت المغادرة",
+        visaType: "نوع التأشيرة",
+        tripNumber: "رقم الرحلة",
+        passengers: "الركاب",
+        addPassenger: "إضافة راكب",
+        passengerName: "اسم الراكب",
+        passengerIdNumber: "رقم الهوية",
+        nationality: "الجنسية"
       },
       auth: {
         driverLogin: "تسجيل دخول السائق",
@@ -221,7 +297,45 @@ const resources = {
         pleaseWait: "براہ کرم انتظار کریں...",
         driverDeleted: "ڈرائیور کامیابی سے حذف کر دیا گیا",
         invalidCredentials: "اکاؤنٹ نہیں ملا یا غلط کریڈنشلز",
-        success: "کامیابی"
+        success: "کامیابی",
+        pendingApproval: "آپ کا اکاؤنٹ منظوری کے انتظار میں ہے۔ منظوری کے بعد آپ آرڈر بنا سکیں گے۔"
+      },
+      search: {
+        placeholder: "تلاش..."
+      },
+      driver: {
+        profile: "ڈرائیور پروفائل",
+        vehicles: "میری گاڑیاں",
+        orders: "آپریشن آرڈرز",
+        history: "تاریخ",
+        operationHistory: "آپریشن کی تاریخ",
+        noOrders: "کوئی آرڈر نہیں ملا",
+        uploadId: "شناختی دستاویز اپلوڈ کریں",
+        uploadLicense: "لائسنس دستاویز اپلوڈ کریں"
+      },
+      vehicle: {
+        manufacturer: "گاڑی کی کمپنی",
+        selectManufacturer: "گاڑی کی کمپنی منتخب کریں",
+        model: "گاڑی کا ماڈل",
+        selectModel: "گاڑی کا ماڈل منتخب کریں",
+        year: "تیاری کا سال",
+        plateNumber: "پلیٹ نمبر",
+        plateNumberPlaceholder: "پلیٹ نمبر درج کریں",
+        photos: "گاڑی کی تصاویر",
+        save: "گاڑی محفوظ کریں"
+      },
+      order: {
+        fromCity: "کس شہر سے",
+        toCity: "کس شہر تک",
+        selectCity: "شہر منتخب کریں",
+        departureTime: "روانگی کا وقت",
+        visaType: "ویزا کی قسم",
+        tripNumber: "سفر نمبر",
+        passengers: "مسافر",
+        addPassenger: "مسافر شامل کریں",
+        passengerName: "مسافر کا نام",
+        passengerIdNumber: "شناختی نمبر",
+        nationality: "قومیت"
       },
       auth: {
         driverLogin: "ڈرائیور لاگ ان",
