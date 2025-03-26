@@ -19,8 +19,14 @@ export default function LanguageToggle() {
   const { t } = useTranslation();
 
   const handleLanguageChange = (langCode: string) => {
-    i18n.changeLanguage(langCode);
+    // Save language preference to localStorage
+    localStorage.setItem('language', langCode);
+
+    // Update document direction
     document.dir = langCode === "ar" ? "rtl" : "ltr";
+
+    // Change language in i18n
+    i18n.changeLanguage(langCode);
   };
 
   return (

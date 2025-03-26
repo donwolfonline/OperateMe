@@ -1,6 +1,13 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
+// Get saved language preference from localStorage, default to 'ar'
+const savedLanguage = localStorage.getItem('language') || 'ar';
+const savedDirection = savedLanguage === 'ar' ? 'rtl' : 'ltr';
+
+// Set initial document direction
+document.dir = savedDirection;
+
 const resources = {
   en: {
     translation: {
@@ -425,7 +432,7 @@ const resources = {
         generatingPdf: "PDF دستاویز تیار کی جا رہی ہے...",
         documentReady: "دستاویز تیار ہے",
         downloadPdf: "PDF ڈاؤن لوڈ کریں",
-        download: "ڈاؤنلوڈ کریں",
+        download: "ڈاؤن لوڈ کریں",
         route: "روٹ",
         driver: "ڈرائیور",
         passengerCount: "مسافروں کی تعداد",
@@ -497,8 +504,8 @@ i18n
   .use(initReactI18next)
   .init({
     resources,
-    lng: "ar",
-    fallbackLng: "ar",
+    lng: savedLanguage,
+    fallbackLng: 'ar',
     interpolation: {
       escapeValue: false
     }
