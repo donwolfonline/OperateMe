@@ -785,7 +785,9 @@ export default function AdminDashboard() {
                 />
                 {filteredOrders?.length === 0 ? (
                   <p className="text-muted-foreground text-center py-4">{t('admin.noOrders')}</p>
-                )                    {filteredOrders?.map(renderOrderCard)}
+                ) : (
+                  <div className="space-y-4">
+                    {filteredOrders?.map(renderOrderCard)}
                   </div>
                 )}
               </CardContent>
@@ -808,40 +810,87 @@ export default function AdminDashboard() {
                 ) : (
                   <div className="grid gap-6">
                     {filteredDocuments.map((order) => (
-                      <div key={order.id} className="bg-muted p-4 rounded-lg">
-                        <div className="flex items-center justify-between mb-4">
-                          <div>
-                            <h3 className="font-medium">Trip #{order.tripNumber}</h3>
-                            <p className="text-sm text-muted-foreground">
-                              {order.driver?.fullName} ({order.driver?.uid})
-                            </p>
+                      <Card key={order.id} className="hover:shadow-md transition-shadow">
+                        <CardContent className="p-6">
+                          <div className="flex flex-col lg:flex-row justify-between gap-4">
+                            <div className="space-y-2">
+                              <div className="flex items-center gap-2">
+                                <FileText className="h-5 w-5 text-primary" />
+                                <h3 className="text-lg font-semibold">
+                                  {t('order.tripNumber')}: {order.tripNumber}
+                                </h3>
+                              </div>
+                              <div className="text-sm text-muted-foreground space-y-1">
+                                <p className="flex items-center gap-2">
+                                  <Calendar className="h-4 w-4" />
+                                  {new Date(order.createdAt).toLocaleString()}
+                                </p>
+                                <p className="flex items-center gap-2">
+                                  <MapPin className="h-4 w-4" />
+                                  {order.fromCity} → {order.toCity}
+                                </p>
+                                <p className="flex items-center gap-2">
+                                  <Users className="h-4 w-4" />
+                                  {t('order.passengerCount')}: {order.passengers?.length || 0}
+                                </p>
+                                {order.driver && order.driver.fullName && (
+                                  <p className="flex items-center gap-2">
+                                    <UserIcon className="h-4 w-4" />
+                                    {t('order.issuedBy')}: {order.driver.fullName}
+                                    {order.driver.uid && ` (${order.driver.uid})`}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex flex-col sm:flex-row gap-2">
+                              {order.pdfUrl && (
+                                <>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    asChild
+                                  >
+                                    <a
+                                      href={getPublicUrl(order.pdfUrl)}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="flex items-center gap-2"
+                                    >
+                                      <FileText className="h-4 w-4" />
+                                      {t('order.viewDocument')}
+                                    </a>
+                                  </Button>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => window.open(getPublicUrl(order.pdfUrl), '_blank')}
+                                  >
+                                    <Download className="h-4 w-4 mr-2" />
+                                    {t('order.download')}
+                                  </Button>
+                                </>
+                              )}
+                              {order.qrCode && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  asChild
+                                >
+                                  <a
+                                    href={getPublicUrl(order.qrCode)}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-2"
+                                  >
+                                    <QrCode className="h-4 w-4" />
+                                    {t('order.viewQr')}
+                                  </a>
+                                </Button>
+                              )}
+                            </div>
                           </div>
-                          <div className="flex gap-2">
-                            {order.pdfUrl && (
-                              <a
-                                href={getPublicUrl(order.pdfUrl)}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center text-sm text-primary hover:underline"
-                              >
-                                <FileText className="h-4 w-4 mr-1" />
-                                {t('order.downloadPdf')}
-                              </a>
-                            )}
-                            {order.qrCode && (
-                              <a
-                                href={getPublicUrl(order.qrCode)}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center text-sm text-primary hover:underline"
-                              >
-                                <QrCode className="h-4 w-4 mr-1" />
-                                {t('order.viewQr')}
-                              </a>
-                            )}
-                          </div>
-                        </div>
-                      </div>
+                        </CardContent>
+                      </Card>
                     ))}
                   </div>
                 )}
