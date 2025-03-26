@@ -504,6 +504,51 @@ export default function AdminDashboard() {
   const filteredDocuments = useMemo(() =>
     filterDocuments(allOrders), [allOrders, searchTerm, activeFilters]);
 
+  const renderExportButtons = () => (
+    <div className="flex gap-2">
+      <Button
+        variant="outline"
+        onClick={() => {
+          const exportData = activeDrivers?.map(driver => ({
+            fullName: driver.fullName,
+            username: driver.username,
+            idNumber: driver.idNumber,
+            licenseNumber: driver.licenseNumber,
+            status: driver.status,
+            createdAt: new Date(driver.createdAt).toLocaleString()
+          }));
+
+          const ws = utils.json_to_sheet(exportData || []);
+          const wb = utils.book_new();
+          utils.book_append_sheet(wb, ws, "Drivers");
+          const wbOut = write(wb, { bookType: 'xlsx', type: 'buffer' });
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(new Blob([wbOut]));
+          a.download = `drivers_${new Date().toISOString().split('T')[0]}.xlsx`;
+          a.click();
+        }}
+      >
+        <Download className="w-4 h-4 mr-2" />
+        {t("admin.exportDrivers")}
+      </Button>
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogTrigger asChild>
+          <Button>
+            <UserIcon className="w-4 h-4 mr-2" />
+            {t("admin.addDriver")}
+          </Button>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("admin.addNewDriver")}</DialogTitle>
+          </DialogHeader>
+          <AddDriverForm onSuccess={handleAddDriverSuccess} />
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+
+
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
@@ -515,7 +560,7 @@ export default function AdminDashboard() {
               onClick={() => logoutMutation.mutate()}
               className="text-sm text-muted-foreground hover:text-foreground"
             >
-              {t('common.logout')}
+              {t("common.logout")}
             </button>
           </div>
         </div>
@@ -523,15 +568,15 @@ export default function AdminDashboard() {
         <Tabs defaultValue="active" className="space-y-4">
           <TabsList className="grid w-full grid-cols-2 lg:grid-cols-5 gap-2">
             <TabsTrigger value="pending">
-              {t('admin.pendingDrivers')}
+              {t("admin.pendingDrivers")}
               {pendingDrivers?.length ? (
                 <Badge variant="destructive" className="ml-2">{pendingDrivers.length}</Badge>
               ) : null}
             </TabsTrigger>
-            <TabsTrigger value="active">{t('admin.activeDrivers')}</TabsTrigger>
-            <TabsTrigger value="suspended">{t('admin.suspendedDrivers')}</TabsTrigger>
-            <TabsTrigger value="orders">{t('admin.orders')}</TabsTrigger>
-            <TabsTrigger value="documents">{t('admin.documents')}</TabsTrigger>
+            <TabsTrigger value="active">{t("admin.activeDrivers")}</TabsTrigger>
+            <TabsTrigger value="suspended">{t("admin.suspendedDrivers")}</TabsTrigger>
+            <TabsTrigger value="orders">{t("admin.orders")}</TabsTrigger>
+            <TabsTrigger value="documents">{t("admin.documents")}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="pending">
@@ -562,48 +607,8 @@ export default function AdminDashboard() {
             <Card>
               <CardContent className="p-6">
                 <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-xl font-semibold">{t('admin.activeDrivers')}</h2>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        const exportData = activeDrivers?.map(driver => ({
-                          fullName: driver.fullName,
-                          username: driver.username,
-                          idNumber: driver.idNumber,
-                          licenseNumber: driver.licenseNumber,
-                          status: driver.status,
-                          createdAt: new Date(driver.createdAt).toLocaleString()
-                        }));
-
-                        const ws = utils.json_to_sheet(exportData || []);
-                        const wb = utils.book_new();
-                        utils.book_append_sheet(wb, ws, "Drivers");
-                        const wbOut = write(wb, { bookType: 'xlsx', type: 'buffer' });
-                        const a = document.createElement('a');
-                        a.href = URL.createObjectURL(new Blob([wbOut]));
-                        a.download = `drivers_${new Date().toISOString().split('T')[0]}.xlsx`;
-                        a.click();
-                      }}
-                    >
-                      <Download className="w-4 h-4 mr-2" />
-                      {t('admin.exportDrivers')}
-                    </Button>
-                    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                      <DialogTrigger asChild>
-                        <Button>
-                          <UserIcon className="w-4 h-4 mr-2" />
-                          {t('admin.addDriver')}
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle>{t('admin.addNewDriver')}</DialogTitle>
-                        </DialogHeader>
-                        <AddDriverForm onSuccess={handleAddDriverSuccess} />
-                      </DialogContent>
-                    </Dialog>
-                  </div>
+                  <h2 className="text-xl font-semibold">{t("admin.activeDrivers")}</h2>
+                  {renderExportButtons()}
                 </div>
                 <SearchAndFilter
                   type="drivers"
@@ -665,7 +670,7 @@ export default function AdminDashboard() {
             <Card>
               <CardContent className="p-6">
                 <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-xl font-semibold">{t('admin.allOrders')}</h2>
+                  <h2 className="text-xl font-semibold">{t("admin.allOrders")}</h2>
                   <Button
                     variant="outline"
                     onClick={() => {
@@ -691,7 +696,7 @@ export default function AdminDashboard() {
                     }}
                   >
                     <Download className="w-4 h-4 mr-2" />
-                    {t('admin.exportOrders')}
+                    {t("admin.exportOrders")}
                   </Button>
                 </div>
                 <SearchAndFilter
