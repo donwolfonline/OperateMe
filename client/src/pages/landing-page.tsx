@@ -12,7 +12,6 @@ export default function LandingPage() {
   const isRTL = i18n.dir() === 'rtl';
   const [iconIndex, setIconIndex] = React.useState(0);
 
-  // Array of icons and their animations
   const icons = React.useMemo(() => [
     {
       Icon: Car,
@@ -52,10 +51,12 @@ export default function LandingPage() {
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
-              fill="currentColor"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
               className="h-8 w-8 md:h-10 md:w-10 text-primary"
             >
-              <path d="M12 2L2 8l10 6 10-6-10-6zM2 16l10 6 10-6-10-6-10 6z" />
+              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
             </svg>
             <div className={`flex items-center ${isRTL ? 'mr-2' : 'ml-2'} min-w-[150px] md:min-w-[180px]`}>
               <span className="text-lg md:text-xl font-bold text-primary whitespace-nowrap">{t('landing.brandFirst')}</span>
