@@ -175,6 +175,11 @@ const resources = {
         jeddahAirport: "Jeddah Airport",
         taifAirport: "Taif Airport",
         medinaAirport: "Medina Airport",
+      },
+      dashboard: {
+        welcome: "Welcome",
+        adminWelcomeMessage: "Managing your transportation fleet operations",
+        driverWelcomeMessage: "Ready for your next journey",
       }
     }
   },
@@ -344,6 +349,11 @@ const resources = {
         jeddahAirport: "مطار جدة",
         taifAirport: "مطار الطائف",
         medinaAirport: "مطار المدينة المنورة",
+      },
+      dashboard: {
+        welcome: "مرحباً",
+        adminWelcomeMessage: "إدارة عمليات أسطول النقل الخاص بك",
+        driverWelcomeMessage: "جاهز لرحلتك القادمة",
       }
     }
   },
@@ -513,6 +523,11 @@ const resources = {
         jeddahAirport: "جدہ ائرپورٹ",
         taifAirport: "طائف ائرپورٹ",
         medinaAirport: "مدینہ ائرپورٹ",
+      },
+      dashboard: {
+        welcome: "خوش آمدید",
+        adminWelcomeMessage: "اپنے ٹرانسپورٹ فلیٹ آپریشنز کا انتظام",
+        driverWelcomeMessage: "اپنے اگلے سفر کے لیے تیار",
       }
     }
   }
