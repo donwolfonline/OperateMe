@@ -24,11 +24,13 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { insertUserSchema } from "@shared/schema";
+import { CompanyMappingWizard } from "@/components/CompanyMappingWizard";
+import {QrCode} from "lucide-react"; // Added import
 
 // Add this function near the top of the file, after imports
 const getPublicUrl = (path: string) => {
   // Use the deployed domain for production, fallback to current origin for development
-  const baseUrl = process.env.NODE_ENV === 'production' 
+  const baseUrl = process.env.NODE_ENV === 'production'
     ? 'https://operit.replit.app'
     : window.location.origin;
   return `${baseUrl}/uploads/${path}`;
@@ -645,7 +647,7 @@ export default function AdminDashboard() {
         </div>
 
         <Tabs defaultValue="pending" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-5 gap-2">
+          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-6 gap-2">
             <TabsTrigger value="pending">
               {t('admin.pendingDrivers')}
               {pendingDrivers?.length ? (
@@ -656,6 +658,7 @@ export default function AdminDashboard() {
             <TabsTrigger value="suspended">{t('admin.suspendedDrivers')}</TabsTrigger>
             <TabsTrigger value="orders">{t('admin.orders')}</TabsTrigger>
             <TabsTrigger value="documents">{t('admin.documents')}</TabsTrigger>
+            <TabsTrigger value="company-mappings">{t('admin.companyMappings')}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="pending">
@@ -782,16 +785,15 @@ export default function AdminDashboard() {
                 />
                 {filteredOrders?.length === 0 ? (
                   <p className="text-muted-foreground text-center py-4">{t('admin.noOrders')}</p>
-                ) : (
-                  <div className="space-y-4">
-                    {filteredOrders?.map(renderOrderCard)}
+                )                    {filteredOrders?.map(renderOrderCard)}
                   </div>
                 )}
               </CardContent>
             </Card>
           </TabsContent>
 
-          <TabsContent value="documents"><Card>
+          <TabsContent value="documents">
+            <Card>
               <CardContent className="p-6">
                 <h2 className="text-xl font-semibold mb-6">{t('admin.documents')}</h2>
                 <SearchAndFilter
@@ -802,73 +804,55 @@ export default function AdminDashboard() {
                   driversList={[...(activeDrivers || []), ...(suspendedDrivers || [])]}
                 />
                 {filteredDocuments.length === 0 ? (
-                  <p className="text-muted-foreground textcenter py-4">{t('admin.noDocuments')}</p>
+                  <p className="text-muted-foreground text-center py-4">{t('admin.noDocuments')}</p>
                 ) : (
                   <div className="grid gap-6">
                     {filteredDocuments.map((order) => (
-                      <Card key={order.id} className="hover:shadow-md transition-shadow">
-                        <CardContent className="p-6">
-                          <div className="flex flex-col lg:flex-row justify-between gap-4">
-                            <div className="space-y-2">
-                              <div className="flex items-center gap-2">
-                                <FileText className="h-5 w-5 text-primary" />
-                                <h3 className="text-lg font-semibold">
-                                  {t('order.tripNumber')}: {order.tripNumber}
-                                </h3>
-                              </div>
-                              <div className="text-sm text-muted-foreground space-y-1">
-                                <p className="flex items-center gap-2">
-                                  <Calendar className="h-4 w-4" />
-                                  {new Date(order.createdAt).toLocaleString()}
-                                </p>
-                                <p className="flex items-center gap-2">
-                                  <MapPin className="h-4 w-4" />
-                                  {order.fromCity} → {order.toCity}
-                                </p>
-                                <p className="flex items-center gap-2">
-                                  <Users className="h-4 w-4" />
-                                  {t('order.passengerCount')}: {order.passengers?.length || 0}
-                                </p>
-                                {order.driver && order.driver.fullName && (
-                                  <p className="flex items-center gap-2">
-                                    <UserIcon className="h-4 w-4" />
-                                    {t('order.issuedBy')}: {order.driver.fullName}
-                                    {order.driver.uid && ` (${order.driver.uid})`}
-                                  </p>
-                                )}
-                              </div>
-                            </div>
-                            <div className="flex flex-col sm:flex-row gap-2">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                asChild
-                              >
-                                <a
-                                  href={getPublicUrl(order.pdfUrl)}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="flex items-center gap-2"
-                                >
-                                  <FileText className="h-4 w-4" />
-                                  {t('order.viewDocument')}
-                                </a>
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => window.open(getPublicUrl(order.pdfUrl), '_blank')}
-                              >
-                                <Download className="h-4 w-4 mr-2" />
-                                {t('order.download')}
-                              </Button>
-                            </div>
+                      <div key={order.id} className="bg-muted p-4 rounded-lg">
+                        <div className="flex items-center justify-between mb-4">
+                          <div>
+                            <h3 className="font-medium">Trip #{order.tripNumber}</h3>
+                            <p className="text-sm text-muted-foreground">
+                              {order.driver?.fullName} ({order.driver?.uid})
+                            </p>
                           </div>
-                        </CardContent>
-                      </Card>
+                          <div className="flex gap-2">
+                            {order.pdfUrl && (
+                              <a
+                                href={getPublicUrl(order.pdfUrl)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center text-sm text-primary hover:underline"
+                              >
+                                <FileText className="h-4 w-4 mr-1" />
+                                {t('order.downloadPdf')}
+                              </a>
+                            )}
+                            {order.qrCode && (
+                              <a
+                                href={getPublicUrl(order.qrCode)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center text-sm text-primary hover:underline"
+                              >
+                                <QrCode className="h-4 w-4 mr-1" />
+                                {t('order.viewQr')}
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      </div>
                     ))}
                   </div>
                 )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="company-mappings">
+            <Card>
+              <CardContent className="p-6">
+                <CompanyMappingWizard />
               </CardContent>
             </Card>
           </TabsContent>

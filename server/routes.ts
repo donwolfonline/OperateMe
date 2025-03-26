@@ -307,8 +307,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/register", async (req, res) => {
-    // ... existing registration logic ...
+    // existing registration logic 
   });
+
+  // Add company mapping routes
+  app.get("/api/company-mappings", async (req, res) => {
+    if (!req.user || req.user.role !== "admin") return res.sendStatus(403);
+    const mappings = await storage.getCompanyMappings();
+    res.json(mappings);
+  });
+
+  app.post("/api/company-mappings", async (req, res) => {
+    if (!req.user || req.user.role !== "admin") return res.sendStatus(403);
+    try {
+      const parsedData = insertCompanyMappingSchema.parse(req.body);
+      const mapping = await storage.createCompanyMapping(parsedData);
+      res.status(201).json(mapping);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.patch("/api/company-mappings/:id/toggle", async (req, res) => {
+    if (!req.user || req.user.role !== "admin") return res.sendStatus(403);
+    try {
+      const mapping = await storage.toggleCompanyMapping(parseInt(req.params.id));
+      if (!mapping) return res.sendStatus(404);
+      res.json(mapping);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
 
   const httpServer = createServer(app);
   return httpServer;

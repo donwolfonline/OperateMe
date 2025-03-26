@@ -19,6 +19,16 @@ export const users = pgTable("users", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+export const companyMappings = pgTable("company_mappings", {
+  id: serial("id").primaryKey(),
+  vehicleType: text("vehicle_type").notNull(),
+  vehicleModel: text("vehicle_model").notNull(),
+  companyName: text("company_name").notNull(),
+  companyNameAr: text("company_name_ar").notNull(),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 export const vehicles = pgTable("vehicles", {
   id: serial("id").primaryKey(),
   driverId: integer("driver_id").notNull(),
@@ -53,6 +63,13 @@ export const operationOrders = pgTable("operation_orders", {
   pdfUrl: text("pdf_url"),
   status: text("status").notNull().default("active"), 
   createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertCompanyMappingSchema = createInsertSchema(companyMappings).pick({
+  vehicleType: true,
+  vehicleModel: true,
+  companyName: true,
+  companyNameAr: true,
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({
@@ -101,3 +118,5 @@ export type Vehicle = typeof vehicles.$inferSelect;
 export type OperationOrder = typeof operationOrders.$inferSelect;
 export type Passenger = typeof passengers.$inferSelect;
 export type InsertPassenger = z.infer<typeof insertPassengerSchema>;
+export type CompanyMapping = typeof companyMappings.$inferSelect;
+export type InsertCompanyMapping = z.infer<typeof insertCompanyMappingSchema>;
