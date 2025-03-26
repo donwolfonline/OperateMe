@@ -10,7 +10,7 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
   try {
     console.log('Starting PDF generation for order:', order.id);
 
-    // Get vehicle information for this order
+    // Get vehicle information
     const vehicle = await storage.getVehicleByOrder(order.id);
     console.log('Raw vehicle information:', vehicle);
 
@@ -18,6 +18,7 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
     const vehicleType = (vehicle?.type || '').toLowerCase();
     const vehicleModel = (vehicle?.model || '').toLowerCase();
 
+    // Log vehicle information for debugging
     console.log('Processed vehicle info for template:', {
       vehicleType,
       vehicleModel,
