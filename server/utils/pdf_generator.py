@@ -104,6 +104,9 @@ def generate_pdf(data_path, output_path):
         with open(data_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
 
+        # Log vehicle information
+        logger.info(f"Vehicle type: {data.get('vehicle_type')}, model: {data.get('vehicle_model')}")
+
         # Get the PDF filename
         pdf_filename = Path(output_path).name
         logger.info(f"PDF filename: {pdf_filename}")
@@ -165,7 +168,3 @@ if __name__ == "__main__":
     except Exception as e:
         logger.error(f"Main execution error: {str(e)}")
         sys.exit(1)
-
-import arabic_reshaper
-from bidi.algorithm import get_display
-from PIL import Image

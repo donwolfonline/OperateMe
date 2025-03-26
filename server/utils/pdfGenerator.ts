@@ -6,37 +6,21 @@ import { storage } from '../storage';
 import { spawn } from 'child_process';
 import { promisify } from 'util';
 
-const getBaseUrl = () => {
-  // In production, always use operit.replit.app
-  if (process.env.NODE_ENV === 'production') {
-    return 'https://operit.replit.app';
-  }
-
-  // For development environments
-  const replitDomain = process.env.REPLIT_DOMAIN;
-  const replId = process.env.REPL_ID;
-  const replSlug = process.env.REPL_SLUG;
-
-  if (replitDomain) {
-    return `https://${replitDomain}`;
-  } else if (replSlug && replId) {
-    return `https://${replSlug}.id.repl.co`;
-  }
-
-  return 'http://localhost:5000';
-};
-
 export async function generateOrderPDF(order: OperationOrder, driver: User): Promise<string> {
   try {
     console.log('Starting PDF generation for order:', order.id);
 
+    // Get vehicle information for this order - this is crucial for template selection
+    const vehicle = await storage.getVehicleByOrder(order.id);
+    console.log('Vehicle information for template selection:', {
+      vehicleType: vehicle?.type,
+      vehicleModel: vehicle?.model,
+      orderId: order.id
+    });
+
     // Get passengers for this order
     const passengers = await storage.getPassengersByOrder(order.id);
     console.log('Found passengers:', passengers.length);
-
-    // Get vehicle information for this order
-    const vehicle = await storage.getVehicleByOrder(order.id);
-    console.log('Vehicle information:', vehicle);
 
     // Format date
     const dateStr = new Date(order.departureTime).toLocaleString('ar-SA', {
@@ -61,8 +45,8 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
         id_number: p.idNumber,
         nationality: p.nationality
       })),
-      vehicle_type: vehicle?.type || '',
-      vehicle_model: vehicle?.model || ''
+      vehicle_type: vehicle?.type?.toLowerCase() || '',
+      vehicle_model: vehicle?.model?.toLowerCase() || ''
     };
 
     const pdfFileName = `order_${order.id}_${Date.now()}.pdf`;
@@ -83,7 +67,7 @@ export async function generateOrderPDF(order: OperationOrder, driver: User): Pro
       ], {
         env: {
           ...process.env,
-          NODE_ENV: process.env.NODE_ENV // Pass NODE_ENV to Python script
+          NODE_ENV: process.env.NODE_ENV
         }
       });
 
