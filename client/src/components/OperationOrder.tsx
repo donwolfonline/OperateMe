@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { useState } from "react";
 import { FileText, Plus, Trash2, AlertCircle } from "lucide-react";
+import { LoadingSpinner } from "./LoadingSpinner";
 
 // Saudi cities list with bilingual names
 const saudiCities = [
@@ -35,6 +36,7 @@ export default function OperationOrder() {
   const { toast } = useToast();
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
 
   // Check if user is pending or not approved
@@ -65,6 +67,7 @@ export default function OperationOrder() {
     try {
       setIsSubmitting(true);
       setPdfUrl(null);
+      setIsGeneratingPdf(true);
 
       const formattedData = {
         ...data,
@@ -78,7 +81,6 @@ export default function OperationOrder() {
         setPdfUrl(order.pdfUrl);
       }
 
-      // Updated to use the correct notification translation keys
       toast({
         title: t('notifications.orderSuccess'),
         description: t('notifications.orderCreated'),
@@ -94,6 +96,7 @@ export default function OperationOrder() {
       });
     } finally {
       setIsSubmitting(false);
+      setIsGeneratingPdf(false);
     }
   };
 
@@ -335,11 +338,17 @@ export default function OperationOrder() {
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">{t('order.documentReady')}</h3>
               <div className="aspect-[16/9] w-full bg-muted rounded-lg overflow-hidden">
-                <iframe
-                  src={`/uploads/${pdfUrl}`}
-                  className="w-full h-full"
-                  title="Order PDF Preview"
-                />
+                {isGeneratingPdf ? (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <LoadingSpinner text={t('order.generatingPdf')} />
+                  </div>
+                ) : (
+                  <iframe
+                    src={`/uploads/${pdfUrl}`}
+                    className="w-full h-full"
+                    title="Order PDF Preview"
+                  />
+                )}
               </div>
               <div className="flex justify-end">
                 <Button
@@ -352,6 +361,13 @@ export default function OperationOrder() {
                 </Button>
               </div>
             </div>
+          </CardContent>
+        </Card>
+      )}
+      {isGeneratingPdf && !pdfUrl && (
+        <Card>
+          <CardContent className="p-6">
+            <LoadingSpinner text={t('order.generatingPdf')} />
           </CardContent>
         </Card>
       )}
