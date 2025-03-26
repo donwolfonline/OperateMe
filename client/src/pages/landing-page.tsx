@@ -29,8 +29,8 @@ export default function LandingPage() {
               <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
             </svg>
             <div className="flex items-center">
-              <span className="text-xl md:text-2xl font-bold text-primary">ROAD</span>
-              <span className="mx-1 md:mx-2 text-xl md:text-2xl font-bold text-muted-foreground">BOLT</span>
+              <span className="text-xl md:text-2xl font-bold text-primary">{t('landing.brandFirst')}</span>
+              <span className="mx-1 md:mx-2 text-xl md:text-2xl font-bold text-muted-foreground">{t('landing.brandSecond')}</span>
             </div>
           </motion.div>
           <LanguageToggle />

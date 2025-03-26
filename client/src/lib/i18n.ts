@@ -11,6 +11,14 @@ document.dir = savedDirection;
 const resources = {
   en: {
     translation: {
+      landing: {
+        title: "Road Bolt Transport",
+        subtitle: "Professional Transportation Services",
+        loginButton: "Driver Login",
+        adminButton: "Admin Login",
+        brandFirst: "ROAD",
+        brandSecond: "BOLT"
+      },
       notifications: {
         success: "Success",
         error: "Error",
@@ -33,12 +41,6 @@ const resources = {
         suspensionMessage: "Your account has been suspended. Please contact administrator.",
         pendingApproval: "Your account is pending approval. You'll be able to create orders once approved.",
         exportSuccess: "Data exported successfully"
-      },
-      landing: {
-        title: "Road Bolt Transport",
-        subtitle: "Professional Transportation Services",
-        loginButton: "Driver Login",
-        adminButton: "Admin Login"
       },
       auth: {
         driverLogin: "Driver Login",
@@ -174,6 +176,14 @@ const resources = {
   },
   ar: {
     translation: {
+      landing: {
+        title: "صاعقة الطريق للنقل",
+        subtitle: "خدمات نقل احترافية",
+        loginButton: "تسجيل دخول السائق",
+        adminButton: "دخول المشرف",
+        brandFirst: "صاعقة",
+        brandSecond: "الطريق"
+      },
       notifications: {
         success: "نجاح",
         error: "خطأ",
@@ -196,12 +206,6 @@ const resources = {
         suspensionMessage: "تم تعليق حسابك. يرجى الاتصال بالمسؤول.",
         pendingApproval: "حسابك قيد الموافقة. ستتمكن من إنشاء الطلبات بمجرد الموافقة عليه.",
         exportSuccess: "تم تصدير البيانات بنجاح"
-      },
-      landing: {
-        title: "Road Bolt Transport",
-        subtitle: "خدمات نقل احترافية",
-        loginButton: "تسجيل دخول السائق",
-        adminButton: "دخول المشرف"
       },
       auth: {
         driverLogin: "تسجيل دخول السائق",
@@ -337,6 +341,14 @@ const resources = {
   },
   ur: {
     translation: {
+      landing: {
+        title: "روڈ بولٹ ٹرانسپورٹ",
+        subtitle: "پیشہ ورانہ ٹرانسپورٹ سروسز",
+        loginButton: "ڈرائیور لاگ ان",
+        adminButton: "ایڈمن لاگ ان",
+        brandFirst: "روڈ",
+        brandSecond: "بولٹ"
+      },
       notifications: {
         success: "کامیابی",
         error: "خطا",
@@ -359,12 +371,6 @@ const resources = {
         suspensionMessage: "آپ کا اکاؤنٹ معطل کر دیا گیا ہے۔ براہ کرم منتظم سے رابطہ کریں۔",
         pendingApproval: "آپ کا اکاؤنٹ منظوری کے انتظار میں ہے۔ منظوری کے بعد آپ آرڈر بنا سکیں گے۔",
         exportSuccess: "ڈیٹا کامیابی سے برآمد ہو گیا"
-      },
-      landing: {
-        title: "Road Bolt Transport",
-        subtitle: "پیشہ ورانہ ٹرانسپورٹ سروسز",
-        loginButton: "ڈرائیور لاگ ان",
-        adminButton: "ایڈمن لاگ ان"
       },
       auth: {
         driverLogin: "ڈرائیور لاگ ان",
