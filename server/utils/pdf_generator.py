@@ -9,6 +9,7 @@ from jinja2 import Template, FileSystemLoader, Environment
 from weasyprint import HTML, CSS
 from weasyprint.text.fonts import FontConfiguration
 import os
+import shutil
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -52,10 +53,28 @@ def generate_qr_code(pdf_filename):
         logger.error(f"Error generating QR code: {str(e)}")
         raise
 
+def setup_template_assets():
+    """Setup template assets including background image"""
+    try:
+        template_dir = Path(__file__).parent / 'pdf_templates'
+
+        # Copy background image to template directory if it doesn't exist
+        bg_image_source = Path(__file__).parent.parent.parent / 'attached_assets' / 'Screenshot 2025-03-26 at 8.03.07 AM.png'
+        bg_image_dest = template_dir / 'lightning_road_bg.png'
+
+        if bg_image_source.exists() and not bg_image_dest.exists():
+            shutil.copy(bg_image_source, bg_image_dest)
+            logger.info("Background image copied successfully")
+
+        return template_dir
+    except Exception as e:
+        logger.error(f"Error setting up template assets: {str(e)}")
+        raise
+
 def render_pdf(data, qr_code_base64, output_path):
     """Generate PDF using the standard template"""
     try:
-        template_dir = Path(__file__).parent / 'pdf_templates'
+        template_dir = setup_template_assets()
         env = Environment(loader=FileSystemLoader(template_dir))
         template = env.get_template('transport_contract.html')
 
@@ -74,7 +93,14 @@ def render_pdf(data, qr_code_base64, output_path):
         )
 
         font_config = FontConfiguration()
-        HTML(string=html_content).write_pdf(output_path, font_config=font_config)
+
+        # Create PDF with background image
+        HTML(string=html_content).write_pdf(
+            output_path,
+            font_config=font_config,
+            presentational_hints=True
+        )
+
         logger.info("Generated transport contract successfully")
     except Exception as e:
         logger.error(f"Error in PDF generation: {str(e)}")
