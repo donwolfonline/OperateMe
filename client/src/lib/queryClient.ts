@@ -27,7 +27,6 @@ export async function apiRequest(
     let errorMessage = "An error occurred";
     try {
       const errorData = await res.json();
-      // If the error message is a translation key, translate it
       if (errorData.message && errorData.message.includes('notifications.')) {
         errorMessage = i18next.t(errorData.message);
       } else {
@@ -36,7 +35,12 @@ export async function apiRequest(
     } catch {
       errorMessage = res.statusText;
     }
-    throw new Error(errorMessage);
+
+    // Instead of throwing, return a Response object with the error
+    return new Response(JSON.stringify({ message: errorMessage }), {
+      status: res.status,
+      statusText: errorMessage
+    });
   }
 
   return res;
@@ -59,7 +63,7 @@ export const queryClient = new QueryClient({
           if (res.status === 401) {
             return null;
           }
-          throw new Error(res.statusText);
+          return null;
         }
 
         return res.json();

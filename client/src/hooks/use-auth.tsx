@@ -41,22 +41,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginData) => {
-      try {
-        const res = await apiRequest("POST", "/api/login", credentials);
-        return res.json();
-      } catch (error: any) {
-        // Handle the error and show toast notification
+      const res = await apiRequest("POST", "/api/login", credentials);
+
+      if (!res.ok) {
+        const errorData = await res.json();
         toast({
           title: t('auth.loginError'),
-          description: error.message,
+          description: errorData.message,
           variant: "destructive",
         });
-        throw error; // Re-throw to trigger error state
+        return null;
       }
+
+      return res.json();
     },
-    onSuccess: (user: SelectUser) => {
-      queryClient.setQueryData(["/api/user"], user);
-      window.location.href = user.role === "admin" ? "/admin/dashboard" : "/driver";
+    onSuccess: (user: SelectUser | null) => {
+      if (user) {
+        queryClient.setQueryData(["/api/user"], user);
+        window.location.href = user.role === "admin" ? "/admin/dashboard" : "/driver";
+      }
     }
   });
 
