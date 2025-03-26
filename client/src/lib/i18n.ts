@@ -35,7 +35,7 @@ const resources = {
         exportSuccess: "Data exported successfully"
       },
       landing: {
-        title: "Road Lightning Transport",
+        title: "Road Bolt Transport",
         subtitle: "Professional Transportation Services",
         loginButton: "Driver Login",
         adminButton: "Admin Login"
@@ -198,7 +198,7 @@ const resources = {
         exportSuccess: "تم تصدير البيانات بنجاح"
       },
       landing: {
-        title: "صاعقة الطريق للنقل",
+        title: "Road Bolt Transport",
         subtitle: "خدمات نقل احترافية",
         loginButton: "تسجيل دخول السائق",
         adminButton: "دخول المشرف"
@@ -361,7 +361,7 @@ const resources = {
         exportSuccess: "ڈیٹا کامیابی سے برآمد ہو گیا"
       },
       landing: {
-        title: "روڈ لائٹننگ ٹرانسپورٹ",
+        title: "Road Bolt Transport",
         subtitle: "پیشہ ورانہ ٹرانسپورٹ سروسز",
         loginButton: "ڈرائیور لاگ ان",
         adminButton: "ایڈمن لاگ ان"

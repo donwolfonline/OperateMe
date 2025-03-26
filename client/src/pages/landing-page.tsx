@@ -16,7 +16,7 @@ export default function LandingPage() {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5 }}
-            className="flex items-center gap-4"
+            className="flex items-center gap-2 md:gap-3"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -24,13 +24,13 @@ export default function LandingPage() {
               fill="none"
               stroke="currentColor"
               strokeWidth="2"
-              className="h-12 w-12 text-primary"
+              className="h-8 w-8 md:h-10 md:w-10 text-primary"
             >
               <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
             </svg>
             <div className="flex items-center">
-              <span className="text-3xl font-bold text-primary">LIGHTNING</span>
-              <span className="mx-2 text-3xl font-bold text-muted-foreground">ROAD</span>
+              <span className="text-xl md:text-2xl font-bold text-primary">ROAD</span>
+              <span className="mx-1 md:mx-2 text-xl md:text-2xl font-bold text-muted-foreground">BOLT</span>
             </div>
           </motion.div>
           <LanguageToggle />
@@ -83,15 +83,15 @@ export default function LandingPage() {
               whileHover={{ scale: 1.05 }}
               className="flex items-center gap-2 text-muted-foreground"
             >
-              <FaGooglePlay className="h-8 w-8" />
-              <span>Google Play</span>
+              <FaGooglePlay className="h-6 w-6 md:h-8 md:w-8" />
+              <span className="text-sm md:text-base">Google Play</span>
             </motion.div>
             <motion.div
               whileHover={{ scale: 1.05 }}
               className="flex items-center gap-2 text-muted-foreground"
             >
-              <FaAppStore className="h-8 w-8" />
-              <span>App Store</span>
+              <FaAppStore className="h-6 w-6 md:h-8 md:w-8" />
+              <span className="text-sm md:text-base">App Store</span>
             </motion.div>
           </motion.div>
         </div>
