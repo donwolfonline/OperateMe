@@ -156,7 +156,7 @@ const AddDriverForm = ({ onSuccess }: { onSuccess: () => void }) => {
 };
 
 export default function AdminDashboard() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user, logoutMutation } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [activeFilters, setActiveFilters] = useState({});

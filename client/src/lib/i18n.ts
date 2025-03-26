@@ -144,7 +144,9 @@ const resources = {
         addDriverSuccess: "Driver added successfully",
         removeDriverSuccess: "Driver removed successfully",
         formTitle: "Add New Driver",
-        required: "Required field"
+        required: "Required field",
+        exportDrivers: "Export Drivers List",
+        exportOrders: "Export Orders List"
       },
       common: {
         logout: "Logout",
@@ -320,7 +322,9 @@ const resources = {
         addDriverSuccess: "تمت إضافة السائق بنجاح",
         removeDriverSuccess: "تمت إزالة السائق بنجاح",
         formTitle: "إضافة سائق جديد",
-        required: "حقل مطلوب"
+        required: "حقل مطلوب",
+        exportDrivers: "تصدير قائمة السائقين",
+        exportOrders: "تصدير قائمة الطلبات"
       },
       common: {
         logout: "تسجيل الخروج",
@@ -496,7 +500,9 @@ const resources = {
         addDriverSuccess: "ڈرائیور کامیابی سے شامل کر دیا گیا",
         removeDriverSuccess: "ڈرائیور کامیابی سے ہٹا دیا گیا",
         formTitle: "نیا ڈرائیور شامل کریں",
-        required: "مطلوب فیلڈ"
+        required: "مطلوب فیلڈ",
+        exportDrivers: "ڈرائیورز کی فہرست برآمد کریں",
+        exportOrders: "آرڈرز کی فہرست برآمد کریں"
       },
       common: {
         logout: "لاگ آؤٹ",
@@ -547,6 +553,12 @@ i18n
     fallbackLng: 'ar',
     interpolation: {
       escapeValue: false
+    },
+    react: {
+      useSuspense: false,
+      bindI18n: 'languageChanged loaded',
+      bindI18nStore: 'added removed',
+      transEmptyNodeValue: '',
     }
   });
 
