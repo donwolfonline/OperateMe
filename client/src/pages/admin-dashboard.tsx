@@ -32,10 +32,7 @@ import { useForm } from "react-hook-form";
 import { Logo } from "@/components/Logo";
 
 const getPublicUrl = (path: string) => {
-  const baseUrl = process.env.NODE_ENV === 'production'
-    ? 'https://operit.replit.app'
-    : window.location.origin;
-  return `${baseUrl}/uploads/${path}`;
+  return `/uploads/${path}`;
 };
 
 const AddDriverForm = ({ onSuccess }: { onSuccess: () => void }) => {
